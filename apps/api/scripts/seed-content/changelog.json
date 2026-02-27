@@ -1,0 +1,207 @@
+{
+  "page_header": {
+    "label": "CHANGELOG",
+    "title": "What's New",
+    "description": "Protocol updates and version history. Every change, improvement, and new feature documented transparently."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "VERSION HISTORY",
+      "title": "Release Timeline"
+    },
+    {
+      "type": "changelog",
+      "entries": [
+        {
+          "version": "v0.3.0",
+          "date": "February 27, 2026",
+          "status": "LATEST",
+          "title": "Marketing Website Expansion",
+          "features": [
+            {
+              "category": "ADDED",
+              "items": [
+                "Multi-page marketing site with comprehensive trust-building content",
+                "Security, audits, open source, and roadmap transparency pages",
+                "Developer documentation with integration examples and API references",
+                "Ecosystem page showcasing compatible wallets and future integrations",
+                "Brand guidelines page with design system documentation"
+              ]
+            },
+            {
+              "category": "CHANGED",
+              "items": [
+                "Navigation redesigned to support multi-page site architecture",
+                "Enhanced brutalist design system with consistent glass-morphism components"
+              ]
+            }
+          ]
+        },
+        {
+          "version": "v0.2.0",
+          "date": "January 15, 2026",
+          "status": "RELEASED",
+          "title": "Developer Tools",
+          "features": [
+            {
+              "category": "ADDED",
+              "items": [
+                "@zkira/sdk TypeScript package with full API coverage",
+                "@zkira/widget embeddable React component for websites",
+                "REST API with OpenAPI specification and API key authentication",
+                "Enhanced Telegram bot with /send and /request commands"
+              ]
+            },
+            {
+              "category": "IMPROVED",
+              "items": [
+                "Gas relayer performance with 50% faster claim processing",
+                "Error handling and user feedback across all interfaces"
+              ]
+            }
+          ]
+        },
+        {
+          "version": "v0.1.0",
+          "date": "December 3, 2025",
+          "status": "INITIAL",
+          "title": "Initial Launch",
+          "features": [
+            {
+              "category": "ADDED",
+              "items": [
+                "Core stealth address cryptography with ECDH key derivation",
+                "Payment escrow Anchor programs with time-lock functionality",
+                "Pay web application with wallet integration and QR support",
+                "Gas relayer service for sponsored claim transactions",
+                "Devnet deployment with full testing environment"
+              ]
+            },
+            {
+              "category": "TECHNICAL",
+              "items": [
+                "Built on Solana with Anchor framework for smart contracts",
+                "Next.js frontend with Wallet Adapter integration",
+                "Ed25519 signatures for all transaction authorization"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "VERSIONING POLICY",
+      "title": "Semantic Versioning",
+      "subtitle": "We follow semantic versioning (SemVer) for clear communication about the nature and impact of changes."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "MAJOR",
+          "subtitle": "X.0.0",
+          "description": "Breaking changes that require updates to integrations. Reserved for protocol-level modifications."
+        },
+        {
+          "title": "MINOR",
+          "subtitle": "0.X.0",
+          "description": "New features and capabilities that maintain backward compatibility with existing integrations."
+        },
+        {
+          "title": "PATCH",
+          "subtitle": "0.0.X",
+          "description": "Bug fixes, performance improvements, and security patches that don't change functionality."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "CHANGE CATEGORIES",
+      "title": "Change Classification"
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "ADDED",
+          "description": "New features, capabilities, and functionality that enhance the protocol without changing existing behavior.",
+          "examples": [
+            "New API endpoints",
+            "Additional wallet support",
+            "Enhanced developer tools"
+          ]
+        },
+        {
+          "title": "CHANGED",
+          "description": "Modifications to existing functionality that may affect user experience but maintain API compatibility.",
+          "examples": [
+            "UI/UX improvements",
+            "Performance optimizations",
+            "Behavior modifications"
+          ]
+        },
+        {
+          "title": "FIXED",
+          "description": "Bug fixes, security patches, and corrections that resolve issues without adding new functionality.",
+          "examples": [
+            "Security vulnerabilities",
+            "Incorrect behavior",
+            "Edge case handling"
+          ]
+        },
+        {
+          "title": "REMOVED",
+          "description": "Deprecated features, discontinued functionality, and breaking changes that remove existing capabilities.",
+          "examples": [
+            "Deprecated API endpoints",
+            "Legacy feature removal",
+            "Breaking changes"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "STAY UPDATED",
+      "title": "Never Miss an Update",
+      "subtitle": "Get notified about new releases and important updates through multiple channels."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "GitHub Releases",
+          "description": "Watch our repositories for release notifications with detailed changelog information.",
+          "link": "https://github.com/zkira-pay/zkira-pay/releases"
+        },
+        {
+          "title": "Developer Newsletter",
+          "description": "Monthly updates with in-depth technical details and upcoming feature previews.",
+          "link": "mailto:dev@zkira.xyz?subject=Subscribe%20to%20Newsletter"
+        },
+        {
+          "title": "RSS Feed",
+          "description": "Add our changelog RSS feed to your reader for automated update notifications.",
+          "link": "/changelog.xml"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Try the latest version",
+      "description": "Experience the latest features and improvements in ZKIRA Pay. Create your first confidential payment link today.",
+      "buttons": [
+        {
+          "text": "Try ZKIRA Pay",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        }
+      ]
+    }
+  ]
+}

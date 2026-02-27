@@ -1,0 +1,88 @@
+{
+  "page_header": {
+    "label": "TELEGRAM BOT",
+    "title": "Confidential Payments from Chat",
+    "description": "Send, request, and manage private payments directly from Telegram. Non-custodial design means your keys never touch the platform."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Telegram Bot" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "SECURITY MODEL",
+      "title": "Non-Custodial by Design"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "The ZKIRA Telegram bot operates on a strict non-custodial model. Your private keys never leave your device, and the bot never has access to your funds or transaction signing capabilities.",
+        "Instead, the bot acts as a convenient interface for generating payment links and tracking your payment activity. When you need to sign transactions or claim funds, the bot directs you to the secure web application where you maintain full control."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "No Key Access: Bot never touches your private keys or wallet",
+        "Link Generation: Creates secure payment and claim links for sharing",
+        "Web App Handoff: Directs you to app.zkira.xyz for all wallet operations"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "COMMAND REFERENCE",
+      "title": "Bot Commands"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "The bot supports a comprehensive set of commands for managing your confidential payments directly from Telegram chat."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "DEMO",
+      "title": "Chat Interface"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Interact with the ZKIRA bot just like any other Telegram contact. Send commands to create payment links, check balances, and manage your confidential payment activity — all without leaving your chat app."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "Instant Commands: Quick payment link generation from simple text commands",
+        "Smart Responses: Bot provides clear next steps and helpful guidance",
+        "Secure Handoff: Wallet operations happen in the secure web app"
+      ]
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Your keys never touch Telegram. The bot only generates and tracks payment links. All wallet operations — including transaction signing, fund deposits, and claims — happen securely in the web application where you maintain complete control of your private keys and funds."
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Add to Telegram",
+      "description": "Start managing confidential payments directly from your chat app. The bot is free to use and respects your privacy at every step.",
+      "buttons": [
+        {
+          "text": "Add to Telegram",
+          "href": "https://t.me/zkira-xyz_bot",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

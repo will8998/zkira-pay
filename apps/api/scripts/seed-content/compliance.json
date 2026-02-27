@@ -1,0 +1,93 @@
+{
+  "page_header": {
+    "label": "COMPLIANCE",
+    "title": "Regulatory Positioning",
+    "description": "How ZKIRA Pay approaches compliance and regulation."
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Our Position",
+      "paragraphs": [
+        "ZKIRA Pay is a privacy tool, not an anonymity tool. We enable confidential payments — not untraceable ones. Our approach balances user privacy with regulatory clarity and compliance requirements."
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "How ZKIRA Differs from Mixers",
+      "paragraphs": [
+        "ZKIRA Pay operates fundamentally differently from traditional cryptocurrency mixers:"
+      ],
+      "list": [
+        "ZKIRA does NOT pool funds from multiple users",
+        "No shared liquidity pool or mixing set",
+        "Each payment is a direct 1-to-1 escrow between sender and stealth address",
+        "Payment creator can always refund unclaimed funds",
+        "On-chain escrow is publicly auditable (amounts visible, addresses obfuscated)"
+      ]
+    },
+    {
+      "type": "table",
+      "heading": "Comparison Table",
+      "table": {
+        "headers": ["", "Mixer", "ZKIRA Pay"],
+        "rows": [
+          ["Pools funds", "Yes", "No"],
+          ["Shared liquidity", "Yes", "No"],
+          ["Direct sender-recipient", "No", "Yes"],
+          ["Refundable", "Rarely", "Always (before claim)"],
+          ["On-chain audit trail", "No", "Yes"]
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "heading": "Selective Transparency",
+      "paragraphs": [
+        "ZKIRA Pay enables \"confidentiality by default, transparency by choice\":"
+      ],
+      "list": [
+        "Users can share viewing keys to prove transactions if required for compliance",
+        "Compliance proofs are possible without revealing all transaction activity",
+        "Selective disclosure allows users to meet regulatory requirements when necessary",
+        "Transaction amounts and escrow contracts remain publicly auditable on-chain"
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Self-Custodial",
+      "paragraphs": [
+        "ZKIRA is a protocol, not a financial intermediary. We do not hold funds, process payments, or manage user accounts. This self-custodial design means:"
+      ],
+      "list": [
+        "Users maintain full control of their funds at all times",
+        "No central authority can freeze or seize funds",
+        "ZKIRA Pay cannot access user funds or transaction data",
+        "Regulatory compliance is the responsibility of individual users"
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Regulatory Engagement",
+      "paragraphs": [
+        "We believe in constructive engagement with regulators and policymakers. Privacy and compliance are not mutually exclusive — they can and should coexist in a well-designed system.",
+        "ZKIRA Pay is designed to provide meaningful privacy protection while maintaining the transparency and auditability that regulators require for legitimate oversight."
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Jurisdiction Considerations",
+      "paragraphs": [
+        "Users are responsible for compliance with local regulations in their jurisdiction. ZKIRA Pay does not offer services in sanctioned jurisdictions or to sanctioned individuals.",
+        "We encourage users to consult with legal counsel regarding the regulatory requirements in their jurisdiction before using privacy-enhancing technologies."
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Contact",
+      "paragraphs": [
+        "For regulatory inquiries or compliance-related questions, please contact us at compliance@zkira.xyz."
+      ]
+    }
+  ]
+}

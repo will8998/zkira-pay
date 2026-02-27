@@ -1,0 +1,81 @@
+{
+  "page_header": {
+    "label": "FEATURES",
+    "title": "Confidential Payments, Six Ways",
+    "description": "Every tool you need for private transactions on Solana."
+  },
+  "sections": [
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "label": "FEATURE 01",
+          "title": "Stealth Payments",
+          "description": "One-time addresses for every payment. Your wallet address stays private while remaining publicly shareable.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/stealth-payments"
+          }
+        },
+        {
+          "label": "FEATURE 02",
+          "title": "Batch Payments",
+          "description": "Pay multiple recipients in one flow. Upload a CSV or enter manually, each recipient gets their own claim link.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/batch-payments"
+          }
+        },
+        {
+          "label": "FEATURE 03",
+          "title": "Conditional Escrow",
+          "description": "Milestone-based payment releases. Funds unlock as conditions are met, perfect for freelance projects.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/conditional-escrow"
+          }
+        },
+        {
+          "label": "FEATURE 04",
+          "title": "Multi-Sig",
+          "description": "Multiple approvers for high-value transfers. Shared control with configurable M-of-N thresholds.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/multisig"
+          }
+        },
+        {
+          "label": "FEATURE 05",
+          "title": "Payment Widget",
+          "description": "Embeddable payments for any website. React components, iframe, or vanilla JS integration options.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/widget"
+          }
+        },
+        {
+          "label": "FEATURE 06",
+          "title": "Telegram Bot",
+          "description": "Confidential payments from chat. Non-custodial bot generates secure payment links for easy sharing.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/telegram-bot"
+          }
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to start?",
+      "description": "Create your first confidential payment link and experience the future of private transactions on Solana.",
+      "buttons": [
+        {
+          "text": "Create a Payment Link",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        }
+      ]
+    }
+  ]
+}

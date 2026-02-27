@@ -1,0 +1,20 @@
+[package]
+name = "conditional-escrow"
+version = "0.1.0"
+description = "PRIV Conditional Escrow with Milestone Releases"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "conditional_escrow"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cbs = []
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }

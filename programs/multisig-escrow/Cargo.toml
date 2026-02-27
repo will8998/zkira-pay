@@ -1,0 +1,21 @@
+[package]
+name = "multisig-escrow"
+version = "0.1.0"
+description = "PRIV Multi-sig Escrow with N-of-M Approvals"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "multisig_escrow"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cbs = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }

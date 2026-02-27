@@ -1,0 +1,195 @@
+{
+  "page_header": {
+    "label": "SECURITY",
+    "title": "Security Model",
+    "description": "How ZKIRA protects your funds and privacy through battle-tested cryptography and self-custody architecture."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "CRYPTOGRAPHIC FOUNDATIONS",
+      "title": "Battle-Tested Cryptography"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "ECDH Key Exchange",
+          "description": "Stealth addresses are derived using Elliptic Curve Diffie-Hellman key exchange. Sender's ephemeral key + receiver's view key = shared secret for one-time address generation.",
+          "code": {
+            "language": "javascript",
+            "title": "Key derivation",
+            "code": "shared_secret = sender_ephemeral * receiver_view\nstealth_address = derive(shared_secret)"
+          }
+        },
+        {
+          "title": "SHA-256 Claim Verification",
+          "description": "Claim secrets are verified on-chain using SHA-256 hashing. Only the hash is stored in escrow, preventing secret exposure while ensuring only valid claimants can unlock funds.",
+          "code": {
+            "language": "javascript",
+            "title": "Claim verification",
+            "code": "claim_hash = sha256(claim_secret)\nrequire(claim_hash == stored_hash)"
+          }
+        },
+        {
+          "title": "Ed25519 Signatures",
+          "description": "All transactions use Solana's native Ed25519 signature scheme. Fast, secure, and deterministic signatures ensure transaction integrity without requiring trust in third parties.",
+          "code": {
+            "language": "javascript",
+            "title": "Signature verification",
+            "code": "verify_ed25519(signature, message, pubkey)\nassert(is_valid == true)"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "SELF-CUSTODY",
+      "title": "Your Keys, Your Funds",
+      "subtitle": "ZKIRA Pay operates as a non-custodial system. We never hold, touch, or have access to your private keys or funds."
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "Never Hold Private Keys",
+          "description": "ZKIRA Pay smart contracts interact only with public addresses and signed transactions. Your private keys remain exclusively in your wallet, never transmitted or stored by our systems."
+        },
+        {
+          "title": "Deterministic Contracts",
+          "description": "All escrow operations are governed by deterministic smart contracts. No human intervention, no admin overrides, no special privileges—just code executing exactly as programmed."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "ESCROW ARCHITECTURE",
+      "title": "On-Chain Escrow"
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "PDA-Based Escrow Accounts",
+          "description": "Program Derived Addresses (PDAs) create deterministic escrow accounts. No private keys exist for these accounts—only the program can control them, eliminating human error or malicious access.",
+          "features": [
+            "Deterministic address generation",
+            "Program-controlled access only",
+            "No private keys to compromise"
+          ]
+        },
+        {
+          "title": "Time-Locked with Auto-Refund",
+          "description": "Every escrow has a configurable expiry time. If unclaimed, funds automatically become refundable to the sender. No funds can ever be permanently lost or stuck in the system.",
+          "features": [
+            "Configurable expiry periods",
+            "Automatic refund mechanisms",
+            "No permanently locked funds"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "title": "Escrow Lifecycle"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {
+          "number": "1",
+          "title": "CREATED",
+          "description": "Tokens deposited\nTimer starts"
+        },
+        {
+          "number": "2",
+          "title": "ACTIVE",
+          "description": "Claimable with\nvalid secret"
+        },
+        {
+          "number": "3",
+          "title": "RESOLVED",
+          "description": "Claimed by recipient\nor refunded to sender"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "OPEN SOURCE",
+      "title": "Verify Everything",
+      "subtitle": "True security requires transparency. Every line of ZKIRA Pay code is open source and auditable by anyone."
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "All Code Public on GitHub",
+          "description": "Every smart contract, API endpoint, and frontend component is available on GitHub. No hidden code, no proprietary algorithms, no secret backdoors.",
+          "features": [
+            "Anchor program source code",
+            "Frontend and API implementations",
+            "Test suites and documentation"
+          ]
+        },
+        {
+          "title": "Verifiable Builds",
+          "description": "Anchor programs are built deterministically. Anyone can verify that the deployed bytecode matches the published source code—no trust required.",
+          "features": [
+            "Deterministic compilation",
+            "Verifiable on-chain programs",
+            "Reproducible build process"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "SECURITY DISCLOSURE",
+      "title": "Report Vulnerabilities",
+      "subtitle": "Security researchers and ethical hackers are essential to blockchain security. We welcome responsible disclosure of potential vulnerabilities."
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Contact our security team at security@zkira.xyz. We follow responsible disclosure practices and will work with you to understand and address any security concerns."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Found a Vulnerability?",
+      "items": [
+        {
+          "number": "1",
+          "title": "REPORT",
+          "description": "Send details to security@zkira.xyz with proof-of-concept"
+        },
+        {
+          "number": "2",
+          "title": "ACKNOWLEDGE",
+          "description": "We confirm receipt and begin investigation within 48 hours"
+        },
+        {
+          "number": "3",
+          "title": "RESOLVE",
+          "description": "Fix issued, coordinated disclosure, recognition provided"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Verify our claims",
+      "description": "Don't take our word for it. Examine our code, run your own tests, and verify every security claim we make.",
+      "buttons": [
+        {
+          "text": "View Code on GitHub",
+          "href": "/open-source",
+          "variant": "primary"
+        }
+      ]
+    }
+  ]
+}

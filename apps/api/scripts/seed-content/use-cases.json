@@ -1,0 +1,76 @@
+{
+  "page_header": {
+    "label": "USE CASES",
+    "title": "Real-World Applications",
+    "description": "See how teams and individuals use ZKIRA for confidential payments."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases" }
+  ],
+  "sections": [
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 2,
+      "items": [
+        {
+          "icon": "briefcase",
+          "label": null,
+          "title": "Freelancers",
+          "description": "Invoice clients without exposing your wallet",
+          "link": {
+            "text": "Learn More →",
+            "href": "/use-cases/freelancers"
+          },
+          "quote": "Every invoice I send shows my balance to clients. With ZKIRA, I can negotiate with confidence."
+        },
+        {
+          "icon": "payroll",
+          "label": null,
+          "title": "Payroll",
+          "description": "Pay teams without revealing compensation",
+          "link": {
+            "text": "Learn More →",
+            "href": "/use-cases/payroll"
+          },
+          "quote": "Our entire team could see everyone else's salary on-chain. ZKIRA solved that immediately."
+        },
+        {
+          "icon": "shop",
+          "label": null,
+          "title": "Merchants",
+          "description": "Accept payments without sharing your business wallet",
+          "link": {
+            "text": "Learn More →",
+            "href": "/use-cases/merchants"
+          },
+          "quote": "Our competitors could see exactly how much revenue we made. Now they can't."
+        },
+        {
+          "icon": "dao",
+          "label": null,
+          "title": "DAO Treasury",
+          "description": "Manage funds with multi-sig privacy",
+          "link": {
+            "text": "Learn More →",
+            "href": "/use-cases/dao-treasury"
+          },
+          "quote": "Competitors could analyze our spending patterns and runway. ZKIRA changed that."
+        },
+        {
+          "icon": "heart",
+          "label": null,
+          "title": "Personal",
+          "description": "Send money to friends and family privately",
+          "link": {
+            "text": "Learn More →",
+            "href": "/use-cases/personal"
+          },
+          "quote": "I sent my sister money for rent. She could see my entire wallet balance. Never again.",
+          "layout": "full-width"
+        }
+      ]
+    }
+  ]
+}

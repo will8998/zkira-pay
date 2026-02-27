@@ -1,0 +1,252 @@
+{
+  "hero": {
+    "badge": "System Online",
+    "headline": [
+      "Get Paid in",
+      "Crypto Without",
+      "Sharing Your",
+      "Wallet"
+    ],
+    "subheadline": "Create confidential payment links on Solana. Receiver identity hidden. Amounts protected. No wallet exposure.",
+    "cta_primary": {
+      "text": "Create a Payment Link",
+      "href": "https://app.zkira.xyz",
+      "variant": "primary",
+      "icon": "arrow_forward"
+    },
+    "cta_secondary": {
+      "text": "Read the Docs",
+      "href": "https://app.zkira.xyz",
+      "variant": "secondary"
+    },
+    "features": [
+      "Open Source",
+      "< 1s Settlement",
+      "Solana",
+      "0.25% Fee"
+    ]
+  },
+  "problem": {
+    "title": "The Confidentiality Layer",
+    "description": "Every transaction you make is permanently public. Your wallet address, counterparties, treasury balance, and payment patterns are all indexed, mapped, calculated, and analyzed. Every dollar. Every relationship. Forever.",
+    "exposure_items": [
+      "Address: 7Xf9...kL3m",
+      "Balance: $2,400,000 USDC",
+      "Last Transfer: $50,000 → 9Bw2...pQ7j",
+      "Counterparties: 12 unique addresses",
+      "Monthly Volume: $3,200,000"
+    ],
+    "cta": {
+      "text": "Read Whitepaper",
+      "href": "https://app.zkira.xyz",
+      "variant": "primary"
+    }
+  },
+  "features": {
+    "label": "CORE FEATURES",
+    "title": "Confidential Payments, Three Ways",
+    "subtitle": "Stealth addresses. Payment escrow. Gas relayer.",
+    "cards": [
+      {
+        "icon": "custom",
+        "label": "FEATURE 01",
+        "title": "Stealth Addresses",
+        "description": "A one-time address for every payment. Share your meta-address publicly. Each sender derives a unique stealth address that only you can detect and claim. No one can link payments to your real wallet.",
+        "link": {
+          "text": "Post your meta-address anywhere",
+          "href": "#"
+        }
+      },
+      {
+        "icon": "custom",
+        "label": "FEATURE 02", 
+        "title": "Payment Links",
+        "description": "Share a link, get paid privately. Create escrow-backed payment links anyone can claim. Funds locked on-chain until recipient claims with a secret."
+      },
+      {
+        "icon": "custom",
+        "title": "Gas Relayer",
+        "description": "Recipients don't need SOL to claim payments. Our relayer sponsors the transaction, preventing gas-funding from revealing identity."
+      }
+    ]
+  },
+  "how_it_works": {
+    "label": "Assembly Flow",
+    "title": "How It Works",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Create",
+        "description": "Deposit tokens into an on-chain escrow. A unique payment link is generated with a claim secret."
+      },
+      {
+        "number": "02", 
+        "title": "Share",
+        "description": "Send the link via Telegram, email, or any channel. The recipient doesn't need to share their wallet address."
+      },
+      {
+        "number": "03",
+        "title": "Claim", 
+        "description": "The recipient claims through a stealth address. The gas relayer sponsors the transaction. No identity link between sender and receiver."
+      }
+    ]
+  },
+  "telegram": {
+    "label": "TELEGRAM",
+    "title": "Confidential Payments via Telegram",
+    "description": "Create payment links and check balances directly from Telegram. The bot guides you to the web app for wallet operations.",
+    "commands": [
+      {
+        "command": "/create 100 USDC",
+        "description": "✓ Payment link created.\npriv.link/x7k2..."
+      },
+      {
+        "command": "/claim x7k2",
+        "description": "Open the link below to claim:\npay.zkira.xyz/claim/x7k2..."
+      }
+    ],
+    "cta": {
+      "text": "Add to Telegram →",
+      "href": "#",
+      "variant": "primary"
+    }
+  },
+  "trust": {
+    "label": "TRUST",
+    "title": "Confidentiality by Default. Transparency by Choice.",
+    "items": [
+      {
+        "icon": "vpn_key",
+        "title": "Self-Custodial",
+        "description": "Your keys, your funds. ZKIRA never holds or controls your tokens. All escrow operations are governed by on-chain smart contracts."
+      },
+      {
+        "icon": "code",
+        "title": "Open Source",
+        "description": "Every line of code is public on GitHub. The Anchor programs, SDK, and client apps are all verifiable."
+      },
+      {
+        "icon": "fact_check",
+        "title": "Verifiable",
+        "description": "On-chain escrow with deterministic PDAs. Claim verification uses SHA-256 hash matching. No trusted third party."
+      }
+    ]
+  },
+  "use_cases": {
+    "label": "Core Applications",
+    "title": "Use Cases",
+    "cases": [
+      {
+        "icon": "custom",
+        "title": "Freelancers",
+        "description": "Create payment links for each client. Get paid without exposing your financial position."
+      },
+      {
+        "icon": "custom", 
+        "title": "DAO Contributors",
+        "description": "Receive grants and bounties through stealth addresses. Your contribution history stays private."
+      },
+      {
+        "icon": "custom",
+        "title": "Creators & Artists", 
+        "description": "Generate payment links for each sale. Buyers pay, you claim privately."
+      },
+      {
+        "icon": "custom",
+        "title": "Payroll & Invoicing",
+        "description": "Pay teams through ZKIRA. Sender and recipient stay unlinked."
+      }
+    ]
+  },
+  "developers": {
+    "label": "DEVELOPERS",
+    "title": "Programmable Privacy",
+    "description": "Integrate confidential payments into any Solana app with the @zkira/sdk.",
+    "code": "// Create a confidential payment link\nimport { ZkiraClient } from '@zkira/sdk';\n\nconst client = new ZkiraClient({\n  connection,\n  wallet,\n});\n\nconst { link, escrow } = await client.createPaymentLink({\n  amount: 1000_000_000,\n  tokenMint: USDC_MINT,\n});\n\n// Share `link` — recipient claims privately",
+    "cta": {
+      "text": "View SDK on GitHub →",
+      "href": "https://github.com/priv-ing",
+      "variant": "primary"
+    }
+  },
+  "stats_bar": {
+    "items": [
+      {
+        "value": "<1s",
+        "label": "Settlement Time"
+      },
+      {
+        "value": "$0.001",
+        "label": "Per Transaction"
+      },
+      {
+        "value": "0.25%",
+        "label": "Claim Fee"
+      },
+      {
+        "value": "Solana",
+        "label": "Native Chain"
+      }
+    ]
+  },
+  "faq": {
+    "label": "FAQ",
+    "title": "Questions & Answers",
+    "items": [
+      {
+        "question": "What are stealth addresses?",
+        "answer": "Stealth addresses use ECDH (Elliptic Curve Diffie-Hellman) cryptography to derive a unique one-time address for every payment. You share a meta-address publicly, and each sender generates a fresh address that only you can detect and claim."
+      },
+      {
+        "question": "How do payment links work?",
+        "answer": "When you create a payment link, tokens are deposited into an on-chain escrow program. The link contains a claim secret. Anyone with the link can claim the funds to a stealth address. The escrow ensures funds are locked until claimed or refunded after expiry."
+      },
+      {
+        "question": "What are the costs?",
+        "answer": "ZKIRA charges a 0.25% fee on claimed payments. Solana transaction fees are approximately $0.001. The gas relayer sponsors claim transactions, so recipients don't need SOL."
+      },
+      {
+        "question": "Which wallets work with ZKIRA?",
+        "answer": "Any Solana wallet that supports the Wallet Adapter standard — Phantom, Solflare, Backpack, and more. For receiving via payment links, no wallet connection is needed until claim time."
+      },
+      {
+        "question": "Can ZKIRA see my transactions?",
+        "answer": "No. ZKIRA is fully on-chain and self-custodial. The escrow program is a deterministic Anchor smart contract. We never have access to your funds or transaction details."
+      },
+      {
+        "question": "Can I revoke a payment link?",
+        "answer": "Yes. Unclaimed payment links can be refunded by the creator at any time after the expiry period. The funds return to the creator's wallet."
+      },
+      {
+        "question": "Is the code audited?",
+        "answer": "ZKIRA is currently on devnet and has not been formally audited. The code is fully open-source on GitHub. We plan to engage professional auditors before mainnet launch."
+      },
+      {
+        "question": "Is this different from Tornado Cash?",
+        "answer": "Yes. ZKIRA does not pool funds or mix transactions. Each payment is a direct escrow between sender and a stealth address. There is no shared liquidity pool."
+      },
+      {
+        "question": "How do I receive my first payment?",
+        "answer": "Connect your wallet on the ZKIRA web app, and your stealth meta-address is automatically generated. Share a payment link with the sender, and claim when funds arrive."
+      },
+      {
+        "question": "Do I need SOL to claim?",
+        "answer": "No. The ZKIRA gas relayer sponsors claim transactions. You can claim payments without holding any SOL."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Start Receiving Confidential Payments",
+    "subtitle": "Create your first payment link in under sixty seconds. No registration required. Just connect your wallet.",
+    "cta_primary": {
+      "text": "Create a Payment Link",
+      "href": "https://app.zkira.xyz",
+      "variant": "primary"
+    },
+    "cta_secondary": {
+      "text": "Talk to Us on Telegram",
+      "href": "https://t.me/zkira_xyz",
+      "variant": "secondary"
+    }
+  }
+}

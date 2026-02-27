@@ -1,0 +1,180 @@
+{
+  "page_header": {
+    "label": "GUIDES",
+    "title": "Getting Started",
+    "description": "Step-by-step tutorials for building with ZKIRA."
+  },
+  "breadcrumbs": [
+    { "label": "Developers", "href": "/developers" },
+    { "label": "Guides" }
+  ],
+  "sections": [
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "flash_on",
+          "label": "Beginner",
+          "title": "Quick Start",
+          "description": "Get your first payment link in 5 minutes",
+          "time": "~5 min",
+          "difficulty": "Beginner",
+          "link": {
+            "text": null,
+            "href": "/developers/sdk"
+          }
+        },
+        {
+          "icon": "web",
+          "label": "Beginner",
+          "title": "Accept Payments on Your Website",
+          "description": "Embed the widget for seamless payment collection",
+          "time": "~10 min",
+          "difficulty": "Beginner",
+          "link": {
+            "text": null,
+            "href": "/developers/widget"
+          }
+        },
+        {
+          "icon": "smart_toy",
+          "label": "Intermediate",
+          "title": "Build a Payment Bot",
+          "description": "Create a Telegram bot with ZKIRA integration",
+          "time": "~30 min",
+          "difficulty": "Intermediate",
+          "link": {
+            "text": null,
+            "href": "/features/telegram-bot"
+          }
+        },
+        {
+          "icon": "account_balance",
+          "label": "Advanced",
+          "title": "DAO Treasury Setup",
+          "description": "Configure multi-sig payments for DAOs",
+          "time": "~45 min",
+          "difficulty": "Advanced",
+          "link": {
+            "text": null,
+            "href": "/features/multisig"
+          }
+        },
+        {
+          "icon": "api",
+          "label": "Intermediate",
+          "title": "Custom Integration via API",
+          "description": "Use REST endpoints for maximum flexibility",
+          "time": "~20 min",
+          "difficulty": "Intermediate",
+          "link": {
+            "text": null,
+            "href": "/developers/api"
+          }
+        },
+        {
+          "icon": "visibility_off",
+          "label": "Advanced",
+          "title": "Stealth Address Deep Dive",
+          "description": "Understand the cryptography behind privacy",
+          "time": "~60 min",
+          "difficulty": "Advanced",
+          "link": {
+            "text": null,
+            "href": "/features/stealth-payments"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Featured",
+      "title": "Complete Integration Walkthrough",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "From Zero to Live Payments",
+        "A comprehensive tutorial covering everything from SDK setup to production deployment. Build a complete payment system with user authentication, transaction monitoring, and webhook handling.",
+        "Advanced • ~2 hours"
+      ]
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "Start Tutorial",
+          "href": "/developers/sdk",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    },
+    {
+      "type": "section_header",
+      "label": "Learning Path",
+      "title": "Recommended Sequence",
+      "subtitle": null
+    },
+    {
+      "type": "steps",
+      "heading": null,
+      "items": [
+        {
+          "number": "1",
+          "title": "Learn the Basics",
+          "description": "Start with Quick Start → Widget Integration",
+          "difficulty": "Beginner"
+        },
+        {
+          "number": "2",
+          "title": "Build Projects",
+          "description": "Create bots, custom integrations via API",
+          "difficulty": "Intermediate"
+        },
+        {
+          "number": "3",
+          "title": "Master Privacy",
+          "description": "DAO treasury, stealth address cryptography",
+          "difficulty": "Advanced"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "Can't find what you need?",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Our team is here to help. Get support, request features, or suggest new tutorial topics."
+      ]
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "Contact Support",
+          "href": "/contact",
+          "variant": "primary"
+        },
+        {
+          "text": "View Source Code",
+          "href": "/developers/github",
+          "variant": "secondary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

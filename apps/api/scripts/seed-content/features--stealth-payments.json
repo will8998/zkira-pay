@@ -1,0 +1,120 @@
+{
+  "page_header": {
+    "label": "STEALTH PAYMENTS",
+    "title": "A Unique Address for Every Payment",
+    "description": "Break the link between your identity and your transactions. Share one meta-address publicly, receive payments through unlimited unique stealth addresses."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Stealth Payments" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "\"On public blockchains, receiving a payment means revealing your wallet address — and with it, your entire transaction history.\"",
+        "Traditional crypto payments force you to choose: either share your wallet address and sacrifice privacy, or create multiple wallets and sacrifice convenience. ZKIRA's stealth payments eliminate this tradeoff.",
+        "With stealth addresses, you can post one meta-address publicly — on social media, your website, or anywhere else — while receiving every payment through a completely unique, unlinkable address generated cryptographically by the sender."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "PROCESS",
+      "title": "How Stealth Payments Work"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {
+          "number": "01",
+          "title": "Share",
+          "description": "Post your meta-address publicly. Unlike a regular wallet address, this reveals nothing about your transactions or balances."
+        },
+        {
+          "number": "02",
+          "title": "Derive",
+          "description": "Sender creates a unique stealth address using ECDH cryptography. Your ephemeral key + their view key = shared secret."
+        },
+        {
+          "number": "03",
+          "title": "Claim",
+          "description": "Only you can detect and claim the funds using your spending key. Gas relayer sponsors the transaction, maintaining anonymity."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "UNDER THE HOOD",
+      "title": "ECDH Key Exchange"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Stealth addresses use Elliptic Curve Diffie-Hellman (ECDH) key exchange, the same cryptographic primitive that secures your HTTPS connections. Here's the magic:"
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "Recipient: Generates a meta-address from view key + spend key",
+        "Sender: Creates ephemeral key + derives shared secret with recipient's view key",
+        "Result: Unique stealth address = recipient spend key + hash(shared secret)"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "IMPLEMENTATION",
+      "title": "SDK Integration"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "TYPESCRIPT",
+      "code": "// Generate a stealth address for the recipient\nimport {\n  ZkiraClient\n} from '@zkira/sdk'\n\n// Initialize client\nconst client = new ZkiraClient()\n\n// Derive stealth address from recipient's meta-address\nconst { stealthAddress, ephemeralPubkey } =\n  client.deriveStealthAddress(recipientMetaAddress)\n\n// Send payment to the stealth address\nawait client.sendPayment({\n  to: stealthAddress,\n  amount: 1000000, // 1 USDC\n  ephemeralPubkey,\n  token: 'USDC'\n})"
+    },
+    {
+      "type": "section_header",
+      "label": "BENEFITS",
+      "title": "Why Use Stealth Payments"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "link_off",
+          "title": "Unlinkable Payments",
+          "description": "Every payment uses a unique address. No one can link multiple payments to the same recipient or analyze your payment patterns."
+        },
+        {
+          "icon": "public",
+          "title": "Public Meta-Address",
+          "description": "Share one address everywhere — social media, websites, business cards. It reveals nothing about your actual balances or transactions."
+        },
+        {
+          "icon": "account_balance_wallet",
+          "title": "Self-Custody",
+          "description": "Your keys, your coins. ZKIRA never has access to your funds. All cryptographic operations happen client-side with your own wallet."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Try Stealth Payments",
+      "description": "Experience the future of private payments. Generate your meta-address and start receiving payments through stealth addresses today.",
+      "buttons": [
+        {
+          "text": "Create Payment Link",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

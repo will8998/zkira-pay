@@ -1,0 +1,128 @@
+{
+  "page_header": {
+    "label": "LEGAL",
+    "title": "Terms of Service",
+    "description": "Terms governing use of ZKIRA Pay."
+  },
+  "sections": [
+    {
+      "type": "legal",
+      "lastUpdated": "February 2026",
+      "sections": [
+        {
+          "heading": "Acceptance of Terms",
+          "paragraphs": [
+            "By accessing or using ZKIRA Pay, including our website, software development kit (SDK), API, Widget, or Pay App, you agree to be bound by these Terms of Service. If you don't agree to these terms, please don't use our services."
+          ]
+        },
+        {
+          "heading": "Description of Service",
+          "paragraphs": [
+            "ZKIRA Pay is an open-source, self-custodial payment protocol built on Solana. We provide software tools including an SDK, API, Widget, and Pay App for creating and managing confidential payments through stealth addresses and on-chain escrow contracts.",
+            "Our protocol enables confidential payments while maintaining the security and transparency of blockchain technology."
+          ]
+        },
+        {
+          "heading": "Self-Custodial Nature",
+          "paragraphs": [
+            "ZKIRA Pay is entirely self-custodial, which means:"
+          ],
+          "list": [
+            "ZKIRA never holds, controls, or has access to your funds",
+            "All transactions are executed by on-chain smart contracts",
+            "You are solely responsible for your wallet security and private keys",
+            "Lost keys cannot be recovered by ZKIRA Pay",
+            "You maintain full control over your cryptocurrency at all times"
+          ]
+        },
+        {
+          "heading": "Acceptable Use",
+          "paragraphs": [
+            "When using ZKIRA Pay, you agree to:"
+          ],
+          "list": [
+            "Comply with all applicable laws and regulations in your jurisdiction",
+            "Not use ZKIRA for money laundering, terrorism financing, or sanctions evasion",
+            "Not attempt to exploit, attack, or compromise the protocol's security",
+            "Not use the service for any illegal or unauthorized purpose",
+            "Respect the rights and privacy of other users"
+          ]
+        },
+        {
+          "heading": "Risks",
+          "paragraphs": [
+            "Using ZKIRA Pay involves various risks that you should understand:"
+          ],
+          "subSections": [
+            {
+              "subHeading": "Smart Contract Risk",
+              "paragraphs": [
+                "Despite thorough testing, smart contracts may contain bugs or vulnerabilities that could result in loss of funds."
+              ]
+            },
+            {
+              "subHeading": "Blockchain Risk",
+              "paragraphs": [
+                "Network congestion, forks, outages, or other blockchain issues may affect transaction processing."
+              ]
+            },
+            {
+              "subHeading": "Regulatory Risk",
+              "paragraphs": [
+                "Laws and regulations regarding privacy technology and cryptocurrency may change, potentially affecting the protocol's availability or legality."
+              ]
+            },
+            {
+              "subHeading": "Price Risk",
+              "paragraphs": [
+                "Cryptocurrency values are highly volatile and may result in significant financial losses."
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Fees",
+          "paragraphs": [
+            "ZKIRA Pay charges a 0.25% fee on claimed payments. Standard Solana transaction fees also apply to all blockchain interactions. Our fee structure may change with reasonable notice posted on our website."
+          ]
+        },
+        {
+          "heading": "No Warranty",
+          "paragraphs": [
+            "ZKIRA Pay software is provided \"AS IS\" without warranty of any kind. We do not guarantee uptime, accuracy, or fitness for any particular purpose. You use the protocol at your own risk."
+          ]
+        },
+        {
+          "heading": "Limitation of Liability",
+          "paragraphs": [
+            "To the maximum extent permitted by law, ZKIRA Pay and its contributors shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or use, arising from your use of the protocol."
+          ]
+        },
+        {
+          "heading": "Open Source License",
+          "paragraphs": [
+            "ZKIRA Pay code is released under the MIT License. The terms of the MIT License apply separately to the use and distribution of the protocol's source code."
+          ]
+        },
+        {
+          "heading": "Modifications",
+          "paragraphs": [
+            "We may modify these terms from time to time. Continued use of ZKIRA Pay after changes are posted constitutes acceptance of the new terms."
+          ]
+        },
+        {
+          "heading": "Governing Law",
+          "paragraphs": [
+            "These terms are governed by the laws of [To Be Determined jurisdiction]. Any disputes will be resolved in the courts of that jurisdiction."
+          ]
+        },
+        {
+          "heading": "Contact",
+          "paragraphs": [
+            "For questions about these terms, please contact us at legal@zkira.xyz."
+          ]
+        }
+      ]
+    }
+  ]
+}

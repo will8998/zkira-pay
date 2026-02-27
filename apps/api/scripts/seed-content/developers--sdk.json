@@ -1,0 +1,129 @@
+{
+  "page_header": {
+    "label": "SDK",
+    "title": "@zkira/sdk",
+    "description": "TypeScript SDK for confidential payments on Solana."
+  },
+  "breadcrumbs": [
+    { "label": "Developers", "href": "/developers" },
+    { "label": "SDK" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "Installation",
+      "title": "Get Started",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": null,
+      "code": "pnpm add @zkira/sdk"
+    },
+    {
+      "type": "section_header",
+      "label": "Quick Start",
+      "title": "Basic Usage",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "1. Import and Initialize Client",
+      "code": "import { ZkiraClient } from '@zkira/sdk'\nimport { Connection, PublicKey } from '@solana/web3.js'\n\nconst connection = new Connection('https://api.mainnet-beta.solana.com')\nconst wallet = // Your wallet adapter\n\nconst client = new ZkiraClient({\n  connection,\n  wallet,\n  cluster: 'mainnet-beta' // or 'devnet'\n})"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "2. Create a Payment Link",
+      "code": "const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')\n\nconst { link, escrow } = await client.createPaymentLink({\n  amount: 1_000_000_000, // 1000 USDC (6 decimals)\n  tokenMint: USDC_MINT,\n  expirySeconds: 3600 // Optional: expires in 1 hour\n})\n\nconsole.log('Payment Link:', link)\nconsole.log('Escrow Address:', escrow.toString())"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "3. Check Payment Status",
+      "code": "const status = await client.getEscrowStatus(escrow)\n\nif (status.state === 'Claimed') {\n  console.log('Payment claimed at:', status.claimedAt)\n  console.log('Claimed by:', status.recipient?.toString())\n} else if (status.state === 'Active') {\n  console.log('Payment waiting to be claimed')\n} else if (status.state === 'Refunded') {\n  console.log('Payment refunded to sender')\n}"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "4. Claim a Payment",
+      "code": "// Recipient claims payment privately\nconst paymentLink = 'https://app.zkira.xyz/claim/...'\n\nconst txSignature = await client.claimPayment(paymentLink, recipientWallet)\nconsole.log('Claim transaction:', txSignature)"
+    },
+    {
+      "type": "section_header",
+      "label": "API Reference",
+      "title": "Key Methods",
+      "subtitle": null
+    },
+    {
+      "type": "list",
+      "heading": null,
+      "style": "table",
+      "items": [
+        {
+          "method": "createPaymentLink(options)",
+          "returns": "{ link, escrow }",
+          "description": "Create a new payment link with specified amount and token"
+        },
+        {
+          "method": "getEscrowStatus(escrowAddress)",
+          "returns": "EscrowState",
+          "description": "Query the current status of an escrow"
+        },
+        {
+          "method": "claimPayment(link, wallet)",
+          "returns": "TransactionSignature",
+          "description": "Claim a payment from a link to the specified wallet"
+        },
+        {
+          "method": "deriveStealthAddress(metaAddress)",
+          "returns": "{ stealthAddress, ephemeralPubkey }",
+          "description": "Generate a stealth address from a meta address"
+        },
+        {
+          "method": "refundPayment(escrowAddress)",
+          "returns": "TransactionSignature",
+          "description": "Refund an unclaimed payment back to the creator"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Types",
+      "title": "TypeScript Interfaces",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": null,
+      "code": "interface EscrowState {\n  state: 'Active' | 'Claimed' | 'Refunded'\n  amount: bigint\n  tokenMint: PublicKey\n  creator: PublicKey\n  createdAt: Date\n  claimedAt?: Date\n  recipient?: PublicKey\n}\n\ninterface PaymentLink {\n  link: string\n  escrow: PublicKey\n  expiresAt?: Date\n}\n\ninterface CreatePaymentOptions {\n  amount: number | bigint\n  tokenMint?: PublicKey // Defaults to USDC\n  expirySeconds?: number // Optional expiry\n  memo?: string // Optional memo\n}"
+    },
+    {
+      "type": "section_header",
+      "label": "Next Steps",
+      "title": "Continue Building",
+      "subtitle": null
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "View on GitHub",
+          "href": "/developers/github",
+          "variant": "primary"
+        },
+        {
+          "text": "Full API Reference",
+          "href": "/developers/guides",
+          "variant": "secondary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

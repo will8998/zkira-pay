@@ -1,0 +1,159 @@
+{
+  "page_header": {
+    "label": "WIDGET",
+    "title": "Payment Widget",
+    "description": "Embed confidential payments in 3 lines of code."
+  },
+  "breadcrumbs": [
+    { "label": "Developers", "href": "/developers" },
+    { "label": "Widget" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "Integration",
+      "title": "Three Ways to Integrate",
+      "subtitle": null
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "React Component",
+      "subtitle": "For React applications"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": "Installation",
+      "code": "pnpm add @zkira/widget"
+    },
+    {
+      "type": "code",
+      "language": "tsx",
+      "title": "Usage",
+      "code": "import { ZkiraPayButton } from '@zkira/widget'\n\nexport function PaymentForm() {\n  const handleSuccess = (txSignature: string) => {\n    console.log('Payment successful:', txSignature)\n  }\n\n  return (\n    <ZkiraPayButton\n      amount={100}\n      token=\"USDC\"\n      label=\"Pay with ZKIRA\"\n      theme=\"dark\"\n      onSuccess={handleSuccess}\n      onError={(error) => console.error(error)}\n    />\n  )\n}"
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "Iframe Bridge",
+      "subtitle": "For any JavaScript framework"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": "Installation",
+      "code": "pnpm add @zkira/widget"
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "title": "Usage",
+      "code": "import { createZkiraPayment } from '@zkira/widget'\n\n// Open payment modal\nconst payment = await createZkiraPayment({\n  amount: 100,\n  token: 'USDC',\n  theme: 'light',\n  onSuccess: (txSignature) => {\n    console.log('Payment successful:', txSignature)\n  },\n  onError: (error) => {\n    console.error('Payment failed:', error)\n  }\n})\n\n// Programmatically close\npayment.close()"
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "Script Tag",
+      "subtitle": "For vanilla HTML/JS"
+    },
+    {
+      "type": "code",
+      "language": "html",
+      "title": "HTML",
+      "code": "<script src=\"https://app.zkira.xyz/widget.js\"></script>\n<button onclick=\"payWithZkira()\">Pay with ZKIRA</button>"
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "title": "JavaScript",
+      "code": "function payWithZkira() {\n  window.Priv.pay({\n    amount: 100,\n    token: 'USDC',\n    theme: 'light',\n    onSuccess: (txSignature) => {\n      console.log('Payment successful:', txSignature)\n    },\n    onError: (error) => {\n      console.error('Payment failed:', error)\n    }\n  })\n}"
+    },
+    {
+      "type": "section_header",
+      "label": "Configuration",
+      "title": "Props & Options",
+      "subtitle": null
+    },
+    {
+      "type": "list",
+      "heading": null,
+      "style": "table",
+      "items": [
+        {
+          "property": "amount",
+          "type": "number",
+          "default": "required",
+          "description": "Payment amount in token's base units"
+        },
+        {
+          "property": "token",
+          "type": "string",
+          "default": "\"USDC\"",
+          "description": "Token symbol (USDC, SOL, etc.)"
+        },
+        {
+          "property": "theme",
+          "type": "\"light\" | \"dark\"",
+          "default": "\"light\"",
+          "description": "UI theme for the payment modal"
+        },
+        {
+          "property": "label",
+          "type": "string",
+          "default": "\"Pay with ZKIRA\"",
+          "description": "Button text label"
+        },
+        {
+          "property": "onSuccess",
+          "type": "function",
+          "default": "undefined",
+          "description": "Callback when payment succeeds"
+        },
+        {
+          "property": "onError",
+          "type": "function",
+          "default": "undefined",
+          "description": "Callback when payment fails"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Examples",
+      "title": "Customization",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "tsx",
+      "title": "Custom Button Label",
+      "code": "<ZkiraPayButton\n  amount={50}\n  token=\"SOL\"\n  label=\"Donate 0.05 SOL\"\n  theme=\"light\"\n/>"
+    },
+    {
+      "type": "code",
+      "language": "tsx",
+      "title": "Dark Theme",
+      "code": "<ZkiraPayButton\n  amount={25}\n  token=\"USDC\"\n  theme=\"dark\"\n  label=\"Pay $25\"\n/>"
+    },
+    {
+      "type": "section_header",
+      "label": "Documentation",
+      "title": "Learn More",
+      "subtitle": null
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "View Full Documentation",
+          "href": "/developers/guides",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

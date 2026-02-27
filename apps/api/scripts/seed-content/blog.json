@@ -1,0 +1,17 @@
+{
+  "page_header": {
+    "label": "BLOG",
+    "title": "Insights & Updates",
+    "description": "Technical deep dives, protocol updates, and the future of confidential payments."
+  },
+  "sections": [
+    {
+      "type": "intro",
+      "description": "Technical deep dives, protocol updates, and insights into the future of confidential payments on Solana."
+    },
+    {
+      "type": "empty_state",
+      "message": "No posts yet. Check back soon."
+    }
+  ]
+}

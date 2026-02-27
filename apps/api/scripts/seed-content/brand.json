@@ -1,0 +1,148 @@
+{
+  "page_header": {
+    "label": "BRAND",
+    "title": "Brand Guidelines",
+    "description": "Resources for press, partners, and community."
+  },
+  "sections": [
+    {
+      "type": "logo",
+      "heading": "Logo",
+      "variants": [
+        {
+          "name": "Dark on Light",
+          "background": "white",
+          "logoColor": "black",
+          "textColor": "black",
+          "text": "ZKIRA PROTOCOL"
+        },
+        {
+          "name": "Light on Dark",
+          "background": "black",
+          "logoColor": "white",
+          "textColor": "white",
+          "text": "ZKIRA PROTOCOL"
+        }
+      ]
+    },
+    {
+      "type": "colors",
+      "heading": "Color Palette",
+      "colors": [
+        {
+          "name": "Background",
+          "hex": "#ffffff"
+        },
+        {
+          "name": "Foreground",
+          "hex": "#0a0a0a"
+        },
+        {
+          "name": "Surface",
+          "hex": "#fafafa"
+        },
+        {
+          "name": "Charcoal Light",
+          "hex": "#525252"
+        },
+        {
+          "name": "Muted",
+          "hex": "#737373"
+        },
+        {
+          "name": "Border",
+          "hex": "#e5e5e5"
+        }
+      ]
+    },
+    {
+      "type": "typography",
+      "heading": "Typography",
+      "fonts": [
+        {
+          "name": "Space Grotesk",
+          "usage": "Headings",
+          "weights": [
+            {
+              "name": "Light",
+              "weight": 300
+            },
+            {
+              "name": "Regular",
+              "weight": 400
+            },
+            {
+              "name": "Medium",
+              "weight": 500
+            },
+            {
+              "name": "Bold",
+              "weight": 700
+            }
+          ]
+        },
+        {
+          "name": "JetBrains Mono",
+          "usage": "Code/Labels",
+          "weights": [
+            {
+              "name": "Regular",
+              "weight": 400
+            },
+            {
+              "name": "Medium",
+              "weight": 500
+            },
+            {
+              "name": "Bold",
+              "weight": 700
+            }
+          ],
+          "special": [
+            {
+              "name": "Uppercase Labels",
+              "example": "ZKIRAACY BY DEFAULT"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "principles",
+      "heading": "Design Principles",
+      "description": "Our visual identity reflects our values: transparency, technical precision, and uncompromising privacy.",
+      "principles": [
+        {
+          "icon": "architecture",
+          "title": "Brutalist",
+          "description": "Sharp edges, hard shadows, zero border radius. Our design language is uncompromising, functional, and deliberately stark—just like our approach to privacy."
+        },
+        {
+          "icon": "palette",
+          "title": "Monochrome",
+          "description": "Black, white, and grays. No unnecessary color distractions. This palette ensures clarity, focus, and timeless aesthetic appeal across all mediums."
+        },
+        {
+          "icon": "terminal",
+          "title": "Technical",
+          "description": "Monospace typography, uppercase labels, grid systems. Every design decision reflects the precision and transparency of our underlying technology."
+        }
+      ]
+    },
+    {
+      "type": "download",
+      "heading": "Brand Assets",
+      "description": "Download our complete brand kit including logo files, color palettes, typography specimens, and usage guidelines for all your creative needs.",
+      "brandKit": {
+        "version": "v1.0",
+        "description": "SVG logos, color swatches, font files, guidelines",
+        "size": "ZIP • 2.4 MB",
+        "downloadText": "Download Brand Kit"
+      },
+      "contact": {
+        "text": "For custom usage or press inquiries, contact",
+        "email": "press@zkira.xyz"
+      }
+    }
+  ]
+}

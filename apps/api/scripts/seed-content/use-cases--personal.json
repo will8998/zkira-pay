@@ -1,0 +1,97 @@
+{
+  "page_header": {
+    "label": "PERSONAL TRANSFERS",
+    "title": "Private Money to Family & Friends",
+    "description": "Payment links for personal transfers. Share a link via any messaging app. Recipient claims without wallet exposure."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases", "href": "/use-cases" },
+    { "label": "Personal" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "Sending money to a friend means they see your entire wallet. Family members can track your spending. Cross-border transfers create permanent public records."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "How ZKIRA Solves This",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Create a payment link for any amount. Share it through WhatsApp, Telegram, SMS, or email. The recipient clicks the link and claims the money to their wallet. No apps required, no balance exposure.",
+        "Perfect for splitting dinner bills, rent payments, birthday gifts, emergency transfers, or any personal transaction where privacy matters."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Workflow",
+      "items": [
+        {
+          "number": "1",
+          "title": "Create Payment Link",
+          "description": "Set the amount and generate a shareable link. Funds go into escrow immediately."
+        },
+        {
+          "number": "2",
+          "title": "Share via Any Channel",
+          "description": "Send the link through any messaging app, email, or social platform."
+        },
+        {
+          "number": "3",
+          "title": "Recipient Claims",
+          "description": "Recipient clicks link, connects wallet, and claims the money. No app installation required."
+        },
+        {
+          "number": "4",
+          "title": "No Public Trace",
+          "description": "Transaction completes with no public connection between sender and recipient wallets."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "heading": "Benefits",
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "family_restroom",
+          "label": null,
+          "title": "Family Privacy",
+          "description": "Send money without exposing your balance. Perfect for family support or allowances."
+        },
+        {
+          "icon": "public",
+          "label": null,
+          "title": "Cross-Border Ready",
+          "description": "USDC on Solana works globally. Send money anywhere instantly with low fees."
+        },
+        {
+          "icon": "smartphone",
+          "label": null,
+          "title": "No App Required",
+          "description": "Recipient just needs a browser and a wallet. Works on any device, any platform."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to Send Private Money?",
+      "description": null,
+      "buttons": [
+        {
+          "text": "Send a Private Payment",
+          "href": "#",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

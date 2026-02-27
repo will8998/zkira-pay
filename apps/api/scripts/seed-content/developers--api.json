@@ -1,0 +1,157 @@
+{
+  "page_header": {
+    "label": "API",
+    "title": "REST API Reference",
+    "description": "HTTP endpoints for payment creation and status queries."
+  },
+  "breadcrumbs": [
+    { "label": "Developers", "href": "/developers" },
+    { "label": "API" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "Base URL",
+      "title": "API Endpoint",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "https",
+      "title": null,
+      "code": "https://api.zkira.xyz"
+    },
+    {
+      "type": "section_header",
+      "label": "Authentication",
+      "title": "API Key Required",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Include your API key in the request headers as X-API-Key."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": null,
+      "code": "curl -X POST https://api.zkira.xyz/api/payments/create \\\n  -H \"Content-Type: application/json\" \\\n  -H \"X-API-Key: your_api_key_here\" \\\n  -d '{\n    \"amount\": 1000000000,\n    \"tokenMint\": \"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\"\n  }'"
+    },
+    {
+      "type": "section_header",
+      "label": "Endpoints",
+      "title": "Available Operations",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "POST /api/payments/create",
+        "Create a new payment link with escrow."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Request Body",
+      "code": "{\n  \"amount\": 1000000000,\n  \"tokenMint\": \"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\",\n  \"expirySeconds\": 3600\n}"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Response",
+      "code": "{\n  \"paymentId\": \"pay_123...\",\n  \"claimUrl\": \"https://app.zkira.xyz/claim/...\",\n  \"escrowAddress\": \"Esc123...\"\n}"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "GET /api/payments/:id",
+        "Get payment status and details by payment ID."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": "Request",
+      "code": "curl -H \"X-API-Key: your_api_key\" \\\n  https://api.zkira.xyz/api/payments/pay_123"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Response",
+      "code": "{\n  \"status\": \"claimed\",\n  \"amount\": 1000000000,\n  \"tokenMint\": \"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"claimedAt\": \"2024-01-15T11:15:00Z\"\n}"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "GET /api/escrows/creator/:pubkey",
+        "List all escrows created by a specific public key."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": "Request",
+      "code": "curl -H \"X-API-Key: your_api_key\" \\\n  https://api.zkira.xyz/api/escrows/creator/Creator123..."
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Response",
+      "code": "{\n  \"escrows\": [\n    {\n      \"address\": \"Esc123...\",\n      \"status\": \"active\",\n      \"amount\": 1000000000,\n      \"createdAt\": \"2024-01-15T10:30:00Z\"\n    }\n  ],\n  \"total\": 1\n}"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "POST /api/payments/status",
+        "Check escrow status by escrow address."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Request Body",
+      "code": "{\n  \"escrowAddress\": \"Esc123...\"\n}"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "title": "Response",
+      "code": "{\n  \"state\": \"Active\",\n  \"amount\": 1000000000,\n  \"tokenMint\": \"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\",\n  \"creator\": \"Creator123...\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\"\n}"
+    },
+    {
+      "type": "section_header",
+      "label": "Rate Limiting",
+      "title": "Usage Limits",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "1000 requests per hour per API key",
+        "Rate limit headers are included in all responses: X-RateLimit-Remaining and X-RateLimit-Reset."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Get Started",
+      "title": "Request API Access",
+      "subtitle": null
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "Get an API Key",
+          "href": "/contact",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

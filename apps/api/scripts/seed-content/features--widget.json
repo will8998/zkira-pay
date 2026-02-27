@@ -1,0 +1,101 @@
+{
+  "page_header": {
+    "label": "PAYMENT WIDGET",
+    "title": "Embed Confidential Payments Anywhere",
+    "description": "Add private payments to any website with React components, iframe integration, or vanilla JavaScript. Complete customization with your branding."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Payment Widget" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "INTEGRATION OPTIONS",
+      "title": "Three Ways to Integrate"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "code",
+          "title": "React Component",
+          "description": "Native React component with TypeScript support, hooks integration, and full customization. Perfect for modern web applications."
+        },
+        {
+          "icon": "web",
+          "title": "Iframe Bridge",
+          "description": "Framework-agnostic iframe integration with JavaScript bridge for communication. Works with any frontend technology."
+        },
+        {
+          "icon": "integration_instructions",
+          "title": "Vanilla JS Script",
+          "description": "Drop-in script tag integration. No build process or framework required. Perfect for static sites and simple integrations."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "CODE EXAMPLES",
+      "title": "Implementation Examples"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "REACT / TYPESCRIPT",
+      "code": "// Install the React component\nnpm install @zkira/react-widget\n\n// Use in your React app\nimport { ZkiraPayButton } from '@zkira/react-widget'\n\nfunction PaymentPage() {\n  const handleSuccess = (txId: string) => {\n    console.log('Payment successful:', txId)\n  }\n\n  return (\n    <ZkiraPayButton\n      amount={100}\n      token=\"USDC\"\n      theme=\"dark\"\n      onSuccess={handleSuccess}\n      onError={(err) => console.error(err)}\n    />\n  )\n}"
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "title": "JAVASCRIPT",
+      "code": "// Create payment widget iframe\nconst widget = createZkiraPayment({\n  amount: 100,\n  token: 'USDC',\n  container: '#payment-widget',\n  theme: 'light',\n  onSuccess: (data) => {\n    console.log('Payment complete', data.txId)\n  }\n})\n\n// Listen for widget events\nwindow.addEventListener('message', (event) => {\n  if (event.data.type === 'PAYMENT_SUCCESS') {\n    // Handle success\n  }\n})"
+    },
+    {
+      "type": "code",
+      "language": "html",
+      "title": "HTML / JAVASCRIPT",
+      "code": "<!-- Add the script tag -->\n<script src=\"https://app.zkira.xyz/widget.js\"></script>\n\n<!-- Add payment button container -->\n<div id=\"priv-pay-button\"></div>\n\n<script>\n  // Initialize payment button\n  ZkiraPay.init({\n    selector: '#zkira-pay-button',\n    amount: 100,\n    token: 'USDC',\n    buttonText: 'Pay with ZKIRA',\n    onSuccess: function(result) {\n      alert('Payment successful!')\n    }\n  });\n</script>"
+    },
+    {
+      "type": "section_header",
+      "label": "CUSTOMIZATION",
+      "title": "Configuration Options"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "The payment widget supports extensive customization options to match your brand and requirements. All configuration options are available across React, iframe, and vanilla JavaScript implementations."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "PREVIEW",
+      "title": "Widget Appearance"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "The widget adapts to both light and dark themes, maintaining a clean, professional appearance that integrates seamlessly with your existing design."
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Start Integrating Today",
+      "description": "Add confidential payments to your website in minutes. Complete documentation and examples available in our developer portal.",
+      "buttons": [
+        {
+          "text": "View Documentation",
+          "href": "/developers/widget",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

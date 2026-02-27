@@ -1,0 +1,130 @@
+{
+  "page_header": {
+    "label": "HOW IT WORKS",
+    "title": "The Anatomy of a Confidential Payment",
+    "description": "A deep dive into the cryptographic and technical architecture that makes ZKIRA Pay secure and private."
+  },
+  "sections": [
+    {
+      "type": "steps",
+      "heading": "3-Step Flow",
+      "items": [
+        {
+          "number": "01",
+          "title": "CREATE",
+          "description": "Sender deposits tokens into an on-chain escrow account. A unique payment link with embedded claim secret is generated. The escrow is time-locked with configurable expiry for automatic refunds.",
+          "features": [
+            "Tokens locked in PDA escrow",
+            "Claim secret generated",
+            "Time-lock configured"
+          ]
+        },
+        {
+          "number": "02",
+          "title": "SHARE",
+          "description": "Payment link is sent via any channel—Telegram, email, QR code, or direct message. The link contains only the claim secret. No wallet addresses are ever exposed in transit.",
+          "features": [
+            "Channel-agnostic sharing",
+            "Only claim secret in URL",
+            "No address exposure"
+          ]
+        },
+        {
+          "number": "03",
+          "title": "CLAIM",
+          "description": "Recipient opens the link and connects their wallet. Our gas relayer sponsors the claim transaction. Funds arrive at a stealth address derived from the recipient's meta-address.",
+          "features": [
+            "Gas-sponsored claiming",
+            "Stealth address delivery",
+            "No SOL needed to claim"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "TECHNICAL ARCHITECTURE",
+      "title": "Complete Payment Pipeline"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "The ZKIRA Pay payment pipeline involves multiple components working together: sender wallet, escrow program, claim secret generation, gas relayer, stealth address derivation, and recipient wallet. Each step is cryptographically secured and operates without trusted intermediaries."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "ZKIRAACY FEATURES",
+      "title": "What Makes It Confidential"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "Stealth Addresses",
+          "description": "Every payment generates a unique one-time address. Your main wallet address remains completely private while staying publicly shareable."
+        },
+        {
+          "title": "Escrow Model",
+          "description": "No direct wallet-to-wallet transfers. All payments go through smart contract escrow, breaking the on-chain connection between sender and receiver."
+        },
+        {
+          "title": "Gas Relayer",
+          "description": "Recipients don't need SOL to claim payments. Our gas relayer sponsors all claim transactions, removing another privacy leak."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "SYSTEM ARCHITECTURE",
+      "title": "Three-Layer Architecture",
+      "subtitle": "ZKIRA Pay is built as a modular system with clear separation between application, protocol, and network layers."
+    },
+    {
+      "type": "list",
+      "heading": "Application Layer",
+      "style": "architecture",
+      "items": [
+        "Pay App",
+        "TypeScript SDK",
+        "React Widget",
+        "Telegram Bot"
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Protocol Layer",
+      "style": "architecture",
+      "items": [
+        "Anchor Programs",
+        "Escrow Contracts",
+        "Stealth Addresses",
+        "Gas Relayer"
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Network Layer",
+      "style": "architecture",
+      "items": [
+        "Solana",
+        "SPL Tokens",
+        "Token-2022",
+        "PDAs"
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to try it?",
+      "description": "Experience confidential payments firsthand. Create your first payment link and see how simple privacy can be.",
+      "buttons": [
+        {
+          "text": "Try It Now",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        }
+      ]
+    }
+  ]
+}

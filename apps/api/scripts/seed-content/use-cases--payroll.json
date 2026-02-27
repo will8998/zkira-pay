@@ -1,0 +1,115 @@
+{
+  "page_header": {
+    "label": "PAYROLL",
+    "title": "Private Team Payments",
+    "description": "Batch payments through ZKIRA. Each employee receives a unique claim link. Salary amounts are hidden from other employees and the public."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases", "href": "/use-cases" },
+    { "label": "Payroll" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "On-chain payroll means every team member can see everyone else's salary. Competitors can map your burn rate. Headhunters can identify your top earners."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "How ZKIRA Solves This",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Upload your payroll CSV with amounts. ZKIRA generates individual claim links for each employee. Execute the batch payment in one transaction, but each employee claims privately.",
+        "Employees can't see each other's salaries. Competitors can't analyze your spending. You maintain the efficiency of batch payments with complete confidentiality."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Workflow",
+      "items": [
+        {
+          "number": "1",
+          "title": "Upload CSV with Amounts",
+          "description": "Import your payroll data. Employee addresses and payment amounts."
+        },
+        {
+          "number": "2",
+          "title": "Preview & Confirm",
+          "description": "Review the batch payment. See total amount and number of recipients."
+        },
+        {
+          "number": "3",
+          "title": "Batch Execute",
+          "description": "Single transaction deploys escrow for all employees. Efficient and gas-optimized."
+        },
+        {
+          "number": "4",
+          "title": "Distribute Claim Links",
+          "description": "Each employee gets a unique claim link. They claim their salary privately."
+        }
+      ]
+    },
+    {
+      "type": "stats",
+      "heading": "Payroll Scale",
+      "items": [
+        {
+          "value": "Up to 50",
+          "label": "per batch"
+        },
+        {
+          "value": "$0.001",
+          "label": "per tx"
+        },
+        {
+          "value": "Individual",
+          "label": "claim links"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "heading": "Benefits",
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "lock",
+          "label": null,
+          "title": "Salary Privacy",
+          "description": "Employee compensation amounts are hidden from other team members and competitors."
+        },
+        {
+          "icon": "speed",
+          "label": null,
+          "title": "Batch Efficiency",
+          "description": "Pay your entire team in one transaction. Lower gas costs, faster execution."
+        },
+        {
+          "icon": "rule",
+          "label": null,
+          "title": "Compliance Ready",
+          "description": "Audit trail for employers while maintaining employee privacy. Best of both worlds."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to Go Private?",
+      "description": null,
+      "buttons": [
+        {
+          "text": "Set Up Payroll",
+          "href": "#",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

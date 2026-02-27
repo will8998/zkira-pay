@@ -1,0 +1,139 @@
+{
+  "page_header": {
+    "label": "BATCH PAYMENTS",
+    "title": "Pay Many, Privately",
+    "description": "Send confidential payments to multiple recipients in a single transaction. Upload a CSV or enter manually — each recipient gets their own private claim link."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Batch Payments" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "\"Paying a team of 20 means 20 public transactions, each revealing amounts and recipients.\"",
+        "Traditional batch payments expose everything: who got paid, how much, when, and by whom. Whether it's payroll, grants, or airdrop distributions, every detail becomes public record on the blockchain.",
+        "ZKIRA's batch payments maintain complete privacy while streamlining operations. Create multiple escrows in one flow, distribute individual claim links, and let recipients claim privately through stealth addresses."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "SOLUTION",
+      "title": "How Batch Payments Work"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Batch payments create multiple private escrows in a single transaction, then generate individual claim links for each recipient. No one can see who was paid, how much, or link payments to each other."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "CSV Upload: Import recipient lists with amounts and optional notes",
+        "Sequential Escrow: Create separate escrows for each payment, all in one transaction",
+        "Individual Claims: Each recipient gets their own unique, unlinkable claim link"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "WORKFLOW",
+      "title": "4-Step Process"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {
+          "number": "01",
+          "title": "Upload CSV",
+          "description": "Import recipient data: addresses, amounts, and optional notes. Or enter manually through the interface."
+        },
+        {
+          "number": "02",
+          "title": "Preview",
+          "description": "Review recipients, amounts, and total. Verify all details before creating the batch escrows."
+        },
+        {
+          "number": "03",
+          "title": "Execute",
+          "description": "Sign one transaction to create all escrows. Each recipient gets their own private escrow account."
+        },
+        {
+          "number": "04",
+          "title": "Distribute Links",
+          "description": "Send each recipient their unique claim link via email, Slack, or any channel. Claims are private and unlinkable."
+        }
+      ]
+    },
+    {
+      "type": "stats",
+      "items": [
+        {
+          "value": "50",
+          "label": "MAX RECIPIENTS"
+        },
+        {
+          "value": "$0.001",
+          "label": "PER TRANSACTION"
+        },
+        {
+          "value": "1:1",
+          "label": "CLAIM LINKS"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Up to 50 recipients per batch for optimal transaction size and gas efficiency.",
+        "Minimal Solana transaction fees, plus 0.25% protocol fee only on successful claims.",
+        "Each recipient gets their own unique, private claim link that can't be linked to others."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "USE CASES",
+      "title": "Perfect For"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "groups",
+          "title": "DAO Payroll",
+          "description": "Pay contributors monthly without revealing individual compensation amounts. Keep team finances private while maintaining transparency with total budgets."
+        },
+        {
+          "icon": "volunteer_activism",
+          "title": "Grant Distribution",
+          "description": "Distribute grants to multiple recipients without revealing funding amounts or creating competitive dynamics between grantees."
+        },
+        {
+          "icon": "redeem",
+          "title": "Private Airdrops",
+          "description": "Send token distributions that recipients can claim privately. No public record of who received what, when, or how much."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Create a Batch Payment",
+      "description": "Start paying your team, contributors, or community privately. Upload a CSV or enter recipients manually to get started.",
+      "buttons": [
+        {
+          "text": "Create Batch Payment",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

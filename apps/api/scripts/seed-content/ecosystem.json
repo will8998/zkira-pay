@@ -1,0 +1,178 @@
+{
+  "page_header": {
+    "label": "ECOSYSTEM",
+    "title": "Partners & Integrations",
+    "description": "The growing ZKIRA Pay ecosystem. Compatible wallets, future integrations, and partnership opportunities."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "SUPPORTED WALLETS",
+      "title": "Compatible Wallets",
+      "subtitle": "ZKIRA Pay works seamlessly with all major Solana wallets through the Wallet Adapter standard."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "Phantom",
+          "description": "The most popular Solana wallet with browser extension and mobile app support. Full compatibility with ZKIRA Pay stealth addresses.",
+          "link": "https://phantom.app",
+          "status": "✓ COMPATIBLE",
+          "features": [
+            "Browser Extension",
+            "Mobile Apps",
+            "Hardware Support",
+            "Built-in Swap"
+          ]
+        },
+        {
+          "title": "Solflare",
+          "description": "Feature-rich Solana wallet with advanced portfolio tracking and staking capabilities. Seamless integration with ZKIRA payment links.",
+          "link": "https://solflare.com",
+          "status": "✓ COMPATIBLE",
+          "features": [
+            "Web & Extension",
+            "Portfolio Tracking",
+            "Staking Support",
+            "NFT Gallery"
+          ]
+        },
+        {
+          "title": "Backpack",
+          "description": "Next-generation wallet with social features and multi-chain support. Full compatibility with ZKIRA Pay's stealth addressing.",
+          "link": "https://backpack.app",
+          "status": "✓ COMPATIBLE",
+          "features": [
+            "Social Features",
+            "Multi-Chain",
+            "xNFTs Support",
+            "Chat Integration"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "FUTURE INTEGRATIONS",
+      "title": "Coming Soon",
+      "subtitle": "Planned integrations with major DeFi protocols, DEXs, and Solana ecosystem partners."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "DEX Integration",
+          "description": "Integration with major Solana DEXs for private swapping and trading. Confidential limit orders and stealth trading capabilities.",
+          "status": "Coming Soon"
+        },
+        {
+          "title": "DeFi Protocols",
+          "description": "Private lending, borrowing, and yield farming through stealth addresses. Maintain privacy while participating in DeFi ecosystems.",
+          "status": "Coming Soon"
+        },
+        {
+          "title": "Payment Gateways",
+          "description": "Merchant integration with e-commerce platforms. Accept private payments through Shopify, WooCommerce, and custom implementations.",
+          "status": "Coming Soon"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "BUILT ON SOLANA",
+      "title": "Solana Ecosystem",
+      "subtitle": "ZKIRA Pay leverages Solana's high-performance blockchain for fast, low-cost confidential payments."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "High Performance",
+          "description": "65,000 transactions per second with sub-second finality. ZKIRA payments confirm almost instantly."
+        },
+        {
+          "title": "Low Cost",
+          "description": "Transaction fees under $0.01. Create and claim payments without worrying about gas costs."
+        },
+        {
+          "title": "Token-2022 Support",
+          "description": "Future integration with Solana's Token-2022 program for native confidential transfer extensions."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "GET INVOLVED",
+      "title": "Join the Ecosystem"
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "Integrate with ZKIRA",
+          "description": "Add confidential payments to your application with our TypeScript SDK, React widgets, and REST API. Complete integration in minutes.",
+          "cta": {
+            "text": "View Documentation",
+            "href": "/developers"
+          }
+        },
+        {
+          "title": "Become a Partner",
+          "description": "Partner with ZKIRA Pay to bring confidential payments to your ecosystem. Strategic partnerships and technical collaborations welcome.",
+          "cta": {
+            "text": "Contact Us",
+            "href": "/contact"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "ECOSYSTEM METRICS",
+      "title": "Growing Adoption"
+    },
+    {
+      "type": "stats",
+      "items": [
+        {
+          "value": "3",
+          "label": "Compatible Wallets"
+        },
+        {
+          "value": "6",
+          "label": "Integration Tools"
+        },
+        {
+          "value": "100%",
+          "label": "Open Source"
+        },
+        {
+          "value": "MIT",
+          "label": "Licensed"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Start building today",
+      "description": "Join the growing ZKIRA Pay ecosystem. Integrate confidential payments, partner with us, or contribute to our open source development.",
+      "buttons": [
+        {
+          "text": "Get Started",
+          "href": "/developers",
+          "variant": "primary"
+        },
+        {
+          "text": "Explore Code",
+          "href": "https://github.com/zkira-pay",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

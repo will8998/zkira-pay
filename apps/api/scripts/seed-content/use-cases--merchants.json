@@ -1,0 +1,135 @@
+{
+  "page_header": {
+    "label": "MERCHANTS",
+    "title": "Private Payment Processing",
+    "description": "Embed the ZKIRA payment widget. Customers pay through stealth addresses. Business revenue stays confidential."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases", "href": "/use-cases" },
+    { "label": "Merchants" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "Accepting crypto payments means publishing a wallet address on your site. Anyone can see your revenue, customer count, and transaction patterns."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "How ZKIRA Solves This",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Embed our payment widget on your site. Each customer payment goes to a unique stealth address. You claim revenue privately, but customers get the familiar checkout experience they expect.",
+        "Competitors can't analyze your sales volume. Customers can't see your business wallet. Your revenue streams remain completely confidential while maintaining payment reliability."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Workflow",
+      "items": [
+        {
+          "number": "1",
+          "title": "Add Widget to Site",
+          "description": "Integrate ZKIRA widget with 3 lines of code. Works with any e-commerce platform."
+        },
+        {
+          "number": "2",
+          "title": "Customer Clicks \"Pay\"",
+          "description": "Familiar payment flow. Customer sees product price and payment options."
+        },
+        {
+          "number": "3",
+          "title": "Payment Goes to Stealth Address",
+          "description": "Customer payment secured in escrow. No connection to your business wallet visible."
+        },
+        {
+          "number": "4",
+          "title": "Merchant Claims Privately",
+          "description": "Claim revenue to your wallet. Customer fulfilled, payment secured, privacy maintained."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "Integration Options",
+      "subtitle": null
+    },
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "code",
+          "label": null,
+          "title": "React Component",
+          "description": "Native React integration"
+        },
+        {
+          "icon": "web",
+          "label": null,
+          "title": "iframe",
+          "description": "Universal embed"
+        },
+        {
+          "icon": "terminal",
+          "label": null,
+          "title": "Script Tag",
+          "description": "Simple copy-paste"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "View Widget Documentation →"
+      ]
+    },
+    {
+      "type": "cards",
+      "heading": "Benefits",
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "trending_up",
+          "label": null,
+          "title": "Revenue Privacy",
+          "description": "Competitors can't track your sales volume, customer count, or revenue trends."
+        },
+        {
+          "icon": "integration_instructions",
+          "label": null,
+          "title": "Easy Integration",
+          "description": "Add private payments to any site with 3 lines of code. No backend changes required."
+        },
+        {
+          "icon": "shopping_cart",
+          "label": null,
+          "title": "Customer Experience",
+          "description": "Familiar checkout flow. Customers don't need to change their payment behavior."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to Accept Private Payments?",
+      "description": null,
+      "buttons": [
+        {
+          "text": "Integrate ZKIRA Widget",
+          "href": "#",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

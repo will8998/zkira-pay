@@ -1,0 +1,177 @@
+{
+  "page_header": {
+    "label": "OPEN SOURCE",
+    "title": "Build in the Open",
+    "description": "All ZKIRA Pay code is open source and auditable."
+  },
+  "breadcrumbs": [
+    { "label": "Developers", "href": "/developers" },
+    { "label": "GitHub" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "Repositories",
+      "title": "Core Infrastructure",
+      "subtitle": null
+    },
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 1,
+      "items": [
+        {
+          "icon": "folder_code",
+          "label": "TypeScript + Rust",
+          "title": "zkira-pay/zkira",
+          "description": "Main monorepo containing API, Pay app, Relayer, SDK, and cryptographic libraries",
+          "link": {
+            "text": "View on GitHub",
+            "href": "https://github.com/zkira-pay/zkira"
+          }
+        },
+        {
+          "icon": "folder_code",
+          "label": "Next.js + TypeScript",
+          "title": "zkira-pay/zkira-web",
+          "description": "Marketing website and documentation",
+          "link": {
+            "text": "View on GitHub",
+            "href": "https://github.com/zkira-pay/zkira-web"
+          }
+        },
+        {
+          "icon": "folder_code",
+          "label": "Rust",
+          "title": "zkira-pay/ghost-registry",
+          "description": "Stealth address registry program for on-chain privacy primitives",
+          "link": {
+            "text": "View on GitHub",
+            "href": "https://github.com/zkira-pay/ghost-registry"
+          }
+        },
+        {
+          "icon": "folder_code",
+          "label": "Rust",
+          "title": "zkira-pay/conditional-escrow",
+          "description": "Conditional escrow program with customizable unlock conditions",
+          "link": {
+            "text": "View on GitHub",
+            "href": "https://github.com/zkira-pay/conditional-escrow"
+          }
+        },
+        {
+          "icon": "folder_code",
+          "label": "Rust",
+          "title": "zkira-pay/multisig-escrow",
+          "description": "Multi-signature escrow program for DAO treasury management",
+          "link": {
+            "text": "View on GitHub",
+            "href": "https://github.com/zkira-pay/multisig-escrow"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Activity",
+      "title": "Development Stats",
+      "subtitle": null
+    },
+    {
+      "type": "stats",
+      "heading": null,
+      "items": [
+        {
+          "value": "5",
+          "label": "Repositories"
+        },
+        {
+          "value": "100k+",
+          "label": "Lines of Code"
+        },
+        {
+          "value": "24/7",
+          "label": "CI/CD Pipeline"
+        },
+        {
+          "value": "MIT",
+          "label": "License"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Contributing",
+      "title": "How to Contribute",
+      "subtitle": null
+    },
+    {
+      "type": "steps",
+      "heading": null,
+      "items": [
+        {
+          "number": "1",
+          "title": "Fork Repository",
+          "description": "Fork the repository you want to contribute to and clone it to your local machine."
+        },
+        {
+          "number": "2",
+          "title": "Create Branch",
+          "description": "Create a feature branch with a descriptive name for your changes."
+        },
+        {
+          "number": "3",
+          "title": "Submit PR",
+          "description": "Submit a pull request with a clear description of your changes and their purpose."
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Code of Conduct",
+        "We are committed to providing a welcoming and inclusive environment for all contributors. Please review our Code of Conduct before participating in our community. Respectful collaboration and constructive feedback are the foundations of our development process."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "License",
+      "title": "Free and Open Source",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "MIT License",
+        "All ZKIRA Pay code is released under the MIT License. You are free to use, modify, and distribute the code for any purpose, including commercial applications.",
+        "Free to use • Modify • Distribute"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Get Involved",
+      "title": "Join the Community",
+      "subtitle": null
+    },
+    {
+      "type": "cta",
+      "title": null,
+      "description": null,
+      "buttons": [
+        {
+          "text": "Star us on GitHub",
+          "href": "https://github.com/zkira-pay",
+          "variant": "primary"
+        },
+        {
+          "text": "Join Discussion",
+          "href": "/contact",
+          "variant": "secondary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

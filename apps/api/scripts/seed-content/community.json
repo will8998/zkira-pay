@@ -1,0 +1,146 @@
+{
+  "page_header": {
+    "label": "COMMUNITY",
+    "title": "Join the Ecosystem",
+    "description": "Connect with privacy advocates, developers, and users building the future of confidential payments."
+  },
+  "sections": [
+    {
+      "type": "cards",
+      "columns": 4,
+      "items": [
+        {
+          "icon": "close",
+          "title": "Twitter/X",
+          "description": "Follow us for updates, news, and privacy insights from the ZKIRA team and community.",
+          "stats": "2.5K+ Followers",
+          "cta": {
+            "text": "Follow",
+            "href": "#"
+          }
+        },
+        {
+          "icon": "discord",
+          "title": "Discord",
+          "description": "Join real-time discussions with developers, get technical support, and collaborate on privacy solutions.",
+          "stats": "1.8K+ Members",
+          "cta": {
+            "text": "Join",
+            "href": "#"
+          }
+        },
+        {
+          "icon": "chat",
+          "title": "Telegram",
+          "description": "Connect with the community in our public Telegram group for casual conversations and announcements.",
+          "stats": "950+ Members",
+          "cta": {
+            "text": "Join",
+            "href": "#"
+          }
+        },
+        {
+          "icon": "code",
+          "title": "GitHub",
+          "description": "Explore our open-source code, contribute to development, and report issues or suggest improvements.",
+          "stats": "300+ Stars",
+          "cta": {
+            "text": "Star",
+            "href": "#"
+          }
+        }
+      ]
+    },
+    {
+      "type": "stats",
+      "items": [
+        {
+          "value": "1,000+",
+          "label": "Members"
+        },
+        {
+          "value": "Open Source",
+          "label": "Always"
+        },
+        {
+          "value": "Active",
+          "label": "Development"
+        },
+        {
+          "value": "Solana",
+          "label": "Ecosystem"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "INSIGHTS",
+      "title": "From the Blog"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "date": "Feb 15, 2024",
+          "title": "Understanding Stealth Addresses: Privacy Without Mixing",
+          "description": "A deep dive into how ZKIRA's stealth address implementation provides privacy without the regulatory concerns of mixing protocols.",
+          "link": "/blog"
+        },
+        {
+          "date": "Feb 8, 2024",
+          "title": "Building Privacy Infrastructure for Solana",
+          "description": "The technical challenges and solutions behind creating confidential payment infrastructure on a transparent blockchain.",
+          "link": "/blog"
+        },
+        {
+          "date": "Jan 30, 2024",
+          "title": "Why Financial Privacy Matters in Web3",
+          "description": "Exploring the importance of transaction privacy for individuals, businesses, and the broader crypto ecosystem.",
+          "link": "/blog"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "title": "Contribute to ZKIRA",
+      "subtitle": "ZKIRA is open source and community-driven. Whether you're a developer, designer, researcher, or privacy advocate, there are many ways to contribute to building better privacy infrastructure for everyone."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "code",
+          "title": "Code",
+          "description": "Contribute to smart contracts, SDK, or frontend development"
+        },
+        {
+          "icon": "description",
+          "title": "Documentation",
+          "description": "Help improve guides, tutorials, and technical documentation"
+        },
+        {
+          "icon": "science",
+          "title": "Research",
+          "description": "Contribute to cryptographic research and protocol improvements"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "buttons": [
+        {
+          "text": "View on GitHub",
+          "href": "/developers/github",
+          "variant": "primary"
+        },
+        {
+          "text": "Join Discord",
+          "href": "#",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

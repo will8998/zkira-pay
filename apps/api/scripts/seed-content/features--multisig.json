@@ -1,0 +1,105 @@
+{
+  "page_header": {
+    "label": "MULTI-SIG",
+    "title": "Shared Control, Confidential Execution",
+    "description": "Multiple signers must approve before funds release. Perfect for DAO treasuries, company funds, and shared accounts with configurable M-of-N thresholds."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Multi-Sig" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "CONCEPT",
+      "title": "Shared Control with Privacy"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Multi-signature payments require multiple approvers to sign off before funds can be released, providing security through distributed control while maintaining complete privacy through stealth address execution.",
+        "Unlike traditional multi-sig wallets where all signatures and transactions are public, ZKIRA multi-sig keeps the approval process confidential. Only the final release appears on-chain through a stealth address, hiding amounts, timing, and recipient identity."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "M-of-N Threshold: Configure how many signatures are required (e.g., 2-of-3, 3-of-5)",
+        "Private Approval: Signatures collected off-chain before final execution",
+        "Stealth Release: Final payment through private stealth address"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "APPROVAL FLOW",
+      "title": "2-of-3 Multi-Signature"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Escrow requires 2-of-3 approvals before release. Once threshold is met, payment executes privately through stealth address. Third approver signature is optional since threshold is already satisfied."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "USE CASES",
+      "title": "Perfect For"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "account_balance",
+          "title": "DAO Treasury",
+          "description": "Secure large treasury funds with distributed approval from key stakeholders. Prevent single points of failure while maintaining spending privacy."
+        },
+        {
+          "icon": "business",
+          "title": "Company Funds",
+          "description": "Require multiple executives to approve large expenditures. Perfect for payroll, vendor payments, and strategic investments with confidential amounts."
+        },
+        {
+          "icon": "group_work",
+          "title": "Shared Accounts",
+          "description": "Joint custody for partnerships, family trusts, or investment groups. Multiple parties must agree before funds can be spent or transferred."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "FEATURES",
+      "title": "Multi-Sig Capabilities"
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "Configurable Threshold: Set any M-of-N combination (2-of-3, 3-of-5, 5-of-7, etc.)",
+        "On-Chain Approval Tracking: Transparent signature collection with cryptographic verification",
+        "Time-Locked Expiry: Optional expiration dates to prevent stale approvals",
+        "Private Execution: Final payment through stealth address maintains confidentiality",
+        "Flexible Approvers: Add or remove signers with existing approver consensus",
+        "Emergency Recovery: Built-in mechanisms for lost key scenarios"
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Set Up Multi-Sig",
+      "description": "Secure high-value funds with distributed control. Create a multi-signature escrow with your team, board, or partners.",
+      "buttons": [
+        {
+          "text": "Set Up Multi-Sig",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

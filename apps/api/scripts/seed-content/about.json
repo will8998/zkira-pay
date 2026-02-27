@@ -1,0 +1,91 @@
+{
+  "page_header": {
+    "label": "ABOUT",
+    "title": "Building the Confidential Layer for Solana",
+    "description": "We believe financial privacy is a fundamental right, not a feature."
+  },
+  "sections": [
+    {
+      "type": "blockquote",
+      "text": "We believe financial privacy is a fundamental right, not a feature."
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "In an era where digital transactions leave permanent footprints, ZKIRA Pay stands as a guardian of financial autonomy. We're building the infrastructure that allows individuals and businesses to transact with confidence, knowing their financial activities remain private and secure.",
+        "Our approach to privacy is different. Rather than obfuscating transactions through complex mixing protocols, ZKIRA uses stealth addresses and escrow mechanisms to create a clean, auditable, and truly private payment experience on Solana. Every transaction is direct, every privacy mechanism is transparent, and every user maintains complete control.",
+        "Privacy shouldn't be a luxury reserved for the technical elite. ZKIRA makes confidential payments accessible to everyone through intuitive interfaces, seamless wallet integrations, and gas-sponsored transactions that remove friction at every step."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "VALUES",
+      "title": "What We Stand For"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "security",
+          "title": "Self-Custody First",
+          "description": "Your keys, your coins, your data. ZKIRA never has access to your funds or transaction details. Everything is self-custodial and runs on deterministic smart contracts."
+        },
+        {
+          "icon": "code",
+          "title": "Open Source Always",
+          "description": "Full transparency through open-source code. Every smart contract, every cryptographic implementation, every line of frontend code is available for community review and contribution."
+        },
+        {
+          "icon": "visibility_off",
+          "title": "Privacy by Default",
+          "description": "Privacy shouldn't be an opt-in feature. Our protocols are designed with privacy as the foundation, not an afterthought. Every transaction is confidential by design."
+        }
+      ]
+    },
+    {
+      "type": "team",
+      "heading": "The Team",
+      "subtitle": "Our team operates under pseudonyms—a common practice in crypto that aligns with our privacy values.",
+      "members": [
+        {
+          "initial": "A",
+          "role": "Protocol Lead",
+          "description": "Cryptography researcher with 8+ years in zero-knowledge proofs and privacy-preserving protocols. Previously contributed to Zcash and Monero research."
+        },
+        {
+          "initial": "S",
+          "role": "Smart Contract Engineer",
+          "description": "Solana ecosystem veteran with expertise in Anchor framework and on-chain program optimization. Former Solana Labs contributor."
+        },
+        {
+          "initial": "D",
+          "role": "Frontend Engineer",
+          "description": "Full-stack developer specializing in wallet integrations and cryptographic UX. Obsessed with making complex protocols feel simple."
+        },
+        {
+          "initial": "R",
+          "role": "DevRel",
+          "description": "Developer advocate and technical writer. Bridges the gap between cutting-edge cryptography and practical implementation."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Join Us",
+      "description": "We're building the future of private payments. Join our community of developers, researchers, and privacy advocates who believe financial autonomy is worth fighting for.",
+      "buttons": [
+        {
+          "text": "Join Discord",
+          "href": "#",
+          "variant": "primary"
+        },
+        {
+          "text": "View on GitHub",
+          "href": "#",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

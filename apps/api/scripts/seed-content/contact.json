@@ -1,0 +1,116 @@
+{
+  "page_header": {
+    "label": "CONTACT",
+    "title": "Get in Touch",
+    "description": "Have questions, feedback, or want to collaborate? We're here to help."
+  },
+  "sections": [
+    {
+      "type": "cards",
+      "heading": "Other Ways to Reach Us",
+      "items": [
+        {
+          "icon": "mail",
+          "title": "Email",
+          "description": "For general inquiries and support",
+          "link": {
+            "text": "hello@zkira.xyz",
+            "href": "mailto:hello@zkira.xyz"
+          }
+        },
+        {
+          "icon": "chat",
+          "title": "Telegram",
+          "description": "Join our community for discussions",
+          "link": {
+            "text": "@zkira_xyz",
+            "href": "#"
+          }
+        },
+        {
+          "icon": "discord",
+          "title": "Discord",
+          "description": "Developer discussions and support",
+          "link": {
+            "text": "discord.gg/zkira",
+            "href": "#"
+          }
+        },
+        {
+          "icon": "code",
+          "title": "GitHub",
+          "description": "Open source code and issues",
+          "link": {
+            "text": "github.com/zkira-pay",
+            "href": "#"
+          }
+        }
+      ]
+    },
+    {
+      "type": "form",
+      "heading": "Send us a Message",
+      "fields": [
+        {
+          "type": "text",
+          "name": "name",
+          "label": "Name",
+          "placeholder": "Your name",
+          "required": true
+        },
+        {
+          "type": "email",
+          "name": "email",
+          "label": "Email",
+          "placeholder": "your@email.com",
+          "required": true
+        },
+        {
+          "type": "select",
+          "name": "subject",
+          "label": "Subject",
+          "options": [
+            { "value": "General", "label": "General" },
+            { "value": "Technical", "label": "Technical" },
+            { "value": "Partnership", "label": "Partnership" },
+            { "value": "Security", "label": "Security" }
+          ],
+          "required": true
+        },
+        {
+          "type": "textarea",
+          "name": "message",
+          "label": "Message",
+          "placeholder": "Tell us how we can help...",
+          "rows": 6,
+          "required": true
+        }
+      ],
+      "submitButton": {
+        "text": "Send Message"
+      }
+    },
+    {
+      "type": "security",
+      "heading": "Security Disclosure",
+      "icon": "shield",
+      "description": "Found a vulnerability? We take security seriously and appreciate responsible disclosure. Please do not publish security issues publicly before we've had a chance to address them.",
+      "process": {
+        "heading": "Reporting Process",
+        "steps": [
+          "Email security@zkira.xyz with details",
+          "Include proof-of-concept if possible",
+          "Allow 72 hours for initial response",
+          "Coordinate disclosure timeline with our team"
+        ]
+      },
+      "button": {
+        "text": "Report Security Issue"
+      }
+    },
+    {
+      "type": "cta",
+      "text": "We typically respond within 24-48 hours during business days."
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "page_header": {
+    "label": "ROADMAP",
+    "title": "Where We're Going",
+    "description": "Our public development roadmap. Track our progress from MVP to production-ready protocol."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "DEVELOPMENT TIMELINE",
+      "title": "Public Roadmap",
+      "subtitle": "Transparent development progress from initial concept to production mainnet deployment."
+    },
+    {
+      "type": "timeline",
+      "items": [
+        {
+          "status": "shipped",
+          "title": "Completed Features",
+          "items": [
+            {
+              "title": "Stealth Address Cryptography",
+              "description": "ECDH key derivation for generating unique one-time addresses",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Payment Escrow Program",
+              "description": "Anchor smart contracts for time-locked escrows with claim verification",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Pay Web App",
+              "description": "Complete web interface for creating and claiming payment links",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Gas Relayer",
+              "description": "Sponsored transaction service for gasless claim experience",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "REST API",
+              "description": "HTTP endpoints for payment management and metadata storage",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Basic Telegram Bot",
+              "description": "/send and /request commands for creating payment links in chat",
+              "status": "✓ DONE"
+            }
+          ]
+        },
+        {
+          "status": "in-progress",
+          "title": "Current Development",
+          "items": [
+            {
+              "title": "Contacts & Address Book",
+              "description": "Save frequently used addresses and manage payment recipients",
+              "status": "⚡ ACTIVE"
+            },
+            {
+              "title": "Payment History Dashboard",
+              "description": "Track sent and received payments with detailed transaction history",
+              "status": "⚡ ACTIVE"
+            },
+            {
+              "title": "Batch Payments",
+              "description": "Send payments to multiple recipients in one transaction",
+              "status": "⚡ ACTIVE"
+            },
+            {
+              "title": "Developer SDK & Widget",
+              "description": "TypeScript SDK and embeddable React components for developers",
+              "status": "⚡ ACTIVE"
+            },
+            {
+              "title": "Telegram Bot Enhancement",
+              "description": "Advanced features, inline queries, and group payment management",
+              "status": "⚡ ACTIVE"
+            }
+          ]
+        },
+        {
+          "status": "planned",
+          "title": "Future Features",
+          "items": [
+            {
+              "title": "Conditional Escrow (Milestones)",
+              "description": "Multi-stage payments with milestone-based releases",
+              "status": "○ FUTURE"
+            },
+            {
+              "title": "Multi-Sig Approval Flows",
+              "description": "M-of-N signature requirements for high-value transfers",
+              "status": "○ FUTURE"
+            },
+            {
+              "title": "Formal Security Audit",
+              "description": "Professional security assessment by tier-1 audit firms",
+              "status": "○ FUTURE"
+            },
+            {
+              "title": "Mainnet Launch",
+              "description": "Production deployment on Solana mainnet after audit completion",
+              "status": "○ FUTURE"
+            },
+            {
+              "title": "Token-2022 Confidential Transfers",
+              "description": "Integration with Solana's native confidential transfer extension",
+              "status": "○ FUTURE"
+            },
+            {
+              "title": "Mobile App",
+              "description": "Native iOS and Android apps with camera QR scanning",
+              "status": "○ FUTURE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "STAY UPDATED",
+      "title": "Real-Time Progress",
+      "subtitle": "This roadmap is updated regularly as we complete milestones and adjust priorities based on community feedback and technical discoveries."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "GitHub",
+          "description": "Follow development progress, issues, and pull requests in real-time on our public repositories.",
+          "link": "https://github.com/zkira-pay"
+        },
+        {
+          "title": "Telegram",
+          "description": "Join our community chat for discussions, announcements, and direct feedback on roadmap priorities.",
+          "link": "https://t.me/zkira-xyz"
+        },
+        {
+          "title": "Twitter",
+          "description": "Get milestone updates, feature announcements, and behind-the-scenes development insights.",
+          "link": "https://twitter.com/zkira-xyz"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Shape our roadmap",
+      "description": "Community feedback drives our development priorities. Share your ideas, vote on features, and help us build the future of confidential payments.",
+      "buttons": [
+        {
+          "text": "Share Feedback",
+          "href": "/contact",
+          "variant": "primary"
+        },
+        {
+          "text": "Contribute Code",
+          "href": "https://github.com/zkira-pay",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

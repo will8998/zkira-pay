@@ -1,0 +1,143 @@
+{
+  "page_header": {
+    "label": "FAQ",
+    "title": "Questions & Answers",
+    "description": "Everything you need to know about ZKIRA Pay."
+  },
+  "sections": [
+    {
+      "type": "faq",
+      "categories": [
+        {
+          "title": "How It Works",
+          "items": [
+            {
+              "question": "What are stealth addresses?",
+              "answer": "Stealth addresses use ECDH (Elliptic Curve Diffie-Hellman) cryptography to derive a unique one-time address for every payment. You share a meta-address publicly, and each sender generates a fresh address that only you can detect and claim."
+            },
+            {
+              "question": "How do payment links work?",
+              "answer": "When you create a payment link, tokens are deposited into an on-chain escrow program. The link contains a claim secret. Anyone with the link can claim the funds to a stealth address. The escrow ensures funds are locked until claimed or refunded after expiry."
+            },
+            {
+              "question": "What are the costs?",
+              "answer": "ZKIRA charges a 0.25% fee on claimed payments. Solana transaction fees are approximately $0.001. The gas relayer sponsors claim transactions, so recipients don't need SOL."
+            },
+            {
+              "question": "Which wallets work with ZKIRA?",
+              "answer": "Any Solana wallet that supports the Wallet Adapter standard — Phantom, Solflare, Backpack, and more. For receiving via payment links, no wallet connection is needed until claim time."
+            },
+            {
+              "question": "What are meta-addresses?",
+              "answer": "Meta-addresses are your public identity in the ZKIRA system. They're derived from your wallet's public key using elliptic curve cryptography. Share your meta-address publicly—senders use it to generate unique stealth addresses for each payment."
+            },
+            {
+              "question": "What happens when payment links expire?",
+              "answer": "Unclaimed payment links automatically expire after the set time period (default 30 days). After expiry, the creator can reclaim the escrowed funds. This prevents funds from being locked forever if links are lost or unused."
+            },
+            {
+              "question": "Which tokens are supported?",
+              "answer": "ZKIRA currently supports SOL and major SPL tokens including USDC, USDT, and wrapped tokens. The protocol is token-agnostic and can be extended to support any SPL token through governance or direct integration."
+            }
+          ]
+        },
+        {
+          "title": "Privacy & Security",
+          "items": [
+            {
+              "question": "Can ZKIRA see my transactions?",
+              "answer": "No. ZKIRA is fully on-chain and self-custodial. The escrow program is a deterministic Anchor smart contract. We never have access to your funds or transaction details."
+            },
+            {
+              "question": "Can I revoke a payment link?",
+              "answer": "Yes. Unclaimed payment links can be refunded by the creator at any time after the expiry period. The funds return to the creator's wallet."
+            },
+            {
+              "question": "Is the code audited?",
+              "answer": "ZKIRA is currently on devnet and has not been formally audited. The code is fully open-source on GitHub. We plan to engage professional auditors before mainnet launch."
+            },
+            {
+              "question": "Is this different from Tornado Cash?",
+              "answer": "Yes. ZKIRA does not pool funds or mix transactions. Each payment is a direct escrow between sender and a stealth address. There is no shared liquidity pool."
+            },
+            {
+              "question": "How are private keys managed?",
+              "answer": "ZKIRA never handles your private keys. Stealth address keys are derived deterministically from your wallet's private key using cryptographic derivation. Only you can generate the private keys needed to claim funds sent to your stealth addresses."
+            },
+            {
+              "question": "What data is stored on-chain?",
+              "answer": "Only essential transaction data is stored on-chain: escrow account details, expiry times, and claim status. No personal information, amounts (encrypted), or linking data between stealth addresses and users is stored publicly."
+            },
+            {
+              "question": "How does ZKIRA handle compliance?",
+              "answer": "ZKIRA is a privacy tool, not an anonymity tool. All transactions are auditable by participants. The protocol includes optional compliance features for businesses, including transaction reporting and audit trails for regulated entities."
+            }
+          ]
+        },
+        {
+          "title": "Getting Started",
+          "items": [
+            {
+              "question": "How do I receive my first payment?",
+              "answer": "Connect your wallet on the ZKIRA web app, and your stealth meta-address is automatically generated. Share a payment link with the sender, and claim when funds arrive."
+            },
+            {
+              "question": "Do I need SOL to claim?",
+              "answer": "No. The ZKIRA gas relayer sponsors claim transactions. You can claim payments without holding any SOL."
+            },
+            {
+              "question": "Which wallets are supported?",
+              "answer": "ZKIRA supports all major Solana wallets: Phantom, Solflare, Backpack, Glow, Slope, Sollet, and any wallet that implements the Wallet Adapter standard. Hardware wallets like Ledger are also supported through compatible wallet interfaces."
+            },
+            {
+              "question": "Is there a minimum payment amount?",
+              "answer": "The minimum payment amount varies by token to cover transaction fees and ensure economic viability. For SOL, the minimum is typically 0.001 SOL. For SPL tokens, minimums are set to cover the 0.25% protocol fee plus gas costs."
+            },
+            {
+              "question": "Does ZKIRA work on mobile?",
+              "answer": "Yes. The ZKIRA web app is fully responsive and works on mobile browsers. We also support mobile wallets like Phantom Mobile, Solflare Mobile, and Glow. A dedicated mobile app is planned for future releases."
+            }
+          ]
+        },
+        {
+          "title": "For Developers",
+          "items": [
+            {
+              "question": "Is there a JavaScript SDK?",
+              "answer": "Yes. The ZKIRA SDK provides TypeScript/JavaScript bindings for all protocol functions including stealth address generation, payment link creation, and claim operations. Full documentation and examples are available on GitHub."
+            },
+            {
+              "question": "Can I integrate ZKIRA into my dApp?",
+              "answer": "Absolutely. ZKIRA offers multiple integration options: a drop-in widget, React components, SDK integration, and REST API. The protocol is designed to be easily embedded into existing Solana applications."
+            },
+            {
+              "question": "Is there an API for payment tracking?",
+              "answer": "Yes. The ZKIRA API provides endpoints for payment status tracking, transaction history, and webhook notifications. Perfect for e-commerce sites, donation platforms, or any application that needs to track incoming payments."
+            },
+            {
+              "question": "How can I contribute to the open source project?",
+              "answer": "We welcome contributions! Check our GitHub for open issues, join our Discord for technical discussions, and review our contribution guidelines. Areas of focus include SDK improvements, UI/UX, cryptographic optimizations, and documentation."
+            }
+          ]
+        },
+        {
+          "title": "Fees & Costs",
+          "items": [
+            {
+              "question": "What fees does ZKIRA charge?",
+              "answer": "ZKIRA charges a 0.25% protocol fee on successfully claimed payments. This fee supports development, gas relayer operations, and protocol maintenance. There are no upfront fees for creating payment links or generating stealth addresses."
+            },
+            {
+              "question": "How much do Solana transactions cost?",
+              "answer": "Solana transaction fees are typically $0.001 or less. Creating payment links and claiming funds each require one transaction. The gas relayer covers claim transaction costs for recipients."
+            },
+            {
+              "question": "What are gas relayer fees?",
+              "answer": "Gas relayer services are provided free of charge, funded by the protocol fee. This ensures recipients can claim payments without holding SOL. For high-volume users, optional priority fees can ensure faster transaction processing."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

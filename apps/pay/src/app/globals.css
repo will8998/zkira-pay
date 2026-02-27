@@ -1,0 +1,412 @@
+@import "tailwindcss";
+
+/* ─── Design System Tokens (Cyberpunk Dark) ─── */
+:root {
+  --color-bg: #000000;
+  --color-text: rgba(255, 255, 255, 0.98);
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-tertiary: rgba(255, 255, 255, 0.4);
+  --color-muted: rgba(255, 255, 255, 0.35);
+  --color-border: #282828;
+  --color-border-strong: #3C3C3C;
+  --color-surface: #111111;
+  --color-surface-alt: #1E1E1E;
+  --color-skeleton: #1A1A1A;
+  --color-hover: #1A1A1A;
+  --color-green: #9CDC6A;
+  --color-green-hover: #B5E88A;
+  --color-red: #FF2828;
+  --color-warning-bg: #1A1500;
+  --color-warning-border: #3D3200;
+  --color-warning-text: #FFD146;
+  --color-active-text: #FFFFFF;
+  --color-button: #FF2828;
+  --color-button-hover: #E02020;
+  --color-button-text: #FFFFFF;
+  --color-section-label: rgba(255, 255, 255, 0.25);
+
+  /* Navigation active state */
+  --color-nav-active-bg: rgba(255, 40, 40, 0.12);
+  --color-nav-active-text: #FF2828;
+
+  /* Panel backgrounds */
+  --bg-panel: #0A0A0A;
+  --bg-main: #000000;
+  --bg-tab-bar: #0A0A0A;
+  
+  /* Cyberpunk Border Tokens */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-subtle-hover: rgba(255, 255, 255, 0.12);
+  --ease-premium: cubic-bezier(0.05, 0.7, 0.1, 1.0);
+  --ease-out-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Mobile Responsive Tokens */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --tab-bar-height: 4rem;
+}
+
+/* ─── Cyberpunk Effects ─── */
+.neon-glow {
+  box-shadow: 0 0 10px rgba(255, 40, 40, 0.3), 0 0 20px rgba(255, 40, 40, 0.1);
+}
+
+.neon-glow-strong {
+  box-shadow: 0 0 15px rgba(255, 40, 40, 0.5), 0 0 30px rgba(255, 40, 40, 0.2);
+}
+
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.01) 2px, rgba(255, 255, 255, 0.01) 4px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ─── Keyframe Animations ─── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes checkDraw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseGreen {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes entranceFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ─── Utility Classes ─── */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out both;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out both;
+  }
+  .animate-check-draw {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: checkDraw 0.4s ease-out 0.2s forwards;
+  }
+  .animate-pulse-green {
+    animation: pulseGreen 2s ease-in-out infinite;
+  }
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+  .delay-400 { animation-delay: 0.4s; }
+  .delay-500 { animation-delay: 0.5s; }
+
+  /* Entrance animation */
+  .animate-entrance {
+    animation: entranceFade 0.4s var(--ease-out-premium) both;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s var(--ease-out-premium) both;
+  }
+
+  /* More delay utilities */
+  .delay-600 { animation-delay: 0.6s; }
+  .delay-700 { animation-delay: 0.7s; }
+  .delay-800 { animation-delay: 0.8s; }
+
+  /* Card utilities */
+  .card-base {
+    background: var(--color-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .card-interactive {
+    background: var(--color-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+    transition: border-color 0.15s ease;
+  }
+  .card-interactive:hover {
+    box-shadow: none;
+    border-color: var(--border-subtle-hover);
+  }
+
+  /* Button press effect */
+  .btn-press {
+    transition: transform 0.1s var(--ease-premium), box-shadow 0.2s ease;
+  }
+  .btn-press:active {
+    transform: scale(0.98);
+  }
+
+  /* Focus ring — applies on keyboard navigation only */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-red);
+  }
+
+  /* Auto focus-visible for all interactive elements */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+  }
+
+  /* Keyboard shortcut badge */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    line-height: 1;
+  }
+
+  /* Input focus */
+  .input-focus:focus {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 3px var(--border-subtle);
+  }
+
+  /* Tabular nums for financial data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-skeleton);
+    border-radius: 0.25rem;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, var(--color-surface), transparent);
+    opacity: 0.5;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* ─── Mobile Responsive Utilities ─── */
+  .pb-safe {
+    padding-bottom: var(--safe-bottom);
+  }
+  .pb-tab {
+    padding-bottom: calc(var(--tab-bar-height) + var(--safe-bottom));
+  }
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .animate-sheet-up {
+    animation: slideUpSheet 0.3s var(--ease-out-premium) both;
+  }
+}
+
+/* ─── Base Resets ─── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ─── Base Typography ─── */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background-color: #FF2828;
+  color: #FFFFFF;
+}
+
+/* ─── Unified Wallet Kit Overrides (Cyberpunk Theme) ─── */
+
+/* Modal backdrop */
+.unified-wallet-modal-overlay {
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Modal container */
+.unified-wallet-modal {
+  background: var(--color-surface) !important;
+  border: 1.5px solid var(--color-border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+  color: var(--color-text) !important;
+  max-width: 420px !important;
+}
+
+/* Force no border-radius anywhere in the wallet modal */
+[class*="UnifiedWallet"],
+[class*="unified-wallet"],
+[class*="wallet-adapter"] {
+  border-radius: 0 !important;
+}
+
+/* Wallet list items */
+.unified-wallet-adapter-list-item,
+[class*="WalletItem"] {
+  border-radius: 0 !important;
+  border: 1px solid var(--border-subtle) !important;
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  font-family: var(--font-sans) !important;
+  transition: all 0.15s !important;
+}
+
+.unified-wallet-adapter-list-item:hover,
+[class*="WalletItem"]:hover {
+  background: var(--color-hover) !important;
+  border-color: var(--border-subtle-hover) !important;
+}
+
+/* Buttons inside wallet modal */
+.unified-wallet-adapter-button,
+[class*="UnifiedWallet"] button {
+  border-radius: 0 !important;
+  font-family: var(--font-sans) !important;
+}
+
+/* Modal title text */
+[class*="UnifiedWallet"] h1,
+[class*="UnifiedWallet"] h2,
+[class*="UnifiedWallet"] h3 {
+  font-family: var(--font-sans) !important;
+  color: var(--color-text) !important;
+}
+
+/* Close button */
+[class*="UnifiedWallet"] [aria-label="Close"],
+[class*="close"] {
+  border-radius: 0 !important;
+}
+
+/* "More options" / collapse area */
+[class*="UnifiedWallet"] [class*="collapse"],
+[class*="UnifiedWallet"] [class*="Collapse"] {
+  border-radius: 0 !important;
+}
+
+/* Detected badge */
+[class*="Detected"],
+[class*="detected"] {
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Override any dark theme backgrounds the kit applies */
+[class*="UnifiedWallet"] [class*="dark"] {
+  background: var(--color-surface) !important;
+}
+
+/* Scrollbar in wallet list */
+[class*="UnifiedWallet"]::-webkit-scrollbar {
+  width: 4px;
+}
+[class*="UnifiedWallet"]::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+[class*="UnifiedWallet"]::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 0;
+}

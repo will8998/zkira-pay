@@ -1,0 +1,104 @@
+{
+  "page_header": {
+    "label": "FREELANCERS",
+    "title": "Invoice Without Exposure",
+    "description": "Create payment links per client. Each client pays to a stealth address. No one can see your total earnings or other clients."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases", "href": "/use-cases" },
+    { "label": "Freelancers" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "Every invoice you send reveals your wallet address. Clients can see your balance, other clients' payments, and your entire financial history. Your negotiating power evaporates."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "How ZKIRA Solves This",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Create unique payment links per client. Each client pays to a stealth address that only you can access. Your total earnings, client roster, and payment history remain completely private.",
+        "No more clients seeing your financial position. No more competitors tracking your client base. Just clean, professional invoicing with complete privacy."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Workflow",
+      "items": [
+        {
+          "number": "1",
+          "title": "Create Payment Link",
+          "description": "Generate a unique stealth payment link for each client or project."
+        },
+        {
+          "number": "2",
+          "title": "Send to Client",
+          "description": "Include the payment link in your invoice. Client sees a professional payment page."
+        },
+        {
+          "number": "3",
+          "title": "Client Pays (Escrow)",
+          "description": "Payment goes into escrow. Client can't see your wallet. You can't see theirs."
+        },
+        {
+          "number": "4",
+          "title": "You Claim Privately",
+          "description": "Claim payment to your wallet. No public connection between you and the client."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "heading": "Benefits",
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "group_off",
+          "label": null,
+          "title": "Client Separation",
+          "description": "Each client gets a unique address. They can't see payments from other clients or your total earnings."
+        },
+        {
+          "icon": "visibility_off",
+          "label": null,
+          "title": "Hidden Revenue",
+          "description": "Your total earnings are invisible. Negotiate from a position of strength, not desperation."
+        },
+        {
+          "icon": "receipt_long",
+          "label": null,
+          "title": "Professional Invoicing",
+          "description": "Clean payment links that work with any invoicing system. No wallet addresses exposed."
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "I was losing deals because clients could see I was desperate—my wallet was nearly empty. ZKIRA fixed that. Now they see a professional payment page, nothing else.",
+        "— Freelance Developer, Solana Ecosystem"
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to Invoice Privately?",
+      "description": null,
+      "buttons": [
+        {
+          "text": "Create Your First Invoice",
+          "href": "#",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "page_header": {
+    "label": "DAO TREASURY",
+    "title": "Private Multi-Sig Operations",
+    "description": "Multi-sig escrow with confidential execution. Treasury operations require M-of-N approval but execute through stealth addresses."
+  },
+  "breadcrumbs": [
+    { "label": "Use Cases", "href": "/use-cases" },
+    { "label": "DAO Treasury" }
+  ],
+  "sections": [
+    {
+      "type": "text",
+      "paragraphs": [
+        "DAO treasuries are fully visible. Competitors know your runway. Contributors' compensation is public. Grant recipients are tracked."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": null,
+      "title": "How ZKIRA Solves This",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Set up a multi-sig treasury with ZKIRA. Proposals require M-of-N approval from signers, but execution happens through stealth addresses. The governance is transparent, but the financial operations are confidential.",
+        "Your runway stays private. Contributor compensation is hidden. Grant recipients can't be tracked back to your DAO. Maintain decentralized governance with financial privacy."
+      ]
+    },
+    {
+      "type": "steps",
+      "heading": "Workflow",
+      "items": [
+        {
+          "number": "1",
+          "title": "Multi-Sig Setup",
+          "description": "Configure M-of-N multi-sig with DAO signers. Set spending thresholds and approval requirements."
+        },
+        {
+          "number": "2",
+          "title": "Propose Payment",
+          "description": "Submit payment proposals with recipient and amount. Publicly visible for governance."
+        },
+        {
+          "number": "3",
+          "title": "Collect Approvals",
+          "description": "Signers approve or reject proposals on-chain. Transparent governance process maintained."
+        },
+        {
+          "number": "4",
+          "title": "Execute Confidentially",
+          "description": "Approved payments execute through stealth addresses. Amount and recipient stay private."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "heading": "Benefits",
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "account_balance_wallet",
+          "label": null,
+          "title": "Treasury Privacy",
+          "description": "Hide runway and spending patterns from competitors. Maintain strategic advantage."
+        },
+        {
+          "icon": "shield",
+          "label": null,
+          "title": "Contributor Protection",
+          "description": "Hide compensation amounts. Protect contributors from targeted attacks and doxxing."
+        },
+        {
+          "icon": "how_to_vote",
+          "label": null,
+          "title": "Governance Transparency",
+          "description": "On-chain approvals with confidential execution. Democracy with privacy."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Ready to Secure Your Treasury?",
+      "description": null,
+      "buttons": [
+        {
+          "text": "Set Up DAO Treasury",
+          "href": "#",
+          "variant": "primary"
+        }
+      ],
+      "footnote": null
+    }
+  ]
+}

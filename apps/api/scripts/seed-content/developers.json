@@ -1,0 +1,135 @@
+{
+  "page_header": {
+    "label": "DEVELOPERS",
+    "title": "Programmable Privacy",
+    "description": "Integrate confidential payments into any Solana application."
+  },
+  "breadcrumbs": [],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "Quick Start",
+      "title": "Three Ways to Build",
+      "subtitle": null
+    },
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 3,
+      "items": [
+        {
+          "icon": "code",
+          "label": null,
+          "title": "SDK",
+          "description": "Build with @zkira/sdk",
+          "details": "TypeScript SDK for creating payment links, managing escrows, and deriving stealth addresses.",
+          "link": {
+            "text": "Get Started",
+            "href": "/developers/sdk"
+          }
+        },
+        {
+          "icon": "api",
+          "label": null,
+          "title": "API",
+          "description": "REST endpoints",
+          "details": "HTTP API for payment creation, status queries, and escrow management from any language.",
+          "link": {
+            "text": "View Docs",
+            "href": "/developers/api"
+          }
+        },
+        {
+          "icon": "widgets",
+          "label": null,
+          "title": "Widget",
+          "description": "Embed payments",
+          "details": "React component, iframe bridge, or vanilla JS for drop-in payment integration.",
+          "link": {
+            "text": "Integrate",
+            "href": "/developers/widget"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Integration",
+      "title": "Start Building in Minutes",
+      "subtitle": null
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": null,
+      "code": "import { ZkiraClient } from '@zkira/sdk'\n\nconst client = new ZkiraClient({ connection, wallet })\nconst { link, escrow } = await client.createPaymentLink({\n  amount: 1_000_000_000,\n  tokenMint: USDC_MINT,\n})\n// Share `link` — recipient claims privately"
+    },
+    {
+      "type": "section_header",
+      "label": "Architecture",
+      "title": "How It Works",
+      "subtitle": null
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Your App → @zkira/sdk → Solana Programs → Stealth Addresses"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Resources",
+      "title": "Deep Dive",
+      "subtitle": null
+    },
+    {
+      "type": "cards",
+      "heading": null,
+      "subtitle": null,
+      "columns": 4,
+      "items": [
+        {
+          "icon": "code",
+          "label": null,
+          "title": "GitHub",
+          "description": "View source code",
+          "link": {
+            "text": null,
+            "href": "/developers/github"
+          }
+        },
+        {
+          "icon": "description",
+          "label": null,
+          "title": "API Docs",
+          "description": "REST reference",
+          "link": {
+            "text": null,
+            "href": "/developers/api"
+          }
+        },
+        {
+          "icon": "library_books",
+          "label": null,
+          "title": "SDK Reference",
+          "description": "TypeScript docs",
+          "link": {
+            "text": null,
+            "href": "/developers/sdk"
+          }
+        },
+        {
+          "icon": "school",
+          "label": null,
+          "title": "Widget Guide",
+          "description": "Integration tutorials",
+          "link": {
+            "text": null,
+            "href": "/developers/guides"
+          }
+        }
+      ]
+    }
+  ]
+}

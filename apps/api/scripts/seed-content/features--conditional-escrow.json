@@ -1,0 +1,114 @@
+{
+  "page_header": {
+    "label": "CONDITIONAL ESCROW",
+    "title": "Milestone-Based Releases",
+    "description": "Lock funds in escrow and release them as conditions are met. Perfect for freelance projects, contractor agreements, and grant milestones."
+  },
+  "breadcrumbs": [
+    { "label": "Features", "href": "/features" },
+    { "label": "Conditional Escrow" }
+  ],
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "CONCEPT",
+      "title": "How Conditional Escrow Works"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Conditional escrow allows you to lock the full payment amount upfront while releasing funds incrementally as milestones are completed. The creator defines milestones with specific amounts, and recipients can claim funds as each milestone is approved.",
+        "This creates accountability and cash flow predictability for both parties. Recipients know the full amount is secured, while creators maintain control over payment releases based on delivered work."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "Upfront Deposit: Full amount locked in smart contract escrow",
+        "Milestone Approval: Creator approves completed milestones to unlock funds",
+        "Private Claims: Recipients claim through stealth addresses for privacy"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "FLOW",
+      "title": "Milestone Process"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Creator deposits $4,500 upfront. As milestones are completed and approved, recipient can claim payments privately. Total amount is secured from day one, but releases are controlled by milestone completion."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "USE CASES",
+      "title": "Perfect For"
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "laptop_mac",
+          "title": "Freelance Projects",
+          "description": "Secure full payment upfront while releasing funds as deliverables are completed. Perfect for web development, design, content creation, and consulting projects."
+        },
+        {
+          "icon": "engineering",
+          "title": "Contractor Agreements",
+          "description": "Structure large contractor payments around deliverable milestones. Provides security for contractors and control for project managers over complex builds."
+        },
+        {
+          "icon": "emoji_events",
+          "title": "Grant Milestones",
+          "description": "Release grant funding based on research milestones, product launches, or community goals. Ensures accountability while supporting innovation."
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "TECHNICAL",
+      "title": "On-Chain Implementation"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Conditional escrow is implemented through Anchor program smart contracts on Solana. Each escrow creates deterministic PDAs (Program Derived Addresses) for milestone tracking and fund management."
+      ]
+    },
+    {
+      "type": "list",
+      "style": "bullet",
+      "items": [
+        "Deterministic PDAs: Milestone accounts generated from project ID and milestone index",
+        "State Management: On-chain tracking of milestone status and approval timestamps",
+        "Gas Relayer: Recipients claim through stealth addresses with sponsored transactions"
+      ]
+    },
+    {
+      "type": "code",
+      "language": "rust",
+      "title": "MILESTONE ACCOUNT",
+      "code": "// On-chain milestone state\npub struct Milestone {\n  pub project_id: Pubkey,\n  pub milestone_index: u8,\n  pub amount: u64,\n  pub status: MilestoneStatus,\n  pub approved_at: Option<i64>,\n  pub recipient: Pubkey,\n}"
+    },
+    {
+      "type": "cta",
+      "title": "Create Milestone Escrow",
+      "description": "Start your next project with confidence. Lock funds in escrow and release them as milestones are completed.",
+      "buttons": [
+        {
+          "text": "Create Milestone Escrow",
+          "href": "https://app.zkira.xyz",
+          "variant": "primary"
+        },
+        {
+          "text": "View All Features",
+          "href": "/features",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}

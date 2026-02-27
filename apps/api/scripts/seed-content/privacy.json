@@ -1,0 +1,101 @@
+{
+  "page_header": {
+    "label": "LEGAL",
+    "title": "Privacy Policy",
+    "description": "How ZKIRA Pay handles your data."
+  },
+  "sections": [
+    {
+      "type": "legal",
+      "lastUpdated": "February 2026",
+      "sections": [
+        {
+          "heading": "Introduction",
+          "paragraphs": [
+            "ZKIRA Pay (\"we\", \"us\", \"our\") operates the zkira.xyz website and related services. This Privacy Policy explains how we collect, use, and protect your information when you use our website and protocol."
+          ]
+        },
+        {
+          "heading": "Information We Collect",
+          "paragraphs": [
+            "We are committed to protecting your privacy and minimizing data collection:"
+          ],
+          "list": [
+            "We do NOT collect wallet addresses, private keys, or transaction data",
+            "Website analytics: Anonymous, privacy-respecting analytics via Plausible Analytics",
+            "Contact form submissions: Name, email address, and message content",
+            "Newsletter subscriptions: Email address only (opt-in)"
+          ]
+        },
+        {
+          "heading": "Blockchain Data",
+          "paragraphs": [
+            "All transactions occur on the Solana blockchain, which is a public ledger. ZKIRA uses stealth addresses to protect recipient identity while maintaining the transparency of blockchain technology.",
+            "We do not store or index on-chain transaction data on our servers. All transaction data exists solely on the Solana blockchain."
+          ]
+        },
+        {
+          "heading": "How We Use Information",
+          "paragraphs": [
+            "We use the limited information we collect to:"
+          ],
+          "list": [
+            "Improve our services and user experience",
+            "Respond to your inquiries and support requests",
+            "Send protocol updates and announcements (opt-in only)",
+            "Understand website usage patterns through anonymous analytics"
+          ]
+        },
+        {
+          "heading": "Third-Party Services",
+          "paragraphs": [
+            "We use minimal third-party services:"
+          ],
+          "list": [
+            "Solana RPC providers for blockchain connectivity",
+            "Plausible Analytics for privacy-respecting website analytics (no Google Analytics)"
+          ],
+          "additionalParagraphs": [
+            "We do not sell, rent, or share your data with third parties for marketing purposes."
+          ]
+        },
+        {
+          "heading": "Cookies",
+          "paragraphs": [
+            "We use minimal cookies, only essential ones for website functionality. We do not use tracking cookies or advertising cookies."
+          ]
+        },
+        {
+          "heading": "Data Retention",
+          "paragraphs": [
+            "Contact form data is retained for 12 months to allow us to respond to inquiries and provide support. Analytics data is anonymous and aggregated, with no personal identifiers."
+          ]
+        },
+        {
+          "heading": "Your Rights",
+          "paragraphs": [
+            "You have the right to access, correct, or delete your personal data. To exercise these rights, please contact us at privacy@zkira.xyz."
+          ]
+        },
+        {
+          "heading": "Children's Privacy",
+          "paragraphs": [
+            "Our services are not directed at children under 18. We do not knowingly collect personal information from children under 18."
+          ]
+        },
+        {
+          "heading": "Changes to Policy",
+          "paragraphs": [
+            "We may update this privacy policy from time to time. Changes will be posted on this page with an updated \"Last Updated\" date."
+          ]
+        },
+        {
+          "heading": "Contact",
+          "paragraphs": [
+            "For questions about this privacy policy or our data practices, please contact us at privacy@zkira.xyz."
+          ]
+        }
+      ]
+    }
+  ]
+}

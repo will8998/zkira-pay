@@ -1,0 +1,163 @@
+{
+  "page_header": {
+    "label": "AUDITS",
+    "title": "Security Audits",
+    "description": "Transparency about our audit status and roadmap. We believe in honest disclosure above marketing claims."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "CURRENT STATUS",
+      "title": "Honest Transparency"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "ZKIRA Pay has not yet been formally audited.",
+        "We believe in transparency over marketing. While our code is open source and built with security-first principles, we have not yet engaged professional audit firms for formal security reviews."
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "What This Means:",
+      "style": "bullet",
+      "items": [
+        "Use ZKIRA Pay on testnet and devnet for experimentation",
+        "Mainnet deployment awaits formal audit completion",
+        "We prioritize security over speed-to-market"
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "SECURITY ROADMAP",
+      "title": "Our Path to Mainnet",
+      "subtitle": "We believe in transparency. Here's our detailed security roadmap and timeline for formal audits and mainnet launch."
+    },
+    {
+      "type": "timeline",
+      "items": [
+        {
+          "version": "Phase 1",
+          "date": "CURRENT",
+          "status": "in-progress",
+          "title": "Open-Source Code Review",
+          "description": "Community testing and review on devnet. All code public on GitHub for transparent examination by security researchers and developers.",
+          "items": [
+            "Public code repository",
+            "Community testing on devnet",
+            "Deterministic builds"
+          ]
+        },
+        {
+          "version": "Phase 2",
+          "date": "Q2 2026",
+          "status": "planned",
+          "title": "Professional Audit Engagement",
+          "description": "Engage professional security audit firms specializing in Solana smart contracts. Multiple auditors for comprehensive coverage of Anchor programs and core architecture.",
+          "items": [
+            "Tier-1 audit firms",
+            "Anchor program focus",
+            "Economic security analysis"
+          ]
+        },
+        {
+          "version": "Phase 3",
+          "date": "Q3 2026",
+          "status": "FUTURE",
+          "title": "Audit Reports & Bug Bounty",
+          "description": "Publication of formal audit reports with full transparency. Launch of public bug bounty program to incentivize ongoing security research.",
+          "items": [
+            "Public audit reports",
+            "Bug bounty program",
+            "Remediation complete"
+          ]
+        },
+        {
+          "version": "Phase 4",
+          "date": "Q4 2026",
+          "status": "FUTURE",
+          "title": "Mainnet Launch",
+          "description": "Full production deployment on Solana mainnet after successful audit completion and remediation. Public launch with confidence in security posture.",
+          "items": [
+            "Mainnet deployment",
+            "Production-ready",
+            "Full public access"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "INTERIM MEASURES",
+      "title": "What We Do Now"
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "Open Source Everything",
+          "description": "Every line of code is public on GitHub. Smart contracts, frontend, API, documentation—nothing is hidden. The community can review and verify our implementation.",
+          "features": [
+            "100% open source codebase",
+            "Deterministic program builds",
+            "Public development process"
+          ]
+        },
+        {
+          "title": "Self-Custody Model",
+          "description": "We never hold private keys or custody funds. All assets remain under user control in their own wallets. ZKIRA operates as a non-custodial coordination layer only.",
+          "features": [
+            "No private key custody",
+            "User-controlled wallets only",
+            "Non-custodial architecture"
+          ]
+        },
+        {
+          "title": "No Admin Keys",
+          "description": "Smart contracts have no admin privileges or upgrade authority. Once deployed, programs are immutable and operate purely according to their code—no human intervention possible.",
+          "features": [
+            "Immutable smart contracts",
+            "No upgrade authority",
+            "Code-only governance"
+          ]
+        },
+        {
+          "title": "Time-Lock Escrows",
+          "description": "All escrows have configurable expiry times with automatic refund mechanisms. Funds cannot be permanently lost or stuck—worst case is delayed refund to the sender.",
+          "features": [
+            "Configurable time-locks",
+            "Automatic refund system",
+            "No permanent fund loss"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "AUDIT REPORTS",
+      "title": "Reports will be published here",
+      "subtitle": "When audit reports become available, they will be published on this page with full transparency and detailed remediation status."
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "No Audit Reports Yet",
+        "Formal audit reports will be published here as they become available. We commit to full transparency in our security assessment process.",
+        "Coming Q2-Q3 2026"
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Review our code today",
+      "description": "While we await formal audits, we encourage the community to review our open source code and provide feedback on our security implementation.",
+      "buttons": [
+        {
+          "text": "Review Our Code",
+          "href": "/open-source",
+          "variant": "primary"
+        }
+      ]
+    }
+  ]
+}

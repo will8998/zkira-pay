@@ -1,0 +1,184 @@
+{
+  "page_header": {
+    "label": "OPEN SOURCE",
+    "title": "Don't Trust, Verify",
+    "description": "Every line of ZKIRA Pay is open source and auditable. Verify our claims, build from source, contribute to the future of private payments."
+  },
+  "sections": [
+    {
+      "type": "section_header",
+      "label": "REPOSITORIES",
+      "title": "Complete Codebase"
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "label": "CORE",
+          "title": "zkira-pay",
+          "description": "Core Anchor programs implementing escrow, stealth addresses, and claim verification. The foundation of ZKIRA Pay's on-chain functionality.",
+          "language": "Rust",
+          "link": "https://github.com/zkira-pay/zkira-pay",
+          "features": [
+            "Escrow Program",
+            "Stealth Addresses",
+            "Claim Verification",
+            "Test Suite"
+          ]
+        },
+        {
+          "label": "APP",
+          "title": "zkira-pay",
+          "description": "Web application for creating and claiming payment links. Built with Next.js, React, and TypeScript for a seamless user experience.",
+          "language": "Next.js",
+          "link": "https://github.com/zkira-pay/zkira-pay",
+          "features": [
+            "Payment Creation",
+            "Claim Interface",
+            "Wallet Integration",
+            "QR Code Support"
+          ]
+        },
+        {
+          "label": "SDK",
+          "title": "@zkira/sdk",
+          "description": "TypeScript SDK for developers to integrate ZKIRA Pay into their applications. Clean API for payment creation, monitoring, and claiming.",
+          "language": "TypeScript",
+          "link": "https://github.com/zkira-pay/zkira-sdk",
+          "features": [
+            "TypeScript Types",
+            "Payment API",
+            "Wallet Adapters",
+            "Event Monitoring"
+          ]
+        },
+        {
+          "label": "WIDGET",
+          "title": "@zkira/widget",
+          "description": "Embeddable React widget for any website. Drop-in payment buttons and forms that integrate seamlessly with existing designs.",
+          "language": "React",
+          "link": "https://github.com/zkira-pay/zkira-widget",
+          "features": [
+            "React Component",
+            "Iframe Support",
+            "Custom Styling",
+            "Event Callbacks"
+          ]
+        },
+        {
+          "label": "API",
+          "title": "zkira-api",
+          "description": "REST API server providing HTTP endpoints for payment management, gas relaying, and metadata storage. Built with Node.js and Express.",
+          "language": "Node.js",
+          "link": "https://github.com/zkira-pay/zkira-api",
+          "features": [
+            "REST Endpoints",
+            "Gas Relayer",
+            "Metadata Storage",
+            "Rate Limiting"
+          ]
+        },
+        {
+          "label": "BOT",
+          "title": "zkira-bot",
+          "description": "Telegram bot for creating and sharing payment links directly in chat. Non-custodial bot generates secure links without handling funds.",
+          "language": "Node.js",
+          "link": "https://github.com/zkira-pay/zkira-bot",
+          "features": [
+            "/send Command",
+            "/request Command",
+            "Inline Buttons",
+            "Non-Custodial"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "BY THE NUMBERS",
+      "title": "Code Statistics"
+    },
+    {
+      "type": "stats",
+      "items": [
+        {
+          "value": "10,000+",
+          "label": "Lines of Code"
+        },
+        {
+          "value": "MIT",
+          "label": "Licensed"
+        },
+        {
+          "value": "100%",
+          "label": "Open Source"
+        },
+        {
+          "value": "6",
+          "label": "Repositories"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "BUILD VERIFICATION",
+      "title": "How to Verify",
+      "subtitle": "Don't trust our deployed programs. Build from source and verify that the on-chain bytecode matches the published code."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "title": "terminal",
+      "code": "# Clone the protocol repository\n$ git clone https://github.com/zkira-pay/zkira-pay.git\n$ cd zkira-pay\n\n# Build the Anchor programs\n$ anchor build\n\n# Verify program IDs match deployed versions\n$ anchor keys list\n\n# Compare bytecode hashes\n$ solana program show <program_id> --url devnet"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "Our Anchor programs are built deterministically, meaning the same source code will always produce identical bytecode. This allows anyone to verify that our deployed programs match the published source.",
+        "Same Rust toolchain version across all builds, locked dependency versions in Cargo.lock, and reproducible build environment ensure deterministic builds."
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "LICENSE",
+      "title": "MIT License",
+      "subtitle": "ZKIRA Pay is licensed under MIT, one of the most permissive open source licenses. Use it, modify it, distribute it—even commercially."
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "Commercial Use",
+          "description": "Use ZKIRA Pay in commercial applications without restrictions"
+        },
+        {
+          "title": "Modification",
+          "description": "Modify the source code to suit your needs and requirements"
+        },
+        {
+          "title": "Distribution",
+          "description": "Distribute original or modified versions under any terms"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Start building",
+      "description": "Ready to integrate ZKIRA Pay? Check out our developer documentation and start building with confidential payments.",
+      "buttons": [
+        {
+          "text": "Browse Repositories",
+          "href": "https://github.com/zkira-pay",
+          "variant": "primary"
+        },
+        {
+          "text": "View Documentation",
+          "href": "/developers",
+          "variant": "secondary"
+        }
+      ]
+    }
+  ]
+}
