@@ -9,6 +9,16 @@ declare_id!("yLGC8fizXAfvxT8AnQaVFCjEAScz5o4zqmBHoPVs3bu");
 pub mod multisig_escrow {
     use super::*;
 
+    pub fn initialize_config(ctx: Context<InitializeConfig>, fee_bps: u16) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+        config.admin = ctx.accounts.admin.key();
+        config.fee_recipient = ctx.accounts.admin.key();
+        config.fee_bps = fee_bps;
+        config.paused = false;
+        config.bump = ctx.bumps.config;
+        Ok(())
+    }
+
     pub fn create_multisig_escrow(
         ctx: Context<CreateMultisigEscrow>,
         nonce: u64,
@@ -278,6 +288,31 @@ pub mod multisig_escrow {
 
         Ok(())
     }
+
+    pub fn update_config(
+        ctx: Context<UpdateConfig>,
+        new_admin: Option<Pubkey>,
+        new_fee_recipient: Option<Pubkey>,
+        new_fee_bps: Option<u16>,
+        paused: Option<bool>,
+    ) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+
+        if let Some(admin) = new_admin {
+            config.admin = admin;
+        }
+        if let Some(fee_recipient) = new_fee_recipient {
+            config.fee_recipient = fee_recipient;
+        }
+        if let Some(fee_bps) = new_fee_bps {
+            config.fee_bps = fee_bps;
+        }
+        if let Some(paused) = paused {
+            config.paused = paused;
+        }
+
+        Ok(())
+    }
 }
 
 // Account Structures
@@ -314,6 +349,33 @@ pub struct MultisigEscrow {
 }
 
 // Instruction Contexts
+
+#[derive(Accounts)]
+pub struct InitializeConfig<'info> {
+    #[account(
+        init,
+        payer = admin,
+        space = 8 + 76, // ProtocolConfig space
+        seeds = [b"config"],
+        bump
+    )]
+    pub config: Account<'info, ProtocolConfig>,
+    #[account(mut)]
+    pub admin: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateConfig<'info> {
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.bump,
+        constraint = config.admin == admin.key() @ MultisigEscrowError::Unauthorized
+    )]
+    pub config: Account<'info, ProtocolConfig>,
+    pub admin: Signer<'info>,
+}
 
 #[derive(Accounts)]
 #[instruction(nonce: u64)]
