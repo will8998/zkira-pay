@@ -15,7 +15,7 @@ export function TopBar() {
   const { setOpen } = useCommandPalette();
   const { connected } = useWallet();
   const { sol, usdc, loading } = useBalance();
-  const { network } = useNetwork();
+
 
   const isActive = (path: string) => {
     if (path === '/') {
