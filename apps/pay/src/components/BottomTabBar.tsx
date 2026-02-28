@@ -30,7 +30,10 @@ export function BottomTabBar() {
            pathname?.startsWith('/developers') ||
            pathname?.startsWith('/points') ||
            pathname?.startsWith('/leaderboard') ||
-           pathname?.startsWith('/referral');
+           pathname?.startsWith('/referral') ||
+           pathname?.startsWith('/tokenomics') ||
+           pathname?.startsWith('/analytics') ||
+           pathname?.startsWith('/learn');
   };
 
   const tabs = [

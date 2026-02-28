@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useCommandPalette } from './CommandPalette';
 import { useWallet } from './WalletProvider';
 import { useBalance } from './useBalance';
 
@@ -12,7 +11,6 @@ import { WalletPill } from './WalletPill';
 
 export function TopBar() {
   const pathname = usePathname();
-  const { setOpen } = useCommandPalette();
   const { connected } = useWallet();
   const { sol, usdc, loading } = useBalance();
 
@@ -32,6 +30,7 @@ export function TopBar() {
     { name: 'Send', href: '/create' },
     { name: 'Request', href: '/request' },
     { name: 'Escrow', href: '/escrow' },
+    { name: 'Learn', href: '/learn' },
   ];
 
   // Profile dropdown items
@@ -90,6 +89,24 @@ export function TopBar() {
         </svg>
       )
     },
+    { 
+      name: 'Analytics', 
+      href: '/analytics',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+      )
+    },
+    {
+      name: 'Tokenomics',
+      href: '/tokenomics',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
   ];
 
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -125,30 +142,8 @@ export function TopBar() {
           })}
         </nav>
       </div>
-      {/* Right — Search + Stats + Help + Network + Wallet */}
+      {/* Right — Stats + Help + Network + Wallet */}
       <div className="flex items-center gap-2 ml-auto md:ml-0">
-        {/* Desktop Search Pill */}
-        <button
-          onClick={() => setOpen(true)}
-          className="hidden sm:flex items-center gap-2 bg-[var(--color-hover)] border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-skeleton)] hover:border-[var(--border-subtle)] transition-all cursor-pointer"
-        >
-          <svg className="w-3.5 h-3.5 text-[var(--color-muted)]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-          <span className="text-[12px] text-[var(--color-muted)]">Search...</span>
-          <span className="kbd">⌘K</span>
-        </button>
-
-        {/* Mobile Search Icon */}
-        <button
-          onClick={() => setOpen(true)}
-          className="sm:hidden flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px]"
-        >
-          <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-        </button>
-
         {/* Balance pills (only when connected) */}
         {connected && (
           <div className="hidden md:flex items-center gap-1.5">
@@ -179,11 +174,15 @@ export function TopBar() {
         <div className="relative">
           <button
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-hover)] border border-[var(--color-border)] hover:bg-[var(--color-skeleton)] hover:border-[var(--border-subtle)] transition-all"
+            className="group flex items-center justify-center gap-2 w-12 h-12 rounded-full bg-[var(--color-hover)] border-2 border-[var(--color-border)] hover:bg-[var(--color-skeleton)] hover:border-[#FF2828] transition-all duration-200 neon-glow-subtle"
           >
-            <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[#FF2828] transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              <span className="hidden md:inline text-sm font-medium text-[var(--color-text)] group-hover:text-[#FF2828] transition-colors">Menu</span>
+            </div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF2828] rounded-full animate-pulse opacity-80" />
           </button>
 
           {profileDropdownOpen && (
