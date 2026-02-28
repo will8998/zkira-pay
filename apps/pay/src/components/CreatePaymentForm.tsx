@@ -41,7 +41,7 @@ export function CreatePaymentForm({ onSubmit, isLoading, disabled = false }: Cre
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const parsedAmount = parseFloat(formData.amount) || 0;
-  const claimFee = parsedAmount * 0.0025;
+  const claimFee = parsedAmount * 0.003;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +139,7 @@ export function CreatePaymentForm({ onSubmit, isLoading, disabled = false }: Cre
             <span className="text-[var(--color-text)] font-medium tabular-nums">${parsedAmount.toFixed(2)} USDC</span>
           </div>
           <div className="flex justify-between text-xs md:text-sm">
-            <span className="text-[var(--color-text-secondary)]">Claim fee (0.25%)<InfoTooltip text="A small protocol fee deducted when the recipient claims the payment. Covers network gas costs." /></span>
+            <span className="text-[var(--color-text-secondary)]">Claim fee (0.3%)<InfoTooltip text="A small protocol fee deducted when the recipient claims the payment. Covers network gas costs." /></span>
             <span className="text-[var(--color-text-muted)] tabular-nums">−${claimFee.toFixed(4)} USDC</span>
           </div>
           <div className="border-t border-[var(--color-border)] pt-2 flex justify-between text-xs md:text-sm">

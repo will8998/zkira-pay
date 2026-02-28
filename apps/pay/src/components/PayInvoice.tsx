@@ -116,7 +116,7 @@ export function PayInvoice({ amount, recipientMetaAddress, claimHashHex, expiryD
   }
 
   const networkFee = '~0.01 SOL';
-  const claimFeePercentage = 0.25;
+  const claimFeePercentage = 0.30;
   const claimFee = (parseFloat(amount) * claimFeePercentage / 100).toFixed(6);
 
   return (
@@ -197,7 +197,7 @@ export function PayInvoice({ amount, recipientMetaAddress, claimHashHex, expiryD
             <span className="text-[var(--color-text)]">{networkFee}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[var(--color-text-secondary)]">Claim fee (0.25%)</span>
+            <span className="text-[var(--color-text-secondary)]">Claim fee (0.3%)</span>
             <span className="text-[var(--color-text)]">${claimFee} USDC</span>
           </div>
         </div>

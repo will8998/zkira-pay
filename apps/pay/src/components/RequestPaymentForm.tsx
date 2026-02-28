@@ -202,7 +202,7 @@ export function RequestPaymentForm({ onSuccess }: RequestPaymentFormProps) {
       <PrivacyCallout variant="full" />
 
       {/* Fee info */}
-      <p className="text-xs text-[var(--color-text-secondary)] text-center">0.25% fee<InfoTooltip text="A small protocol fee deducted when the recipient claims the payment. Covers network gas costs." /> charged on claim</p>
+      <p className="text-xs text-[var(--color-text-secondary)] text-center">0.3% fee<InfoTooltip text="A small protocol fee deducted when the recipient claims the payment. Covers network gas costs." /> charged on claim</p>
 
       {/* Submit Button — DARK CTA */}
       <button

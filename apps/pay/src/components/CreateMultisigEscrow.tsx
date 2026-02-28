@@ -44,7 +44,7 @@ export function CreateMultisigEscrow({ onSubmit, isLoading, disabled = false }: 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const parsedAmount = parseFloat(formData.amount) || 0;
-  const claimFee = parsedAmount * 0.0025;
+  const claimFee = parsedAmount * 0.003;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,7 +259,7 @@ export function CreateMultisigEscrow({ onSubmit, isLoading, disabled = false }: 
             <span className="text-[var(--color-text)] font-medium">${parsedAmount.toFixed(2)} USDC</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-[var(--color-text-secondary)]">Claim fee (0.25%)</span>
+            <span className="text-[var(--color-text-secondary)]">Claim fee (0.3%)</span>
             <span className="text-[var(--color-muted)]">−${claimFee.toFixed(4)} USDC</span>
           </div>
           <div className="border-t border-[var(--color-border)] pt-2 flex justify-between text-sm">

@@ -62,7 +62,7 @@ export default function DevelopersPage() {
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
         title="Developer API" 
-        description="Manage API keys and integrate zkirapay payments into your applications"
+        description="Manage API keys and integrate ZKIRA Pay payments into your applications"
         actionLabel="Generate New API Key"
         onAction={generateApiKey}
       />
@@ -160,7 +160,7 @@ export default function DevelopersPage() {
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 md:p-6">
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Quick Start</h2>
           <p className="text-[var(--color-text-secondary)] text-sm mb-4">
-            Use the zkirapay API to create confidential payments in your application:
+            Use the ZKIRA Pay API to create confidential payments in your application:
           </p>
           <div className="bg-[var(--color-button)] rounded p-4 overflow-x-auto relative group">
             <pre className="font-[family-name:var(--font-mono)] text-sm text-[var(--color-border)] whitespace-pre">
@@ -184,7 +184,7 @@ export default function DevelopersPage() {
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 md:p-6">
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Widget Embed</h2>
           <p className="text-[var(--color-text-secondary)] text-sm mb-4">
-            Add the zkirapay payment widget directly to your HTML:
+            Add the ZKIRA Pay payment widget directly to your HTML:
           </p>
           <div className="bg-[var(--color-button)] rounded p-4 overflow-x-auto relative group">
             <pre className="font-[family-name:var(--font-mono)] text-sm text-[var(--color-border)] whitespace-pre">

@@ -52,7 +52,7 @@ export function BatchPaymentForm() {
     return sum + amount;
   }, 0);
 
-  const totalFees = totalAmount * 0.0025;
+  const totalFees = totalAmount * 0.003;
   const totalCost = totalAmount + totalFees;
 
   const parseCSV = (text: string): Payment[] => {
@@ -651,7 +651,7 @@ export function BatchPaymentForm() {
               <span className="text-[var(--color-text)] font-medium tabular-nums">${totalAmount.toFixed(2)} USDC</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[var(--color-text-secondary)]">Total fees (0.25% each)</span>
+              <span className="text-[var(--color-text-secondary)]">Total fees (0.3% each)</span>
               <span className="text-[var(--color-muted)] tabular-nums">${totalFees.toFixed(4)} USDC</span>
             </div>
             <div className="border-t border-[var(--color-border)] pt-2 flex justify-between text-sm">

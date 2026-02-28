@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md px-4 md:px-0">
         <div className="bg-[var(--color-surface)] rounded-none border-1.5 border-[var(--border-subtle)] p-6 md:p-8">
           <div className="text-center mb-8">
-            <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)] mb-2">zkirapay Admin</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)] mb-2">ZKIRA Pay Admin</h1>
             <p className="text-[var(--color-muted)]">Enter your admin password to continue</p>
           </div>
 

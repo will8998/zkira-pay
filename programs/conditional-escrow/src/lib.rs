@@ -54,7 +54,7 @@ pub mod conditional_escrow {
         escrow.milestones_released = 0;
         escrow.refunded = false;
         escrow.nonce = nonce;
-        escrow.fee_bps = 250; // 2.5% fee (hardcoded for now)
+        escrow.fee_bps = 30; // 0.3% fee
         escrow.bump = ctx.bumps.escrow;
         escrow.created_at = clock.unix_timestamp;
 

@@ -55,7 +55,7 @@ export function CreateMilestoneEscrow({ onSubmit, isLoading, disabled = false }:
 
   const parsedTotalAmount = parseFloat(formData.totalAmount) || 0;
   const milestoneSum = formData.milestones.reduce((sum, milestone) => sum + (parseFloat(milestone.amount) || 0), 0);
-  const claimFee = parsedTotalAmount * 0.025; // 2.5% fee for milestone escrow
+  const claimFee = parsedTotalAmount * 0.003; // 0.3% fee for milestone escrow
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -317,7 +317,7 @@ export function CreateMilestoneEscrow({ onSubmit, isLoading, disabled = false }:
             <span className="text-[var(--color-text)] font-medium tabular-nums">${parsedTotalAmount.toFixed(2)} USDC</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-[var(--color-text-secondary)]">Release fee (2.5% per milestone)</span>
+            <span className="text-[var(--color-text-secondary)]">Release fee (0.3% per milestone)</span>
             <span className="text-[var(--color-muted)] tabular-nums">~${claimFee.toFixed(4)} USDC total</span>
           </div>
           <div className="flex justify-between text-xs">
