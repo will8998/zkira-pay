@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import Link from 'next/link';
 import { EmptyState } from '@/components/EmptyState';
-import { useWallet } from '@/components/WalletProvider';
+import { useWallet, useUnifiedWalletContext } from '@/components/WalletProvider';
 
 interface Transaction {
   id?: string;
@@ -34,7 +34,8 @@ interface Invoice {
 }
 
 export default function Dashboard() {
-  const { connected, publicKey, connect } = useWallet();
+  const { connected, publicKey } = useWallet();
+  const { setShowModal } = useUnifiedWalletContext();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [userPoints, setUserPoints] = useState<string>('0');
@@ -148,7 +149,7 @@ export default function Dashboard() {
 
   if (!connected) {
     return (
-      <div className="h-[calc(100dvh-3.5rem)] bg-[#000000] relative overflow-hidden">
+      <div className="h-[calc(100dvh-3.5rem-4rem)] md:h-[calc(100dvh-3.5rem)] bg-[#000000] relative overflow-hidden">
         {/* Video Background — fills viewport */}
         <video
           autoPlay
@@ -168,12 +169,12 @@ export default function Dashboard() {
         <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
           {/* Hero Text */}
           <div className="text-center mb-10 max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-5 font-[family-name:var(--font-sans)] tracking-tight leading-[1.05]">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 font-[family-name:var(--font-sans)] tracking-[-0.02em] leading-[1.05]">
               Stealth Payments
               <br />
               <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">on Solana</span>
             </h1>
-            <p className="text-base md:text-lg text-[rgba(255,255,255,0.55)] max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-[rgba(255,255,255,0.6)] max-w-lg mx-auto leading-relaxed">
               Send confidential payments with stealth addresses.
               <br className="hidden sm:block" />
               Zero traceability. Instant settlement.
@@ -182,56 +183,22 @@ export default function Dashboard() {
 
           {/* CTA Button — frosted glass */}
           <button
-            onClick={connect}
-            className="bg-[rgba(255,40,40,0.85)] backdrop-blur-md text-white px-10 py-3.5 text-[15px] font-semibold rounded-full hover:bg-[rgba(255,40,40,1)] transition-all duration-300 transform hover:scale-[1.03] shadow-[0_0_30px_rgba(255,40,40,0.3)] font-[family-name:var(--font-sans)] tracking-wide mb-14"
+            onClick={() => setShowModal(true)}
+            className="w-full sm:w-auto bg-[#FF2828] text-white px-8 py-3 text-[15px] font-medium rounded-full hover:bg-[#E02020] transition-all duration-200 font-[family-name:var(--font-sans)] mb-12"
           >
             Connect Wallet
           </button>
 
-          {/* Feature Pills — glass cards at bottom */}
-          <div className="w-full max-w-4xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-4 text-center transition-all duration-300 hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]">
-                <div className="w-8 h-8 mx-auto mb-2 text-[rgba(255,255,255,0.7)]">
-                  <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                </div>
-                <div className="text-[13px] font-medium text-white">Stealth</div>
-                <div className="text-[11px] text-[rgba(255,255,255,0.4)] mt-0.5">Private transfers</div>
-              </div>
-
-              <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-4 text-center transition-all duration-300 hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]">
-                <div className="w-8 h-8 mx-auto mb-2 text-[rgba(255,255,255,0.7)]">
-                  <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                  </svg>
-                </div>
-                <div className="text-[13px] font-medium text-white">Invoices</div>
-                <div className="text-[11px] text-[rgba(255,255,255,0.4)] mt-0.5">Payment links</div>
-              </div>
-
-              <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-4 text-center transition-all duration-300 hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]">
-                <div className="w-8 h-8 mx-auto mb-2 text-[rgba(255,255,255,0.7)]">
-                  <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="text-[13px] font-medium text-white">Escrow</div>
-                <div className="text-[11px] text-[rgba(255,255,255,0.4)] mt-0.5">Milestone-based</div>
-              </div>
-
-              <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-4 text-center transition-all duration-300 hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]">
-                <div className="w-8 h-8 mx-auto mb-2 text-[rgba(255,255,255,0.7)]">
-                  <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                  </svg>
-                </div>
-                <div className="text-[13px] font-medium text-white">Multi-sig</div>
-                <div className="text-[11px] text-[rgba(255,255,255,0.4)] mt-0.5">Shared approval</div>
-              </div>
-            </div>
-          </div>
+          {/* Feature Labels — minimal and clean */}
+          <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[rgba(255,255,255,0.7)]">
+            <span className="text-[13px] font-light tracking-wide">Stealth</span>
+            <span className="text-[rgba(255,255,255,0.3)]">•</span>
+            <span className="text-[13px] font-light tracking-wide">Invoices</span>
+            <span className="text-[rgba(255,255,255,0.3)]">•</span>
+            <span className="text-[13px] font-light tracking-wide">Escrow</span>
+            <span className="text-[rgba(255,255,255,0.3)]">•</span>
+            <span className="text-[13px] font-light tracking-wide">Multi-sig</span>
+        </div>
         </div>
       </div>
     );
