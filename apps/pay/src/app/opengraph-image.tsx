@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'PRIV — Confidential Payments on Solana';
+export const alt = 'zkirapay — Stealth Payments on Solana';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -10,7 +10,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: '#1A3A1A',
+          background: '#0A0A0A',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -26,14 +26,14 @@ export default async function Image() {
             width: 80,
             height: 80,
             borderRadius: 16,
-            background: '#6BBF3B',
+            background: '#FF2828',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 32,
           }}
         >
-          <span style={{ color: '#EDEAE4', fontSize: 48, fontWeight: 700 }}>P</span>
+          <span style={{ color: '#FFFFFF', fontSize: 48, fontWeight: 700 }}>Z</span>
         </div>
 
         {/* Title */}
@@ -46,13 +46,13 @@ export default async function Image() {
             marginBottom: 16,
           }}
         >
-          PRIV
+          zkirapay
         </div>
 
         {/* Subtitle */}
         <div
           style={{
-            color: '#8FAF8F',
+            color: 'rgba(255,255,255,0.5)',
             fontSize: 28,
             fontWeight: 400,
             letterSpacing: '-0.01em',

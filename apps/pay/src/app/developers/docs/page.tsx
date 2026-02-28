@@ -134,7 +134,7 @@ export default function DeveloperDocsPage() {
     <div className="px-6 py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
         title="API Documentation" 
-        description="Complete reference for the PRIV payment API"
+        description="Complete reference for the zkirapay payment API"
       />
 
       <div className="space-y-4">
