@@ -57,10 +57,10 @@ export function ComparisonEditor({ value, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* PRIV Value */}
+        {/* ZKIRA Value */}
         <div>
           <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider mb-1 block">
-            PRIV Value
+            ZKIRA Value
           </label>
           <div className="space-y-2">
             <input
@@ -126,7 +126,7 @@ export function ComparisonEditor({ value, onChange }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider mb-1 block">
-            PRIV Column Header
+            ZKIRA Column Header
           </label>
           <input
             type="text"

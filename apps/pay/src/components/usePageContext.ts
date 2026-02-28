@@ -68,8 +68,8 @@ export function usePageContext(): PageContext {
 
   // Fallback
   return {
-    title: 'PRIV',
+    title: 'zkirapay',
     section: null,
-    breadcrumbs: [{ label: 'PRIV', href: '/' }],
+    breadcrumbs: [{ label: 'zkirapay', href: '/' }],
   };
 }

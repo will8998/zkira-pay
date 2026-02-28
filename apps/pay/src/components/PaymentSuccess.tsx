@@ -54,7 +54,7 @@ export function PaymentSuccess({ type, paymentUrl, txSignature, invoiceUrl, amou
           {/* Top Section */}
           <div className="flex items-center justify-between mb-8">
             <div className="font-[family-name:var(--font-mono)] text-lg font-bold text-[var(--color-text)] tracking-wide">
-              PRIV
+              ZKIRA
             </div>
             <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] font-medium">
               CONFIDENTIAL PAYMENT
