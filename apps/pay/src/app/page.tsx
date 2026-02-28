@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import Link from 'next/link';
-import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
-import { SkeletonMetric } from '@/components/Skeleton';
 import { useWallet } from '@/components/WalletProvider';
 
 interface Transaction {
@@ -36,10 +34,9 @@ interface Invoice {
 }
 
 export default function Dashboard() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, connect } = useWallet();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [welcomeDismissed, setWelcomeDismissed] = useState(true);
   const [userPoints, setUserPoints] = useState<string>('0');
   
   // Fetch points balance
@@ -88,15 +85,6 @@ export default function Dashboard() {
   const { containerRef: pullRefreshRef } = usePullToRefresh({
     onRefresh: handleRefresh,
   });
-
-  useEffect(() => {
-    setWelcomeDismissed(localStorage.getItem('zkira_welcome_dismissed') === 'true');
-  }, []);
-
-  const dismissWelcome = () => {
-    localStorage.setItem('zkira_welcome_dismissed', 'true');
-    setWelcomeDismissed(true);
-  };
 
   useEffect(() => {
     // Load data from localStorage
@@ -160,114 +148,112 @@ export default function Dashboard() {
 
   if (!connected) {
     return (
-      <div ref={pullRefreshRef} className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-        <PageHeader title="Dashboard" description="Overview of your confidential payments" />
-        
+      <div ref={pullRefreshRef} className="min-h-screen bg-[#000000] relative overflow-x-hidden">
         {/* Hero Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-[var(--color-text)] mb-4 font-[family-name:var(--font-sans)]">
-            Confidential Payments Infrastructure
-          </h1>
-          <p className="text-[14px] text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-            Build privacy-first payment experiences with stealth addresses, invoice links, milestone escrow, and multi-signature approvals. Enterprise-grade confidential transactions on Solana.
-          </p>
-        </div>
-
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '0ms' }}>
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-6 text-[#FF2828] flex-shrink-0">
-                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.242 4.242L9.88 9.88" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1">Stealth Transfers</h3>
-                <p className="text-[13px] text-[var(--color-muted)]">Send USDC via stealth addresses. Only the claim link recipient can access funds.</p>
-              </div>
-            </div>
+        <div className="min-h-screen flex flex-col items-center justify-center px-6 relative">
+          {/* Hero Content */}
+          <div className="text-center mb-12 max-w-4xl mx-auto">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 font-[family-name:var(--font-sans)] tracking-tight leading-none">
+              Stealth Payments
+              <br />
+              <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">on Solana</span>
+            </h1>
+            <p className="text-lg md:text-xl text-[var(--color-muted)] max-w-3xl mx-auto mb-16 leading-relaxed">
+              Send confidential payments with stealth addresses. Zero traceability. Instant settlement.
+            </p>
           </div>
 
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '60ms' }}>
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-6 text-[#FF2828] flex-shrink-0">
-                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1">Invoice Links</h3>
-                <p className="text-[13px] text-[var(--color-muted)]">Generate invoice links for incoming payments with built-in expiry.</p>
-              </div>
-            </div>
+          {/* Hero Video */}
+          <div className="w-full max-w-4xl mx-auto mb-16 relative">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto rounded-none shadow-[0_0_60px_rgba(255,40,40,0.15),0_0_120px_rgba(255,40,40,0.1)] border border-[rgba(255,40,40,0.2)]"
+              style={{
+                filter: 'brightness(1.1) contrast(1.05)',
+              }}
+            >
+              <source src="/hero-animation.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
 
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '120ms' }}>
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-6 text-[#FF2828] flex-shrink-0">
-                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1">Milestone Escrow</h3>
-                <p className="text-[13px] text-[var(--color-muted)]">Release funds milestone-by-milestone with on-chain enforcement.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '180ms' }}>
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-6 text-[#FF2828] flex-shrink-0">
-                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1">Multi-sig Approval</h3>
-                <p className="text-[13px] text-[var(--color-muted)]">Require multiple approvers before funds are released.</p>
-              </div>
-            </div>
+          {/* Connect Wallet CTA */}
+          <div className="text-center">
+            <button
+              onClick={connect}
+              className="bg-[#FF2828] text-white px-12 py-4 text-lg font-semibold hover:bg-[#E02020] transition-all duration-300 neon-glow transform hover:scale-105 font-[family-name:var(--font-sans)] tracking-wide"
+            >
+              Connect Wallet to Get Started
+            </button>
           </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="text-center mb-8">
-          <div className="bg-[#FF2828] text-[#FFFFFF] px-6 py-2.5 text-[13px] font-semibold inline-block cursor-pointer hover:bg-[#E02020] transition-colors duration-200 min-h-[48px] flex items-center justify-center neon-glow">
-            Connect Wallet to Get Started
-          </div>
-        </div>
+        {/* Feature Boxes Section */}
+        <div className="py-24 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Stealth Transfers */}
+              <div className="animate-entrance bg-[#111111] border border-[rgba(255,255,255,0.06)] p-8 hover:border-[rgba(255,40,40,0.3)] transition-all duration-500 group" style={{ animationDelay: '0ms' }}>
+                <div className="flex items-start gap-6">
+                  <div className="w-8 h-8 text-[#FF2828] flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-3 font-[family-name:var(--font-sans)]">Stealth Transfers</h3>
+                    <p className="text-[var(--color-muted)] leading-relaxed">Send USDC via stealth addresses. Only the claim link recipient can access funds.</p>
+                  </div>
+                </div>
+              </div>
 
-        {/* Preview Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '240ms' }}>
-            <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Total Sent</div>
-            <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-              $0.00
-            </div>
-            <div className="text-xs text-[var(--color-muted)] mt-0.5">
-              No activity yet
-            </div>
-          </div>
+              {/* Invoice Links */}
+              <div className="animate-entrance bg-[#111111] border border-[rgba(255,255,255,0.06)] p-8 hover:border-[rgba(255,40,40,0.3)] transition-all duration-500 group" style={{ animationDelay: '100ms' }}>
+                <div className="flex items-start gap-6">
+                  <div className="w-8 h-8 text-[#FF2828] flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-3 font-[family-name:var(--font-sans)]">Invoice Links</h3>
+                    <p className="text-[var(--color-muted)] leading-relaxed">Generate invoice links for incoming payments with built-in expiry.</p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '300ms' }}>
-            <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Total Received</div>
-            <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-              $0.00
-            </div>
-            <div className="text-xs text-[var(--color-muted)] mt-0.5">
-              No activity yet
-            </div>
-          </div>
+              {/* Milestone Escrow */}
+              <div className="animate-entrance bg-[#111111] border border-[rgba(255,255,255,0.06)] p-8 hover:border-[rgba(255,40,40,0.3)] transition-all duration-500 group" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-start gap-6">
+                  <div className="w-8 h-8 text-[#FF2828] flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-3 font-[family-name:var(--font-sans)]">Milestone Escrow</h3>
+                    <p className="text-[var(--color-muted)] leading-relaxed">Release funds milestone-by-milestone with on-chain enforcement.</p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '360ms' }}>
-            <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Active Escrows</div>
-            <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-              0
-            </div>
-            <div className="text-xs text-[var(--color-muted)] mt-0.5">
-              No activity yet
+              {/* Multi-sig Approval */}
+              <div className="animate-entrance bg-[#111111] border border-[rgba(255,255,255,0.06)] p-8 hover:border-[rgba(255,40,40,0.3)] transition-all duration-500 group" style={{ animationDelay: '300ms' }}>
+                <div className="flex items-start gap-6">
+                  <div className="w-8 h-8 text-[#FF2828] flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-3 font-[family-name:var(--font-sans)]">Multi-sig Approval</h3>
+                    <p className="text-[var(--color-muted)] leading-relaxed">Require multiple approvers before funds are released.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -277,34 +263,6 @@ export default function Dashboard() {
 
   return (
     <div ref={pullRefreshRef} className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <PageHeader title="Dashboard" description="Overview of your confidential payments" />
-      
-      {!welcomeDismissed && (
-        <div className="bg-[var(--color-surface)] border-1.5 border-[var(--border-subtle)] rounded-none shadow-[0_1px_3px_0_var(--border-subtle)] p-6 mb-6 animate-entrance relative">
-          <button
-            onClick={dismissWelcome}
-            className="absolute top-4 right-4 text-[var(--color-section-label)] hover:text-[var(--color-text-secondary)] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <h2 className="text-lg font-semibold text-[var(--color-text)]">Welcome to ZKIRA Pay</h2>
-          <p className="text-[13px] text-[var(--color-muted)] mt-1 mb-5">Confidential payments on Solana. Send, request, and manage funds with full privacy.</p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <a href="/create" className="flex-1 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] px-4 py-2.5 text-[13px] font-medium text-center transition-colors btn-press min-h-[44px] flex items-center justify-center">
-              Send Payment
-            </a>
-            <a href="/request" className="flex-1 border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-hover)] px-4 py-2.5 text-[13px] font-medium text-center transition-colors min-h-[44px] flex items-center justify-center">
-              Request Payment
-            </a>
-            <a href="/developers" className="flex-1 border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-hover)] px-4 py-2.5 text-[13px] font-medium text-center transition-colors min-h-[44px] flex items-center justify-center">
-              Explore API
-            </a>
-          </div>
-        </div>
-      )}
-      
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '0ms' }}>
