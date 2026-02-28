@@ -31,7 +31,6 @@ export function BottomTabBar() {
            pathname?.startsWith('/points') ||
            pathname?.startsWith('/leaderboard') ||
            pathname?.startsWith('/referral') ||
-           pathname?.startsWith('/tokenomics') ||
            pathname?.startsWith('/analytics') ||
            pathname?.startsWith('/learn');
   };
