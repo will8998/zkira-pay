@@ -23,6 +23,7 @@ import adminPointsRoutes from './routes/admin-points.js';
 import referralRoutes from './routes/referrals.js';
 import contentRoutes from './routes/content.js';
 import paymentLinkRoutes from './routes/payment-links.js';
+import analyticsRoutes from './routes/analytics.js';
 import { createPathBasedAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { createPathBasedRateLimit } from './middleware/rate-limit.js';
@@ -73,6 +74,7 @@ app.route('/', adminPointsRoutes);
 app.route('/', referralRoutes);
 app.route('/', contentRoutes);
 app.route('/', paymentLinkRoutes);
+app.route('/', analyticsRoutes);
 
 // Start server
 async function startServer() {
