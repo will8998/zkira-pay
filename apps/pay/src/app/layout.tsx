@@ -60,7 +60,7 @@ export default function RootLayout({
           loop
           muted
           playsInline
-          className="fixed inset-0 w-full h-full object-cover opacity-[0.15] z-0 pointer-events-none"
+          className="fixed inset-0 w-full h-full object-cover opacity-[0.4] z-0 pointer-events-none"
         >
           <source src="/huly_laser_remix.webm" type="video/webm" />
           <source src="/huly_laser_remix.mp4" type="video/mp4" />
