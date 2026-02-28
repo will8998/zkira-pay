@@ -174,7 +174,7 @@ export function Sidebar() {
     <div className="w-full bg-[var(--bg-panel)] backdrop-blur-xl glass-panel border-r border-[var(--border-subtle)] h-screen flex flex-col sticky top-0 overflow-y-auto">
       {/* Top Section */}
       <Link href="/" className="px-4 py-4 flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3 mb-1 hover:opacity-80 transition-opacity">
-        <Image src="/zkira-logo.svg" alt="ZKIRA" width={101} height={40} className="h-[28px] w-auto logo-image" priority />
+        <Image src="/logo.webp" alt="ZKIRA" width={101} height={40} className="h-[28px] w-auto logo-image" priority />
       </Link>
 
 

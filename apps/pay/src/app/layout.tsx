@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Poppins, JetBrains_Mono } from 'next/font/google';
+import { Chakra_Petch, Share_Tech_Mono } from 'next/font/google';
 import { WalletContextProvider } from '@/components/WalletProvider';
 import { NetworkProvider } from '@/lib/network-config';
 import { TopBar } from '@/components/TopBar';
@@ -8,15 +8,16 @@ import { Toaster } from 'sonner';
 import './globals.css';
 import { BottomTabBar } from '@/components/BottomTabBar';
 
-const poppins = Poppins({
+const chakraPetch = Chakra_Petch({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const shareTechMono = Share_Tech_Mono({
   subsets: ['latin'],
+  weight: ['400'],
   variable: '--font-mono',
   display: 'swap',
 });
@@ -51,9 +52,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="dark" className={`${poppins.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
         <div className="scanlines" />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="fixed inset-0 w-full h-full object-cover opacity-[0.15] z-0 pointer-events-none"
+        >
+          <source src="/bg-video.webm" type="video/webm" />
+        </video>
         <NetworkProvider>
           <WalletContextProvider>
             <CommandPaletteProvider>

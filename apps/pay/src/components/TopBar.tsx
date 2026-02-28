@@ -98,7 +98,7 @@ export function TopBar() {
     <div className="relative z-20 h-14 bg-[rgba(10,10,10,0.7)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] px-3 md:px-4 flex items-center shrink-0">
       {/* Left — ZKIRA Logo */}
       <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-        <img src="/zkira-logo.svg" alt="ZKIRA Pay" className="h-7 w-auto" />
+        <img src="/logo.webp" alt="ZKIRA Pay" className="h-7 w-auto" />
       </Link>
 
       {/* Center — Navigation (hidden on mobile) */}

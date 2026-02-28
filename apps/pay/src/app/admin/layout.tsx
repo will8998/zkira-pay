@@ -28,7 +28,7 @@ function AdminTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
           </svg>
         </button>
         <Link href="/admin" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/zkira-logo.svg" alt="ZKIRA Pay" width={101} height={40} className="h-[24px] w-auto" priority />
+          <Image src="/logo.webp" alt="ZKIRA Pay" width={101} height={40} className="h-[24px] w-auto" priority />
           <span className="text-sm font-semibold text-[var(--color-text)]">Admin</span>
         </Link>
       </div>
