@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { useCommandPalette } from './CommandPalette';
 import { useWallet } from './WalletProvider';
 import { useBalance } from './useBalance';
-import { HelpPopover } from './HelpPopover';
+
 import { WalletPill } from './WalletPill';
-import { useNetwork, NETWORK_CONFIG } from '@/lib/network-config';
+
 
 export function TopBar() {
   const pathname = usePathname();
@@ -95,7 +95,7 @@ export function TopBar() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   return (
-    <div className="relative z-20 h-14 bg-[#0A0A0A] border-b border-[#282828] px-3 md:px-4 flex items-center shrink-0">
+    <div className="relative z-20 h-14 bg-[rgba(10,10,10,0.7)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] px-3 md:px-4 flex items-center shrink-0">
       {/* Left — ZKIRA Logo */}
       <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
         <img src="/zkira-logo.svg" alt="ZKIRA Pay" className="h-7 w-auto" />
@@ -223,13 +223,6 @@ export function TopBar() {
           )}
         </div>
 
-        {/* Help */}
-        <HelpPopover />
-
-        {/* Network badge */}
-        <div className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide rounded-full hidden sm:block border ${NETWORK_CONFIG[network].badge.bgClass} ${NETWORK_CONFIG[network].badge.textClass} ${NETWORK_CONFIG[network].badge.borderClass}`}>
-          {NETWORK_CONFIG[network].label}
-        </div>
         {/* Wallet */}
         <WalletPill />
       </div>
