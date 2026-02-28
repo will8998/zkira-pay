@@ -174,7 +174,7 @@ export function TopBar() {
         <div className="relative">
           <button
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-            className="group flex items-center justify-center gap-2 w-12 h-12 rounded-full bg-[var(--color-hover)] border-2 border-[var(--color-border)] hover:bg-[var(--color-skeleton)] hover:border-[#FF2828] transition-all duration-200 neon-glow-subtle"
+            className="group flex items-center justify-center gap-2 px-3 h-10 bg-[var(--color-hover)] border border-[var(--color-border)] hover:bg-[var(--color-skeleton)] hover:border-[#FF2828] transition-all duration-200"
           >
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[#FF2828] transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
