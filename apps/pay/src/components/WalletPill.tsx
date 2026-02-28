@@ -112,9 +112,9 @@ export function WalletPill() {
     return (
       <button
         onClick={handleConnect}
-        className="cyberpunk-connect text-[14px] font-bold px-6 py-2.5 hover:transform hover:scale-105 transition-all duration-300 min-h-[44px] relative z-10"
+        className="cyberpunk-connect text-[13px] font-bold px-3 py-1.5 hover:transform hover:scale-105 transition-all duration-300 min-h-[36px]"
       >
-        <span className="relative z-10 tracking-wider">CONNECT</span>
+        <span className="relative tracking-wider">CONNECT</span>
       </button>
     )
   }
