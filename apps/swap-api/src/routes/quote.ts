@@ -11,6 +11,8 @@ function mapQuoteToRouteQuote(quote: RocketXQuote): RouteQuote {
   const isPrivate = quote.exchangeInfo.private === true;
 
   return {
+    fromTokenId: quote.fromTokenInfo.id,
+    toTokenId: quote.toTokenInfo.id,
     exchangeKeyword: quote.exchangeInfo.keyword,
     exchangeTitle: quote.exchangeInfo.title,
     exchangeLogo: quote.exchangeInfo.logo,

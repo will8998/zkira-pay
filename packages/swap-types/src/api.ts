@@ -33,6 +33,8 @@ export interface TokensResponse {
 export type RouteType = 'standard' | 'private';
 
 export interface RouteQuote {
+  fromTokenId: number;
+  toTokenId: number;
   exchangeKeyword: string;
   exchangeTitle: string;
   exchangeLogo: string;

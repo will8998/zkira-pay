@@ -64,8 +64,8 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
     try {
       const request: SwapRequest = {
         amount: parseFloat(amount),
-        fromTokenId: fromToken.id,
-        toTokenId: toToken.id,
+        fromTokenId: selectedRoute.fromTokenId,
+        toTokenId: selectedRoute.toTokenId,
         destinationAddress: destinationAddress,
       }
       const swap = await createSwap(request)
