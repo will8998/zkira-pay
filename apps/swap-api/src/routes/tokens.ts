@@ -14,7 +14,13 @@ tokenRoutes.get('/tokens', async (c) => {
     return c.json({ error: parsed.error.flatten().fieldErrors, status: 400 }, 400);
   }
 
-  const tokens = await client.getTokens(parsed.data);
+  const allTokens = await client.getTokens(parsed.data);
+
+  // Filter out scam/meme tokens — RocketX returns ALL DEX tokens including junk.
+  // Legit tokens have score >= 1 (major coins, stablecoins, well-known alts).
+  // Tokens with score < 1 are random ERC20s using fake tickers (e.g. "BTC" = HarryPotterObamaSonic10Inu).
+  const MIN_TOKEN_SCORE = 1;
+  const tokens = allTokens.filter(t => (t.score ?? 0) >= MIN_TOKEN_SCORE);
 
   return c.json({ tokens });
 });
