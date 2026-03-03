@@ -179,10 +179,6 @@ export default function RoutesPanel() {
                     >
                       <td>
                         <div className="flex items-center gap-3">
-                          {route.exchangeLogo && (
-                            <img src={route.exchangeLogo} alt={route.exchangeTitle} className="w-6 h-6 shrink-0"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          )}
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
@@ -227,10 +223,6 @@ export default function RoutesPanel() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      {route.exchangeLogo && (
-                        <img src={route.exchangeLogo} alt={route.exchangeTitle} className="w-5 h-5"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      )}
                       <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
                       {route.walletLess && <span className="badge-walletless">Walletless</span>}
                       {route.isPrivate && <span className="badge-privacy">Privacy</span>}
