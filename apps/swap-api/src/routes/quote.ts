@@ -56,7 +56,8 @@ quoteRoutes.get('/quote', async (c) => {
 
   const quotes: RouteQuote[] = data.quotes
     .filter((q) => q.exchangeInfo.walletLess)
-    .filter((q) => !q.err && q.toAmount != null) // Exclude error quotes (below min amount, etc.)
+    .filter((q) => q.exchangeInfo.private === true) // Privacy-only: ZKIRA is a private swap platform
+    .filter((q) => !q.err && q.toAmount != null)
     .filter((q) => !EXCHANGE_BLACKLIST.includes(q.exchangeInfo.keyword))
     .map(mapQuoteToRouteQuote);
 

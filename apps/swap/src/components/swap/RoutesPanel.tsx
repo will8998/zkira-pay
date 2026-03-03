@@ -6,7 +6,7 @@ import { useQuotes } from '@/hooks/useQuotes';
 import { formatNumber, formatUSD, formatDuration } from '@/lib/utils';
 import type { RouteQuote } from '@zkira/swap-types';
 
-type RouteFilter = 'best' | 'fastest' | 'private';
+
 
 const ICON_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF', '#5F27CD', '#1DD1A1', '#FD79A8'];
 
@@ -44,7 +44,7 @@ export default function RoutesPanel() {
     toToken
   });
 
-  const [activeFilter, setActiveFilter] = useState<RouteFilter>('best');
+
 
   // Keep selectedRoute in sync with latest routes data
   const selectedKeywordRef = useRef<string | null>(null);
@@ -81,49 +81,18 @@ export default function RoutesPanel() {
     return ((route.toAmount - best) / best) * 100;
   };
 
-  const getFilteredRoutes = (): RouteQuote[] => {
-    const sorted = [...routes];
-    switch (activeFilter) {
-      case 'best':
-        return sorted.sort((a, b) => b.toAmount - a.toAmount);
-      case 'fastest':
-        return sorted.sort((a, b) => a.estimatedTimeSeconds - b.estimatedTimeSeconds);
-      case 'private':
-        return sorted.filter(r => r.isPrivate).sort((a, b) => b.toAmount - a.toAmount);
-      default:
-        return sorted;
-    }
-  };
-
-  const filteredRoutes = getFilteredRoutes();
-  const privateCount = routes.filter(r => r.isPrivate).length;
-
-  const filters: { key: RouteFilter; label: string; icon: string }[] = [
-    { key: 'best', label: 'Best', icon: '★' },
-    { key: 'fastest', label: 'Fastest', icon: '⚡' },
-    { key: 'private', label: 'Private', icon: '🔒' },
-  ];
+  // All routes from backend are privacy-only, sort by best quote
+  const sortedRoutes = [...routes].sort((a, b) => b.toAmount - a.toAmount);
 
   return (
     <div className="card-base w-full flex flex-col">
-      {/* Header: filter tabs + countdown */}
-      <div className="flex items-center justify-between px-4 pt-4">
-        <div className="flex items-center border-b border-[var(--color-border)] flex-1">
-          {filters.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(f.key)}
-              className={`filter-tab ${activeFilter === f.key ? 'active' : ''}`}
-            >
-              <span className="mr-1.5">{f.icon}</span>
-              {f.label}
-              {f.key === 'private' && privateCount > 0 && (
-                <span className="ml-1.5 bg-[var(--color-red)] text-white text-[10px] px-1.5 py-0.5 font-bold leading-none">{privateCount}</span>
-              )}
-            </button>
-          ))}
+      {/* Header: title + privacy badge + countdown */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-border)]">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-[var(--color-text)] tracking-wide">Private Routes</span>
+          <span className="badge-privacy">🔒 Privacy</span>
         </div>
-        <div className="flex items-center gap-2 text-[var(--color-text-secondary)] pl-3 pb-2">
+        <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -153,21 +122,16 @@ export default function RoutesPanel() {
         )}
 
         {/* Empty */}
-        {!loading && filteredRoutes.length === 0 && !error && (
+        {!loading && sortedRoutes.length === 0 && !error && (
           <div className="text-center py-12 text-[var(--color-text-secondary)]">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
             </svg>
-            {activeFilter === 'private' ? (
+            {amount && parseFloat(amount) > 0 && fromToken && toToken ? (
               <>
-                <p>No privacy routes available</p>
-                <p className="text-xs mt-1">Not all token pairs support private swaps. Try stablecoin pairs (USDT, USDC) across major networks.</p>
-              </>
-            ) : amount && parseFloat(amount) > 0 && fromToken && toToken ? (
-              <>
-                <p>No walletless routes for this pair</p>
-                <p className="text-xs mt-1">Try stablecoin pairs (USDT, USDC)</p>
+                <p>No private routes for this pair</p>
+                <p className="text-xs mt-1">Try stablecoin pairs (USDT, USDC) across major networks</p>
               </>
             ) : (
               <>
@@ -179,7 +143,7 @@ export default function RoutesPanel() {
         )}
 
         {/* Desktop table */}
-        {!loading && filteredRoutes.length > 0 && (
+        {!loading && sortedRoutes.length > 0 && (
           <div className="hidden lg:block">
             <table className="routes-table">
               <thead>
@@ -192,7 +156,7 @@ export default function RoutesPanel() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRoutes.map((route, index) => {
+                {sortedRoutes.map((route, index) => {
                   const isSelected = selectedRoute?.exchangeKeyword === route.exchangeKeyword;
                   const pct = getYouSave(route);
                   return (
@@ -233,9 +197,9 @@ export default function RoutesPanel() {
         )}
 
         {/* Mobile cards */}
-        {!loading && filteredRoutes.length > 0 && (
+        {!loading && sortedRoutes.length > 0 && (
           <div className="lg:hidden p-4 space-y-3">
-            {filteredRoutes.map((route, index) => {
+            {sortedRoutes.map((route, index) => {
               const isSelected = selectedRoute?.exchangeKeyword === route.exchangeKeyword;
               const pct = getYouSave(route);
               return (
