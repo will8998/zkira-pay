@@ -55,7 +55,6 @@ quoteRoutes.get('/quote', async (c) => {
   const EXCHANGE_BLACKLIST = ['PRIVATESWAP14'];
 
   const quotes: RouteQuote[] = data.quotes
-    .filter((q) => q.isTxnAllowed)
     .filter((q) => q.exchangeInfo.walletLess)
     .filter((q) => !EXCHANGE_BLACKLIST.includes(q.exchangeInfo.keyword))
     .map(mapQuoteToRouteQuote);
