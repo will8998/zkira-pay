@@ -23,18 +23,21 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
     destinationAddress,
     refundAddress,
     selectedRoute,
+    routes,
     setFromToken,
     setToToken,
     setAmount,
     setDestinationAddress,
     setRefundAddress,
+    setSelectedRoute,
   } = useSwapContext()
 
   const { create: createSwap, loading: swapLoading, error: swapError } = useSwap()
   const [tokenSelectorOpen, setTokenSelectorOpen] = useState<'from' | 'to' | null>(null)
+  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null)
 
   const getSwapButtonLabel = () => {
-    if (swapLoading) return 'Swapping...'
+    if (swapLoading) return fallbackMessage ?? 'Swapping...'
     if (!fromToken || !toToken) return 'Select tokens'
     if (fromToken && toToken && isSameToken(fromToken, toToken)) return 'Select different tokens'
     if (!amount || parseFloat(amount) <= 0) return 'Enter amount'
@@ -61,21 +64,40 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
   const handleSwap = async () => {
     if (isSwapDisabled() || !fromToken || !toToken || !selectedRoute) return
 
-    try {
-      const request: SwapRequest = {
-        amount: parseFloat(amount),
-        fromTokenId: selectedRoute.fromTokenId,
-        toTokenId: selectedRoute.toTokenId,
-        destinationAddress: destinationAddress,
-        ...(selectedRoute.refundAddressRequired && refundAddress ? { refundAddress } : {}),
+    // Build the ordered list: selected route first, then remaining routes
+    const orderedRoutes = [
+      selectedRoute,
+      ...routes.filter(r => r.exchangeKeyword !== selectedRoute.exchangeKeyword),
+    ]
+
+    for (let i = 0; i < orderedRoutes.length; i++) {
+      const route = orderedRoutes[i]
+      if (i > 0) {
+        setFallbackMessage(`${orderedRoutes[i - 1].exchangeTitle} unavailable, trying ${route.exchangeTitle}...`)
+        setSelectedRoute(route)
       }
-      const swap = await createSwap(request)
-      if (swap) {
-        onSwapCreated(swap)
+
+      try {
+        const request: SwapRequest = {
+          amount: parseFloat(amount),
+          fromTokenId: route.fromTokenId,
+          toTokenId: route.toTokenId,
+          destinationAddress: destinationAddress,
+          ...(route.refundAddressRequired && refundAddress ? { refundAddress } : {}),
+        }
+        const swap = await createSwap(request)
+        if (swap) {
+          setFallbackMessage(null)
+          onSwapCreated(swap)
+          return
+        }
+        // createSwap returned null (error) — try next route
+      } catch (error) {
+        console.error(`Swap failed via ${route.exchangeTitle}:`, error)
       }
-    } catch (error) {
-      console.error('Swap failed:', error)
     }
+    // All routes failed
+    setFallbackMessage(null)
   }
 
   return (

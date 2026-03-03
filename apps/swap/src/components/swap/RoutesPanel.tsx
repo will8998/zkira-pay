@@ -12,7 +12,8 @@ export default function RoutesPanel() {
     toToken,
     amount,
     selectedRoute,
-    setSelectedRoute
+    setSelectedRoute,
+    setRoutes: setContextRoutes,
   } = useSwapContext();
 
   const { routes, loading, error, countdown } = useQuotes({
@@ -42,6 +43,11 @@ export default function RoutesPanel() {
     setSelectedRoute(match ?? routes[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, setSelectedRoute]);
+
+  // Push routes into context so SwapCard can access them for auto-fallback
+  useEffect(() => {
+    setContextRoutes(routes);
+  }, [routes, setContextRoutes]);
 
   const handleRouteSelect = (route: RouteQuote) => {
     setSelectedRoute(route);
@@ -125,8 +131,17 @@ export default function RoutesPanel() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p>No available routes</p>
-            <p className="text-xs mt-1">Enter amount and select tokens to see routes</p>
+            {amount && parseFloat(amount) > 0 && fromToken && toToken ? (
+              <>
+                <p>No walletless routes for this pair</p>
+                <p className="text-xs mt-1">Try stablecoin pairs (USDT, USDC) for the best experience</p>
+              </>
+            ) : (
+              <>
+                <p>No available routes</p>
+                <p className="text-xs mt-1">Enter amount and select tokens to see routes</p>
+              </>
+            )}
           </div>
         )}
 

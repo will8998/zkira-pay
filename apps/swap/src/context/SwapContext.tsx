@@ -13,6 +13,7 @@ interface SwapState {
   refundAddress: string;
   step: SwapStep;
   selectedRoute: RouteQuote | null;
+  routes: RouteQuote[];
   swap: SwapResponse | null;
   error: string | null;
 }
@@ -26,6 +27,7 @@ interface SwapContextValue extends SwapState {
   setRefundAddress: (addr: string) => void;
   setStep: (step: SwapStep) => void;
   setSelectedRoute: (route: RouteQuote | null) => void;
+  setRoutes: (routes: RouteQuote[]) => void;
   setSwap: (swap: SwapResponse | null) => void;
   setError: (error: string | null) => void;
   flipTokens: () => void;
@@ -41,6 +43,7 @@ const initialState: SwapState = {
   refundAddress: '',
   step: 'idle',
   selectedRoute: null,
+  routes: [],
   swap: null,
   error: null,
 };
@@ -115,6 +118,10 @@ export function SwapProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const setRoutes = useCallback((routes: RouteQuote[]) => {
+    setState(prev => ({ ...prev, routes }));
+  }, []);
+
   const setSwap = useCallback((swap: SwapResponse | null) => {
     setState(prev => ({ ...prev, swap }));
   }, []);
@@ -148,6 +155,7 @@ export function SwapProvider({ children }: { children: ReactNode }) {
         setRefundAddress,
         setStep,
         setSelectedRoute,
+        setRoutes,
         setSwap,
         setError,
         flipTokens,
