@@ -80,8 +80,8 @@ export default function TokenInput({
                   />
                 ) : (
                   <div
-                  <div
                     className="w-6 h-6 flex items-center justify-center text-white text-xs font-semibold"
+                    style={{ backgroundColor: getFallbackColor() }}
                   >
                     {getInitial()}
                   </div>
