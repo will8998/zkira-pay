@@ -7,9 +7,10 @@ interface TokenItemProps {
   token: TokenItem
   isSelected: boolean
   onSelect: (token: TokenItem) => void
+  networkCount?: number
 }
 
-export function TokenItemComponent({ token, isSelected, onSelect }: TokenItemProps) {
+export function TokenItemComponent({ token, isSelected, onSelect, networkCount }: TokenItemProps) {
   const [imageError, setImageError] = useState(false)
 
   function handleClick() {
@@ -74,6 +75,15 @@ export function TokenItemComponent({ token, isSelected, onSelect }: TokenItemPro
           </div>
         </div>
       </div>
+
+      {networkCount && (
+        <div className="flex items-center gap-1 text-zkira-text-secondary ml-2">
+          <span className="text-xs">{networkCount} networks</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      )}
     </div>
   )
 }

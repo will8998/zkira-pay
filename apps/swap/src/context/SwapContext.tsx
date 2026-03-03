@@ -59,14 +59,14 @@ export function SwapProvider({ children }: { children: ReactNode }) {
         const response = await getTokens({ perPage: 100 });
         const tokens = response.tokens;
 
-        // Find USDT on Ethereum for fromToken
-        const fromToken = tokens.find(t => t.token_symbol === 'USDT' && t.network_id === 'ethereum');
+        // Default: BTC on bitcoin → ETH on ethereum (clearly different tokens)
+        const fromToken =
+          tokens.find(t => t.token_symbol === 'BTC' && t.network_id === 'BTC') ||
+          tokens.find(t => t.token_symbol === 'BTC');
 
-        // Find USDT on other networks for toToken
         const toToken =
-          tokens.find(t => t.token_symbol === 'USDT' && t.network_id === 'tron') ||
-          tokens.find(t => t.token_symbol === 'USDT' && t.network_id === 'binance') ||
-          tokens.find(t => t.token_symbol === 'USDT' && t.network_id !== 'ethereum');
+          tokens.find(t => t.token_symbol === 'ETH' && t.network_id === 'ethereum') ||
+          tokens.find(t => t.token_symbol === 'ETH');
 
         if (fromToken && toToken) {
           setState(prev => ({ ...prev, fromToken, toToken }));

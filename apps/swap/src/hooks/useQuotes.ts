@@ -5,6 +5,7 @@ import type { TokenItem, RouteQuote } from '@zkira/swap-types';
 import { getQuotation } from '@/lib/api';
 import { QUOTE_DEBOUNCE_MS } from '@/lib/constants';
 import { useDebounce } from './useDebounce';
+import { isSameToken } from '@/lib/utils';
 
 const QUOTE_REFRESH_INTERVAL = 60;
 
@@ -26,7 +27,7 @@ export function useQuotes({ amount, fromToken, toToken }: UseQuotesParams) {
   const debouncedAmount = useDebounce(amount, QUOTE_DEBOUNCE_MS);
 
   const fetchQuotes = useCallback(async (signal?: AbortSignal) => {
-    if (!debouncedAmount || debouncedAmount <= 0 || !fromToken || !toToken || fromToken.id === toToken.id) {
+    if (!debouncedAmount || debouncedAmount <= 0 || !fromToken || !toToken || isSameToken(fromToken, toToken)) {
       setRoutes([]);
       setLoading(false);
       setError(null);
@@ -70,7 +71,7 @@ export function useQuotes({ amount, fromToken, toToken }: UseQuotesParams) {
       clearInterval(countdownRef.current);
     }
 
-    if (!debouncedAmount || debouncedAmount <= 0 || !fromToken || !toToken || fromToken.id === toToken.id) {
+    if (!debouncedAmount || debouncedAmount <= 0 || !fromToken || !toToken || isSameToken(fromToken, toToken)) {
       setRoutes([]);
       setLoading(false);
       setError(null);

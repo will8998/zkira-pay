@@ -9,6 +9,7 @@ import SwapDirectionButton from './SwapDirectionButton'
 import AddressInput from './AddressInput'
 import SwapButton from './SwapButton'
 import { TokenSelector } from './TokenSelector'
+import { isSameToken } from '@/lib/utils'
 
 interface SwapCardProps {
   onSwapCreated: (swap: SwapResponse) => void;
@@ -35,7 +36,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
   const getSwapButtonLabel = () => {
     if (swapLoading) return 'Swapping...'
     if (!fromToken || !toToken) return 'Select tokens'
-    if (fromToken && toToken && fromToken.id === toToken.id) return 'Select different tokens'
+    if (fromToken && toToken && isSameToken(fromToken, toToken)) return 'Select different tokens'
     if (!amount || parseFloat(amount) <= 0) return 'Enter amount'
     if (!selectedRoute) return 'Select a route'
     if (!destinationAddress) return 'Enter address'
@@ -47,7 +48,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
     return (
       !fromToken ||
       !toToken ||
-      fromToken?.id === toToken?.id ||
+      isSameToken(fromToken, toToken) ||
       !amount ||
       parseFloat(amount) <= 0 ||
       !selectedRoute ||

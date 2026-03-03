@@ -4,14 +4,17 @@ import React, { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { TokenItem } from '@zkira/swap-types'
 import { TokenItemComponent } from './TokenItem'
+import { isSameToken } from '@/lib/utils'
 
 interface TokenListProps {
   tokens: TokenItem[]
   onSelect: (token: TokenItem) => void
   selectedToken: TokenItem | null
+  showNetworkCount?: boolean
+  getNetworkCount?: (symbol: string) => number
 }
 
-export function TokenList({ tokens, onSelect, selectedToken }: TokenListProps) {
+export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, getNetworkCount }: TokenListProps) {
   const parentRef = useRef<HTMLDivElement>(null)
 
   const virtualizer = useVirtualizer({
@@ -52,6 +55,7 @@ export function TokenList({ tokens, onSelect, selectedToken }: TokenListProps) {
       >
         {virtualizer.getVirtualItems().map((virtualItem) => {
           const token = tokens[virtualItem.index]
+          const networkCount = showNetworkCount && getNetworkCount ? getNetworkCount(token.token_symbol) : 0
           return (
             <div
               key={virtualItem.key}
@@ -66,8 +70,9 @@ export function TokenList({ tokens, onSelect, selectedToken }: TokenListProps) {
             >
               <TokenItemComponent
                 token={token}
-                isSelected={selectedToken?.id === token.id}
+                isSelected={isSameToken(selectedToken, token)}
                 onSelect={onSelect}
+                networkCount={networkCount > 1 ? networkCount : undefined}
               />
             </div>
           )

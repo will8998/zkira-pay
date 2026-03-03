@@ -1,3 +1,5 @@
+import type { TokenItem } from '@zkira/swap-types';
+
 import { clsx, type ClassValue } from 'clsx';
 
 export function formatNumber(n: number, decimals = 2): string {
@@ -36,4 +38,10 @@ export function formatDuration(seconds: number): string {
 
 export function cn(...classes: ClassValue[]): string {
   return clsx(classes);
+}
+
+/** RocketX uses the same token id across networks — compare id + network_id */
+export function isSameToken(a: TokenItem | null, b: TokenItem | null): boolean {
+  if (!a || !b) return false;
+  return a.id === b.id && a.network_id === b.network_id;
 }
