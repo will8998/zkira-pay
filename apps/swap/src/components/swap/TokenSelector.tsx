@@ -124,7 +124,7 @@ export function TokenSelector({
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full max-w-md mx-4 mt-20 bg-zkira-card rounded-xl border border-zkira-border max-h-[70vh] flex flex-col animate-fade-in-up"
+        className="w-full max-w-md mx-4 mt-20 bg-zkira-card rounded-xl border border-zkira-border max-h-[70vh] flex flex-col overflow-hidden animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-zkira-border">
@@ -234,7 +234,7 @@ export function TokenSelector({
           </div>
         )}
 
-        <div className="flex-1 min-h-0" style={{ height: '400px' }}>
+        <div className="flex-1 min-h-0 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-3">
