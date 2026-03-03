@@ -27,9 +27,6 @@ export type TokenItem = RocketXTokenListItem;
 
 export interface TokensResponse {
   tokens: TokenItem[];
-  totalPages: number;
-  currentPage: number;
-  perPage: number;
 }
 
 // Quote — we pass through RocketX quotes with route categorization

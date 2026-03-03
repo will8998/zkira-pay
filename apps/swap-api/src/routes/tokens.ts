@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../app.js';
-import type { TokensResponse } from '@zkira/swap-types';
 import { RocketXClient } from '../services/rocketx-client.js';
 import { tokensQuerySchema } from '../schemas/tokens.js';
 
@@ -15,16 +14,9 @@ tokenRoutes.get('/tokens', async (c) => {
     return c.json({ error: parsed.error.flatten().fieldErrors, status: 400 }, 400);
   }
 
-  const data = await client.getTokens(parsed.data);
+  const tokens = await client.getTokens(parsed.data);
 
-  const response: TokensResponse = {
-    tokens: data.data,
-    totalPages: data.totalPages,
-    currentPage: data.currentPage,
-    perPage: data.perPage,
-  };
-
-  return c.json(response);
+  return c.json({ tokens });
 });
 
 export default tokenRoutes;

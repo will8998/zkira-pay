@@ -113,12 +113,8 @@ export interface RocketXTokenListItem {
   score: number;
 }
 
-export interface RocketXTokensResponse {
-  data: RocketXTokenListItem[];
-  totalPages: number;
-  currentPage: number;
-  perPage: number;
-}
+// RocketX /v1/tokens returns a plain array
+export type RocketXTokensResponse = RocketXTokenListItem[];
 
 // Config response (GET /v1/configs)
 export interface RocketXSupportedExchange {
