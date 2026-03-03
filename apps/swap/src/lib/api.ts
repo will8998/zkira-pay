@@ -98,10 +98,3 @@ export async function getConfigs(): Promise<ConfigsResponse> {
   return fetchJson<ConfigsResponse>(`${API_BASE}/configs`);
 }
 
-export async function validateInviteCode(code: string): Promise<{ valid: boolean; used: boolean }> {
-  return fetchJson<{ valid: boolean; used: boolean }>(`${API_BASE}/invite/validate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  });
-}

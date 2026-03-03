@@ -74,7 +74,6 @@ export interface SwapRequest {
   toAddress: string;
   refundAddress?: string;
   slippage?: number;
-  inviteCode?: string;
 }
 
 export interface SwapResponse {

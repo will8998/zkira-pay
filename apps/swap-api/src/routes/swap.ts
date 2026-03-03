@@ -16,11 +16,7 @@ swapRoutes.post('/swap', async (c) => {
     return c.json({ error: parsed.error.flatten().fieldErrors, status: 400 }, 400);
   }
 
-  const { inviteCode, ...swapParams } = parsed.data;
-
-  // TODO: validate inviteCode if provided
-
-  const data = await client.createSwap(swapParams);
+  const data = await client.createSwap(parsed.data);
 
   const response: SwapResponse = {
     requestId: data.requestId,

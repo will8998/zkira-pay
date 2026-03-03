@@ -10,7 +10,6 @@ export const swapBodySchema = z.object({
   toAddress: z.string().min(1, 'Destination address is required'),
   refundAddress: z.string().optional(),
   slippage: z.number().min(0).max(50).optional(),
-  inviteCode: z.string().optional(),
 });
 
 export type SwapBody = z.infer<typeof swapBodySchema>;
