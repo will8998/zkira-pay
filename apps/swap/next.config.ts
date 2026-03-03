@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next';
 
+const API_URL = process.env.SWAP_API_URL || 'http://localhost:3014';
+
 const nextConfig: NextConfig = {
   transpilePackages: ['@zkira/swap-types'],
   images: {
@@ -20,7 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3014/api/:path*',
+        destination: `${API_URL}/api/:path*`,
       },
     ];
   },
