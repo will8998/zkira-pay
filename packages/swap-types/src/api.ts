@@ -67,12 +67,8 @@ export interface QuotationResponse {
 export interface SwapRequest {
   fromTokenId: number;
   toTokenId: number;
-  fromNetwork: string;
-  toNetwork: string;
   amount: number;
-  exchangeKeyword: string;
-  toAddress: string;
-  refundAddress?: string;
+  destinationAddress: string;
   slippage?: number;
 }
 
@@ -82,6 +78,9 @@ export interface SwapResponse {
   status: string;
   fromAmount: number;
   toAmount: number;
+  fromTokenSymbol: string;
+  toTokenSymbol: string;
+  memo: string | null;
 }
 
 // Status
@@ -94,6 +93,7 @@ export interface StatusResponse {
   toAmount: number;
   fromToken: string;
   toToken: string;
+  depositAddress: string;
   txHash?: string;
   txHashOut?: string;
 }

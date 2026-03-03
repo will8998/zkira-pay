@@ -142,35 +142,57 @@ export interface RocketXConfigsResponse {
 
 // Swap request/response (POST /v1/swap)
 export interface RocketXSwapRequest {
+  fee: number;
   fromTokenId: number;
   toTokenId: number;
-  fromNetwork: string;
-  toNetwork: string;
   amount: number;
-  exchangeKeyword: string;
-  toAddress: string;
-  refundAddress?: string;
-  slippage?: number;
+  slippage: number;
+  disableEstimate: boolean;
+  destinationAddress: string;
+  userAddress?: string;  // only for DEX/wallet-connected swaps
+  referrerAddress?: string;
 }
 
 export interface RocketXSwapResponse {
   requestId: string;
-  depositAddress: string;
-  status: string;
-  fromAmount: number;
-  toAmount: number;
-  [key: string]: unknown; // May have additional fields
+  txId: number;
+  exchangeInfo: RocketXExchangeInfo;
+  fromTokenInfo: RocketXTokenInfo;
+  toTokenInfo: RocketXTokenInfo;
+  estTimeInSeconds: RocketXEstTime;
+  swap: {
+    fromAmount: number;
+    toAmount: number;
+    depositAddress: string;
+    partnerFee: number;
+    tx: {
+      from: string;
+      to: string;
+      memo: string | null;
+      method: string;
+      chainId: string;
+      networkType: string;
+      [key: string]: unknown;
+    };
+  };
+  [key: string]: unknown;
 }
 
 // Status response (GET /v1/status)
 export interface RocketXStatusResponse {
   requestId: string;
-  status: string; // "pending", "confirming", "exchanging", "success", "failed", "refunded"
-  fromAmount: number;
-  toAmount: number;
-  fromToken: string;
-  toToken: string;
-  txHash?: string;
-  txHashOut?: string;
+  exchangeInfo: RocketXExchangeInfo;
+  fromTokenInfo: RocketXTokenInfo;
+  toTokenInfo: RocketXTokenInfo;
+  destinationAddress: string;
+  originTokenAmount: number;
+  expectedTokenAmount: number;
+  actualAmount: number;
+  depositAddress: string;
+  status: string;
+  transactionTime: string;
+  originTransactionHash: string;
+  subState: string;
+  txId: number;
   [key: string]: unknown;
 }

@@ -27,10 +27,13 @@ export default function SwapDetailPage({ params }: SwapPageProps) {
 
         setSwap({
           requestId: status.requestId || id,
-          depositAddress: '', // Not available from status endpoint
+          depositAddress: status.depositAddress || '',
           status: status.status,
           fromAmount: status.fromAmount,
           toAmount: status.toAmount,
+          fromTokenSymbol: status.fromToken || '',
+          toTokenSymbol: status.toToken || '',
+          memo: null,
         });
         setError(null);
       } catch (err) {
@@ -85,8 +88,8 @@ export default function SwapDetailPage({ params }: SwapPageProps) {
     <div className="flex items-center justify-center min-h-[60vh] px-4 pt-12 md:pt-16">
       <StatusTracker
         swap={swap}
-        fromTokenSymbol={statusData?.fromToken || ''}
-        toTokenSymbol={statusData?.toToken || ''}
+        fromTokenSymbol={swap.fromTokenSymbol}
+        toTokenSymbol={swap.toTokenSymbol}
         isPrivate={false}
         onNewSwap={handleNewSwap}
       />

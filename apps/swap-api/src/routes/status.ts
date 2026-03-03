@@ -20,12 +20,13 @@ statusRoutes.get('/status/:requestId', async (c) => {
   const response: StatusResponse = {
     requestId: data.requestId,
     status: data.status as SwapStatusValue,
-    fromAmount: data.fromAmount,
-    toAmount: data.toAmount,
-    fromToken: data.fromToken,
-    toToken: data.toToken,
-    txHash: data.txHash,
-    txHashOut: data.txHashOut,
+    fromAmount: data.originTokenAmount,
+    toAmount: data.expectedTokenAmount || data.actualAmount,
+    fromToken: data.fromTokenInfo?.token_symbol || '',
+    toToken: data.toTokenInfo?.token_symbol || '',
+    depositAddress: data.depositAddress || '',
+    txHash: data.originTransactionHash || undefined,
+    txHashOut: undefined,
   };
 
   return c.json(response);

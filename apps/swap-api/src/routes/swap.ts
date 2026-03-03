@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../app.js';
-import type { SwapResponse } from '@zkira/swap-types';
+import type { SwapResponse, RocketXSwapRequest } from '@zkira/swap-types';
 import { RocketXClient } from '../services/rocketx-client.js';
 import { swapBodySchema } from '../schemas/swap.js';
 
@@ -16,14 +16,27 @@ swapRoutes.post('/swap', async (c) => {
     return c.json({ error: parsed.error.flatten().fieldErrors, status: 400 }, 400);
   }
 
-  const data = await client.createSwap(parsed.data);
+  const rocketxBody: RocketXSwapRequest = {
+    fee: 1,
+    fromTokenId: parsed.data.fromTokenId,
+    toTokenId: parsed.data.toTokenId,
+    amount: parsed.data.amount,
+    slippage: parsed.data.slippage ?? 1,
+    disableEstimate: false,
+    destinationAddress: parsed.data.destinationAddress,
+  };
+
+  const data = await client.createSwap(rocketxBody);
 
   const response: SwapResponse = {
     requestId: data.requestId,
-    depositAddress: data.depositAddress,
-    status: data.status,
-    fromAmount: data.fromAmount,
-    toAmount: data.toAmount,
+    depositAddress: data.swap.depositAddress,
+    status: 'pending',
+    fromAmount: data.swap.fromAmount,
+    toAmount: data.swap.toAmount,
+    fromTokenSymbol: data.fromTokenInfo.token_symbol,
+    toTokenSymbol: data.toTokenInfo.token_symbol,
+    memo: data.swap.tx?.memo || null,
   };
 
   return c.json(response);

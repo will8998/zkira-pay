@@ -66,11 +66,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
         amount: parseFloat(amount),
         fromTokenId: fromToken.id,
         toTokenId: toToken.id,
-        fromNetwork: fromToken.network_id,
-        toNetwork: toToken.network_id,
-        exchangeKeyword: selectedRoute.exchangeKeyword,
-        toAddress: destinationAddress,
-        refundAddress: selectedRoute.refundAddressRequired ? refundAddress || undefined : undefined,
+        destinationAddress: destinationAddress,
       }
       const swap = await createSwap(request)
       if (swap) {
