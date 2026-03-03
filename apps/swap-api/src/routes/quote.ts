@@ -12,6 +12,7 @@ function mapQuoteToRouteQuote(quote: RocketXQuote): RouteQuote {
 
   return {
     fromTokenId: quote.fromTokenInfo.id,
+    exchangeId: quote.exchangeInfo.id,
     toTokenId: quote.toTokenInfo.id,
     exchangeKeyword: quote.exchangeInfo.keyword,
     exchangeTitle: quote.exchangeInfo.title,

@@ -35,6 +35,7 @@ export type RouteType = 'standard' | 'private';
 export interface RouteQuote {
   fromTokenId: number;
   toTokenId: number;
+  exchangeId: string | number;
   exchangeKeyword: string;
   exchangeTitle: string;
   exchangeLogo: string;
@@ -70,6 +71,7 @@ export interface SwapRequest {
   fromTokenId: number;
   toTokenId: number;
   amount: number;
+  exchangeId: string | number;
   destinationAddress: string;
   slippage?: number;
   refundAddress?: string;

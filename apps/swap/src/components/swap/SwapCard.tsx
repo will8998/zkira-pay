@@ -88,6 +88,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
           toTokenId: route.toTokenId,
           destinationAddress: destinationAddress,
           ...(route.refundAddressRequired && refundAddress ? { refundAddress } : {}),
+          exchangeId: route.exchangeId,
         }
         const swap = await createSwap(request)
         if (swap) {
