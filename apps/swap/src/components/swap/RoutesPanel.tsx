@@ -8,6 +8,26 @@ import type { RouteQuote } from '@zkira/swap-types';
 
 type RouteFilter = 'best' | 'fastest' | 'private';
 
+const ICON_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF', '#5F27CD', '#1DD1A1', '#FD79A8'];
+
+function ExchangeIcon({ logo, name, size = 'md' }: { logo?: string; name: string; size?: 'sm' | 'md' }) {
+  const [failed, setFailed] = useState(false);
+  const dim = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
+  const textSize = size === 'sm' ? 'text-[9px]' : 'text-[10px]';
+  const color = ICON_COLORS[name.charCodeAt(0) % ICON_COLORS.length];
+
+  if (!logo || failed) {
+    return (
+      <div className={`${dim} rounded-full flex items-center justify-center text-white font-bold shrink-0 ${textSize}`} style={{ backgroundColor: color }}>
+        {name.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+
+  return (
+    <img src={logo} alt={name} className={`${dim} rounded-full shrink-0`} onError={() => setFailed(true)} />
+  );
+}
 export default function RoutesPanel() {
   const {
     fromToken,
@@ -179,6 +199,7 @@ export default function RoutesPanel() {
                     >
                       <td>
                         <div className="flex items-center gap-3">
+                          <ExchangeIcon logo={route.exchangeLogo} name={route.exchangeTitle} />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
@@ -223,6 +244,7 @@ export default function RoutesPanel() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
+                      <ExchangeIcon logo={route.exchangeLogo} name={route.exchangeTitle} size="sm" />
                       <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
                       {route.walletLess && <span className="badge-walletless">Walletless</span>}
                       {route.isPrivate && <span className="badge-privacy">Privacy</span>}
