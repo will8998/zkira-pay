@@ -9,7 +9,7 @@ import SwapDirectionButton from './SwapDirectionButton'
 import AddressInput from './AddressInput'
 import SwapButton from './SwapButton'
 import { TokenSelector } from './TokenSelector'
-import { isSameToken } from '@/lib/utils'
+import { isSameToken, formatNumber, formatUSD, formatDuration } from '@/lib/utils'
 
 interface SwapCardProps {
   onSwapCreated: (swap: SwapResponse) => void;
@@ -149,6 +149,54 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
           onChange={setRefundAddress}
           placeholder={`Refund address on ${fromToken?.network_id ?? 'source'} network`}
         />
+      )}
+
+      {/* Route detail panel */}
+      {selectedRoute && (
+        <div className="mt-4 bg-[var(--color-bg)] border border-[var(--border-subtle)] p-4">
+          <div className="space-y-3">
+            {/* YOU SAVE */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">YOU SAVE</span>
+              <span className="text-sm font-medium text-[var(--color-green)]">
+                {routes.length > 0 ? formatUSD(routes[0].platformFeeUsd - selectedRoute.platformFeeUsd) : '$0.00'}
+              </span>
+            </div>
+            
+            {/* Separator */}
+            <div className="border-t border-dashed border-[var(--color-border)]"></div>
+            
+            {/* QUOTE */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">QUOTE</span>
+              <span className="text-sm font-medium">{formatNumber(selectedRoute.toAmount, 6)} {selectedRoute.toTokenSymbol}</span>
+            </div>
+            
+            {/* MIN RECEIVED */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">MIN RECEIVED</span>
+              <span className="text-sm font-medium">{selectedRoute.minReceived ? formatNumber(selectedRoute.minReceived, 6) : 'MARKET PRICE'}</span>
+            </div>
+            
+            {/* EST. TIME */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">EST. TIME</span>
+              <span className="text-sm font-medium">{formatDuration(selectedRoute.estimatedTimeSeconds)}</span>
+            </div>
+            
+            {/* PLATFORM FEE */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">PLATFORM FEE</span>
+              <span className="text-sm font-medium">{formatUSD(selectedRoute.platformFeeUsd)}</span>
+            </div>
+            
+            {/* GAS FEE */}
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--color-text-secondary)] uppercase tracking-wider text-xs">GAS FEE</span>
+              <span className="text-sm font-medium">{formatUSD(selectedRoute.gasFeeUsd)}</span>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="mt-4">

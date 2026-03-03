@@ -28,16 +28,16 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
     return (
       <div className="flex items-center justify-center py-12 text-[var(--color-text-secondary)]">
         <div className="text-center">
-          <svg className="w-8 h-8 mx-auto mb-3 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 mx-auto mb-3 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2V4M12 20V22M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M2 12H4M20 12H22" opacity={0.4} />
           </svg>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          <div className="text-sm font-medium">No tokens found</div>
-          <div className="text-xs text-[var(--color-muted)] mt-1">
+          <div className="text-sm font-medium font-[family-name:var(--font-sans)]">No tokens found</div>
+          <div className="text-xs text-[var(--color-muted)] mt-1 font-[family-name:var(--font-sans)]">
             Refine your search or check network filters
           </div>
         </div>
       </div>
-    )
   }
 
   return (

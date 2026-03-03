@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSwapContext } from '@/context/SwapContext';
 import { useQuotes } from '@/hooks/useQuotes';
 import { formatNumber, formatUSD, formatDuration } from '@/lib/utils';
 import type { RouteQuote } from '@zkira/swap-types';
+
+type RouteFilter = 'best' | 'fastest' | 'private';
 
 export default function RoutesPanel() {
   const {
@@ -22,29 +24,24 @@ export default function RoutesPanel() {
     toToken
   });
 
-  // Keep selectedRoute in sync with latest routes data.
-  // Without this, selectedRoute becomes stale after quote refreshes,
-  // causing the "To" field to show outdated amounts.
+  const [activeFilter, setActiveFilter] = useState<RouteFilter>('best');
+
+  // Keep selectedRoute in sync with latest routes data
   const selectedKeywordRef = useRef<string | null>(null);
   selectedKeywordRef.current = selectedRoute?.exchangeKeyword ?? null;
 
   useEffect(() => {
     if (routes.length === 0) return;
-
     const currentKeyword = selectedKeywordRef.current;
     if (!currentKeyword) {
-      // No route selected yet — pick the best (first)
       setSelectedRoute(routes[0]);
       return;
     }
-
-    // Update selectedRoute with fresh data from the new routes
     const match = routes.find(r => r.exchangeKeyword === currentKeyword);
     setSelectedRoute(match ?? routes[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, setSelectedRoute]);
 
-  // Push routes into context so SwapCard can access them for auto-fallback
   useEffect(() => {
     setContextRoutes(routes);
   }, [routes, setContextRoutes]);
@@ -53,88 +50,100 @@ export default function RoutesPanel() {
     setSelectedRoute(route);
   };
 
-  const formatCountdown = (seconds: number) => {
-    return `${seconds}s`;
-  };
-
   const getBestRouteAmount = () => {
     if (routes.length === 0) return 0;
     return routes[0].toAmount;
   };
 
-  const getPercentDiff = (route: RouteQuote) => {
+  const getYouSave = (route: RouteQuote) => {
     const best = getBestRouteAmount();
     if (!best || best === 0) return 0;
     return ((route.toAmount - best) / best) * 100;
   };
 
-  const getPercentageColor = (percentage: number) => {
-    if (percentage < 0) return 'text-[var(--color-red)]';
-    if (percentage === 0) return 'text-[var(--color-text-secondary)]';
-    return 'text-[var(--color-green)]';
+  const getFilteredRoutes = (): RouteQuote[] => {
+    const sorted = [...routes];
+    switch (activeFilter) {
+      case 'best':
+        return sorted.sort((a, b) => b.toAmount - a.toAmount);
+      case 'fastest':
+        return sorted.sort((a, b) => a.estimatedTimeSeconds - b.estimatedTimeSeconds);
+      case 'private':
+        return sorted.filter(r => r.isPrivate).sort((a, b) => b.toAmount - a.toAmount);
+      default:
+        return sorted;
+    }
   };
 
+  const filteredRoutes = getFilteredRoutes();
+
+  const filters: { key: RouteFilter; label: string; icon: string }[] = [
+    { key: 'best', label: 'Best', icon: '★' },
+    { key: 'fastest', label: 'Fastest', icon: '⚡' },
+    { key: 'private', label: 'Private', icon: '🔒' },
+  ];
+
   return (
-    <div className="card-base p-6 w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-[var(--color-text)] tracking-wide">Best Routes</h2>
-        <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="card-base w-full flex flex-col">
+      {/* Header: filter tabs + countdown */}
+      <div className="flex items-center justify-between px-4 pt-4">
+        <div className="flex items-center border-b border-[var(--color-border)] flex-1">
+          {filters.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setActiveFilter(f.key)}
+              className={`filter-tab ${activeFilter === f.key ? 'active' : ''}`}
+            >
+              <span className="mr-1.5">{f.icon}</span>
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 text-[var(--color-text-secondary)] pl-3 pb-2">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span className="text-sm">({formatCountdown(countdown)})</span>
+          <span className="text-xs font-mono">{countdown}s</span>
         </div>
       </div>
 
-      <div className="space-y-3">
+      {/* Content area */}
+      <div className="flex-1 overflow-auto">
+        {/* Loading */}
         {loading && (
-          <>
-            <div className="border border-[var(--border-subtle)] p-4 animate-pulse skeleton-shimmer">
-              <div className="flex items-center justify-between mb-2">
-                <div className="bg-[var(--color-border)] h-5 w-16"></div>
-                <div className="bg-[var(--color-border)] h-4 w-4"></div>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+          <div className="p-4 space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="border border-[var(--border-subtle)] p-4 animate-pulse skeleton-shimmer">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="bg-[var(--color-border)] h-6 w-6"></div>
-                  <div className="bg-[var(--color-border)] h-6 w-24"></div>
+                  <div className="bg-[var(--color-border)] h-5 w-32"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="bg-[var(--color-border)] h-4 w-20"></div>
+                  <div className="bg-[var(--color-border)] h-4 w-16"></div>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="bg-[var(--color-border)] h-4 w-20"></div>
-                <div className="bg-[var(--color-border)] h-4 w-16"></div>
-              </div>
-            </div>
-            <div className="border border-[var(--border-subtle)] p-4 animate-pulse skeleton-shimmer">
-              <div className="flex items-center justify-between mb-2">
-                <div className="bg-[var(--color-border)] h-5 w-20"></div>
-                <div className="bg-[var(--color-border)] h-4 w-4"></div>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[var(--color-border)] h-6 w-6"></div>
-                  <div className="bg-[var(--color-border)] h-6 w-28"></div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="bg-[var(--color-border)] h-4 w-24"></div>
-                <div className="bg-[var(--color-border)] h-4 w-20"></div>
-              </div>
-            </div>
-          </>
+            ))}
+          </div>
         )}
 
-        {!loading && routes.length === 0 && !error && (
-          <div className="text-center py-8 text-[var(--color-text-secondary)]">
+        {/* Empty */}
+        {!loading && filteredRoutes.length === 0 && !error && (
+          <div className="text-center py-12 text-[var(--color-text-secondary)]">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
             </svg>
-            {amount && parseFloat(amount) > 0 && fromToken && toToken ? (
+            {activeFilter === 'private' ? (
+              <>
+                <p>No privacy routes for this pair</p>
+                <p className="text-xs mt-1">Try &quot;Best&quot; or &quot;Fastest&quot;</p>
+              </>
+            ) : amount && parseFloat(amount) > 0 && fromToken && toToken ? (
               <>
                 <p>No walletless routes for this pair</p>
-                <p className="text-xs mt-1">Try stablecoin pairs (USDT, USDC) for the best experience</p>
+                <p className="text-xs mt-1">Try stablecoin pairs (USDT, USDC)</p>
               </>
             ) : (
               <>
@@ -145,90 +154,108 @@ export default function RoutesPanel() {
           </div>
         )}
 
-        {!loading && routes.map((route, index) => {
-          const isSelected = selectedRoute?.exchangeKeyword === route.exchangeKeyword;
-          const percentDiff = getPercentDiff(route);
+        {/* Desktop table */}
+        {!loading && filteredRoutes.length > 0 && (
+          <div className="hidden lg:block">
+            <table className="routes-table">
+              <thead>
+                <tr>
+                  <th>Exchange</th>
+                  <th>Quote</th>
+                  <th>Min. Received</th>
+                  <th>Gas Fee</th>
+                  <th>You Save</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRoutes.map((route, index) => {
+                  const isSelected = selectedRoute?.exchangeKeyword === route.exchangeKeyword;
+                  const pct = getYouSave(route);
+                  return (
+                    <tr
+                      key={route.exchangeKeyword || index}
+                      onClick={() => handleRouteSelect(route)}
+                      className={isSelected ? 'route-selected' : ''}
+                    >
+                      <td>
+                        <div className="flex items-center gap-3">
+                          {route.exchangeLogo && (
+                            <img src={route.exchangeLogo} alt={route.exchangeTitle} className="w-6 h-6 shrink-0"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
+                              {route.walletLess && <span className="badge-walletless">Walletless</span>}
+                              {route.isPrivate && <span className="badge-privacy">Privacy</span>}
+                            </div>
+                            <div className="text-[10px] text-[var(--color-muted)] uppercase tracking-wider mt-0.5">
+                              {route.exchangeType} | {route.exchangeType === 'DEX' ? 'Instant' : `~${Math.round(route.estimatedTimeSeconds / 60)} mins`}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span className="text-[var(--color-text)] font-medium">{formatNumber(route.toAmount, 4)} {route.toTokenSymbol}</span></td>
+                      <td><span className="text-[var(--color-text-secondary)]">{route.minReceived ? `${formatNumber(route.minReceived, 4)} ${route.toTokenSymbol}` : 'Market Price'}</span></td>
+                      <td><span className="text-[var(--color-text-secondary)]">{formatUSD(route.gasFeeUsd)}</span></td>
+                      <td>
+                        <span className={`font-medium ${pct >= 0 ? 'text-[var(--color-green)]' : 'text-[var(--color-red)]'}`}>
+                          {pct === 0 ? 'Best' : pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-          return (
-            <div
-              key={route.exchangeKeyword || index}
-              onClick={() => handleRouteSelect(route)}
-              className={`
-                border p-4 cursor-pointer transition-all duration-200 hover:bg-[var(--color-hover)] hover:scale-[1.01]
-                ${isSelected
-                  ? 'route-card-selected neon-glow-subtle'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle-hover)]'
-                }
-              `}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`
-                    px-2 py-1 rounded text-xs font-medium
-                    ${route.routeType === 'private'
-                      ? 'route-badge-private'
-                      : 'route-badge-standard'
-                    }
-                  `}>
-                    {route.isPrivate ? 'Privacy' : 'Standard'}
-                  </span>
-                  <button className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-                {isSelected && (
-                  <div className="text-[var(--color-red)]">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+        {/* Mobile cards */}
+        {!loading && filteredRoutes.length > 0 && (
+          <div className="lg:hidden p-4 space-y-3">
+            {filteredRoutes.map((route, index) => {
+              const isSelected = selectedRoute?.exchangeKeyword === route.exchangeKeyword;
+              const pct = getYouSave(route);
+              return (
+                <div
+                  key={route.exchangeKeyword || index}
+                  onClick={() => handleRouteSelect(route)}
+                  className={`border p-4 cursor-pointer transition-all hover:bg-[var(--color-hover)] ${
+                    isSelected ? 'border-[var(--color-red)] neon-glow-subtle' : 'border-[var(--border-subtle)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {route.exchangeLogo && (
+                        <img src={route.exchangeLogo} alt={route.exchangeTitle} className="w-5 h-5"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      )}
+                      <span className="text-[var(--color-text)] font-medium text-sm">{route.exchangeTitle}</span>
+                      {route.walletLess && <span className="badge-walletless">Walletless</span>}
+                      {route.isPrivate && <span className="badge-privacy">Privacy</span>}
+                    </div>
+                    <div className="text-[10px] text-[var(--color-muted)] uppercase">
+                      {route.exchangeType} | {route.exchangeType === 'DEX' ? 'Instant' : formatDuration(route.estimatedTimeSeconds)}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  {route.exchangeLogo && (
-                    <img
-                      src={route.exchangeLogo}
-                      alt={route.exchangeTitle}
-                      className="w-6 h-6"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <span className="text-[var(--color-text)] text-lg font-bold">
-                    {formatNumber(route.toAmount, 6)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 text-[var(--color-text-secondary)]">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{formatDuration(route.estimatedTimeSeconds)}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--color-text)] text-lg font-bold">{formatNumber(route.toAmount, 4)} {route.toTokenSymbol}</span>
+                    <span className={`text-sm font-medium ${pct >= 0 ? 'text-[var(--color-green)]' : 'text-[var(--color-red)]'}`}>
+                      {pct === 0 ? 'Best' : pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`}
+                    </span>
                   </div>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {formatUSD(route.platformFeeUsd)}
-                  </span>
+                  <div className="flex gap-4 mt-2 text-xs text-[var(--color-text-secondary)]">
+                    <span>Fee: {formatUSD(route.gasFeeUsd)}</span>
+                    <span>Min: {route.minReceived ? formatNumber(route.minReceived, 4) : 'Market'}</span>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                <span className={`font-medium ${getPercentageColor(percentDiff)}`}>
-                  {percentDiff === 0 ? 'Best' :
-                   percentDiff > 0 ? `+${percentDiff.toFixed(1)}%` :
-                   `${percentDiff.toFixed(1)}%`}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-
+        {/* Error */}
         {error && (
           <div className="text-center py-8 text-[var(--color-red)]">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">

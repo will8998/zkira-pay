@@ -127,5 +127,16 @@ export function useTokens() {
     return tokens.filter(t => t.token_symbol === symbol);
   }, [tokens]);
 
-  return { tokens: sortedTokens, topTokens, loading, error, search, getNetworkVariants };
+  /** Get unique network IDs from all tokens */
+  const uniqueNetworks = useMemo(() => {
+    return Array.from(new Set(tokens.map(token => token.network_id)));
+  }, [tokens]);
+
+  /** Get a representative icon URL for a network (first token's icon on that network) */
+  const getNetworkIcon = useCallback((networkId: string): string | undefined => {
+    const firstToken = tokens.find(token => token.network_id === networkId);
+    return firstToken?.icon_url;
+  }, [tokens]);
+
+  return { tokens: sortedTokens, topTokens, loading, error, search, getNetworkVariants, uniqueNetworks, getNetworkIcon };
 }

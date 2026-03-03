@@ -32,7 +32,16 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
-        <div className="ambient-bg" />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="fixed inset-0 w-full h-full object-cover z-[-20]"
+        >
+          <source src="/ascii_remix.webm" type="video/webm" />
+        </video>
+        <div className="fixed inset-0 bg-black/60 z-[-10]" />
         <div className="scanlines" />
         <SwapProvider>
           <div className="relative z-10 flex flex-col min-h-screen">

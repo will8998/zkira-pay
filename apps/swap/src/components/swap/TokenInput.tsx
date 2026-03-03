@@ -50,23 +50,55 @@ export default function TokenInput({
 
   return (
     <div className="bg-[var(--color-surface)] p-4">
-      <div className="text-xs text-[var(--color-text-secondary)] tracking-wider uppercase mb-2">
-        {label}
+      {/* Network label row */}
+      <div className="flex items-center gap-2 mb-2">
+        {token && (
+          <div className="relative shrink-0">
+            {!imageError ? (
+              <img
+                src={token.icon_url}
+                alt={token.network_id}
+                className="w-5 h-5 rounded-full"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                style={{ backgroundColor: getFallbackColor() }}
+              >
+                {token.network_id.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+        )}
+        <span className="text-[11px] text-[var(--color-text-secondary)] tracking-wider uppercase font-medium">
+          {token ? token.network_id.replace(/_/g, ' ').toUpperCase() + ' NETWORK' : label.toUpperCase()}
+        </span>
       </div>
 
+      {/* Amount + Token selector row */}
       <div className="flex items-center justify-between">
-        <input
-          type="text"
-          value={loading ? '' : amount}
-          onChange={handleAmountChange}
-          placeholder={loading ? '' : '0'}
-          disabled={readOnly || loading}
-          className="bg-transparent text-[var(--color-text)] text-3xl font-light flex-1 border-none outline-none placeholder-[var(--color-muted)] min-w-0"
-        />
+        <div className="flex-1 min-w-0">
+          <input
+            type="text"
+            value={loading ? '' : amount}
+            onChange={handleAmountChange}
+            placeholder={loading ? '' : '0'}
+            disabled={readOnly || loading}
+            className="bg-transparent text-[var(--color-text)] text-2xl md:text-3xl font-light w-full border-none outline-none placeholder-[var(--color-muted)] min-w-0"
+          />
+          <div className="h-4 mt-0.5">
+            {usdValue && !loading ? (
+              <span className="text-xs text-[var(--color-text-secondary)]">~{formatNumber(parseFloat(usdValue))} USD</span>
+            ) : loading ? (
+              <div className="animate-pulse bg-[var(--color-border)] h-3 w-16"></div>
+            ) : null}
+          </div>
+        </div>
 
         <button
           onClick={onTokenClick}
-          className="flex items-center gap-3 bg-[var(--color-border)] px-3 py-2 hover:bg-[var(--color-border-strong)] transition-colors"
+          className="flex items-center gap-2 bg-[var(--color-border)] px-3 py-2 hover:bg-[var(--color-border-strong)] transition-colors ml-3 shrink-0"
         >
           {token ? (
             <>
@@ -75,34 +107,29 @@ export default function TokenInput({
                   <img
                     src={token.icon_url}
                     alt={token.token_symbol}
-                    className="w-6 h-6"
+                    className="w-6 h-6 rounded-full"
                     onError={() => setImageError(true)}
                   />
                 ) : (
                   <div
-                    className="w-6 h-6 flex items-center justify-center text-white text-xs font-semibold"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold"
                     style={{ backgroundColor: getFallbackColor() }}
                   >
                     {getInitial()}
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-start">
-                <span className="text-[var(--color-text)] font-semibold text-sm">
-                  {token.token_symbol}
-                </span>
-                <span className="text-[var(--color-text-secondary)] text-xs">
-                  On {token.network_id}
-                </span>
-              </div>
+              <span className="text-[var(--color-text)] font-semibold text-sm">
+                {token.token_symbol}
+              </span>
             </>
           ) : (
-            <span className="text-[var(--color-text-secondary)]">
+            <span className="text-[var(--color-text-secondary)] text-sm">
               Select token
             </span>
           )}
           <svg
-            className="w-4 h-4 text-[var(--color-text-secondary)] ml-auto"
+            className="w-4 h-4 text-[var(--color-text-secondary)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -111,23 +138,6 @@ export default function TokenInput({
           </svg>
         </button>
       </div>
-
-      <div className="mt-2">
-        <div className="text-xs text-[var(--color-text-secondary)]">
-          {usdValue && !loading ? `$${formatNumber(parseFloat(usdValue))}` : ''}
-          {loading && (
-            <div className="animate-pulse bg-[var(--color-border)] h-3 w-16"></div>
-          )}
-        </div>
-      </div>
-
-      {loading && (
-        <div className="absolute inset-0 bg-[var(--color-surface)] flex items-center justify-center">
-          <div className="animate-pulse text-2xl font-mono text-[var(--color-muted)]">
-            <div className="bg-[var(--color-border)] h-8 w-24"></div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

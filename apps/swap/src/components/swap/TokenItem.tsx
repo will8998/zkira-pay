@@ -63,14 +63,14 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-semibold text-[var(--color-text)] truncate">
+            <span className="text-sm font-semibold text-[var(--color-text)] truncate font-[family-name:var(--font-sans)]">
               {token.token_symbol}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)] rounded-sm">
+            <span className="inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)] font-[family-name:var(--font-sans)]">
               {token.network_id.charAt(0).toUpperCase() + token.network_id.slice(1)}
             </span>
           </div>
-          <div className="text-xs text-[var(--color-text-secondary)] truncate">
+          <div className="text-xs text-[var(--color-text-secondary)] truncate font-[family-name:var(--font-sans)]">
             {token.token_name}
           </div>
         </div>
@@ -78,7 +78,7 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
 
       {networkCount && (
         <div className="flex items-center gap-1 text-[var(--color-red)] ml-2">
-          <span className="text-xs font-medium">{networkCount} networks</span>
+          <span className="text-xs font-medium font-[family-name:var(--font-sans)]">{networkCount} networks</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

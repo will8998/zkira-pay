@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import type { TokenItem } from '@zkira/swap-types'
 import { useTokens } from '@/hooks/useTokens'
 import { TokenList } from './TokenList'
-import { POPULAR_TOKENS } from '@/lib/constants'
+import { POPULAR_TOKENS, getNetworkCategory, type NetworkCategory } from '@/lib/constants'
 
 interface TokenSelectorProps {
   isOpen: boolean
@@ -21,65 +21,33 @@ export function TokenSelector({
   selectedToken,
   label
 }: TokenSelectorProps) {
-  const [searchTerm, setSearchTerm] = useState('')
   const [selectedNetwork, setSelectedNetwork] = useState<string>('all')
-  const [activeTab, setActiveTab] = useState<'top' | 'all'>('top')
-  const [networkDropdownOpen, setNetworkDropdownOpen] = useState(false)
-  const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const { tokens, topTokens, search, loading, getNetworkVariants } = useTokens()
+  const [selectedCategory, setSelectedCategory] = useState<NetworkCategory>('ALL')
+  const [networkSearchTerm, setNetworkSearchTerm] = useState('')
+  const [tokenSearchTerm, setTokenSearchTerm] = useState('')
+  const networkSearchRef = useRef<HTMLInputElement>(null)
+  const tokenSearchRef = useRef<HTMLInputElement>(null)
 
-  // Get unique networks from tokens
-  const uniqueNetworks = Array.from(new Set(tokens.map(token => token.network_id)))
+  const { tokens, search, loading, uniqueNetworks, getNetworkIcon } = useTokens()
 
-  // Filter tokens by network and search term
-  const networkFilteredTokens = selectedNetwork === 'all'
-    ? tokens
-    : tokens.filter(token => token.network_id === selectedNetwork)
-
-  const searchFilteredTokens = searchTerm
-    ? search(searchTerm).filter(token => selectedNetwork === 'all' || token.network_id === selectedNetwork)
-    : networkFilteredTokens
-
-  // Top tab shows deduplicated tokens; All tab shows everything
-  const getDisplayTokens = () => {
-    if (searchTerm) return searchFilteredTokens
-
-    if (activeTab === 'top') {
-      // If a symbol is expanded, show the network variants for it
-      if (expandedSymbol) {
-        const variants = getNetworkVariants(expandedSymbol)
-          .filter(t => selectedNetwork === 'all' || t.network_id === selectedNetwork)
-        return variants
-      }
-      // Otherwise show deduplicated top tokens
-      if (selectedNetwork === 'all') return topTokens
-      return topTokens.filter(t => t.network_id === selectedNetwork)
-    }
-
-    return searchFilteredTokens
-  }
-
-  const filteredTokens = getDisplayTokens()
-
+  // Reset all state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSearchTerm('')
-      setExpandedSymbol(null)
+      setSelectedNetwork('all')
+      setSelectedCategory('ALL')
+      setNetworkSearchTerm('')
+      setTokenSearchTerm('')
       setTimeout(() => {
-        searchInputRef.current?.focus()
+        networkSearchRef.current?.focus()
       }, 100)
     }
   }, [isOpen])
 
+  // Escape key handling
   useEffect(() => {
     function handleEscape(e: KeyboardEvent) {
       if (e.key === 'Escape' && isOpen) {
-        if (expandedSymbol) {
-          setExpandedSymbol(null)
-        } else {
-          onClose()
-        }
+        onClose()
       }
     }
 
@@ -94,7 +62,31 @@ export function TokenSelector({
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'auto'
     }
-  }, [isOpen, onClose, expandedSymbol])
+  }, [isOpen, onClose])
+
+  // Filter networks by category and search
+  const filteredNetworks = uniqueNetworks.filter(network => {
+    const categoryMatch = selectedCategory === 'ALL' || getNetworkCategory(network) === selectedCategory
+    const searchMatch = !networkSearchTerm || network.toLowerCase().includes(networkSearchTerm.toLowerCase())
+    return categoryMatch && searchMatch
+  })
+
+  // Filter tokens by network and search
+  const filteredTokens = (() => {
+    let filtered = tokenSearchTerm ? search(tokenSearchTerm) : tokens
+    if (selectedNetwork !== 'all') {
+      filtered = filtered.filter(token => token.network_id === selectedNetwork)
+    }
+    return filtered
+  })()
+
+  // Get popular tokens for pills (only when no search and all networks)
+  const popularTokensForPills = POPULAR_TOKENS
+    .map(symbol => tokens.find(token => token.token_symbol === symbol))
+    .filter((token): token is TokenItem => token !== undefined)
+    .filter(token => selectedNetwork === 'all' || token.network_id === selectedNetwork)
+
+  const showPopularPills = !tokenSearchTerm && (selectedNetwork === 'all' || popularTokensForPills.length > 0)
 
   function handleBackdropClick(e: React.MouseEvent) {
     if (e.target === e.currentTarget) {
@@ -102,205 +94,221 @@ export function TokenSelector({
     }
   }
 
+  function handleNetworkSelect(networkId: string) {
+    setSelectedNetwork(networkId)
+  }
+
   function handleTokenSelect(token: TokenItem) {
-    // In top tab with deduped view, expand to show network variants
-    if (activeTab === 'top' && !expandedSymbol && !searchTerm) {
-      const variants = getNetworkVariants(token.token_symbol)
-      if (variants.length > 1) {
-        setExpandedSymbol(token.token_symbol)
-        return
-      }
-    }
-    // Direct select
     onSelect(token)
     onClose()
   }
 
-  if (!isOpen) return null
+  function handlePopularTokenClick(token: TokenItem) {
+    onSelect(token)
+    onClose()
+  }
 
   const capitalizeNetwork = (id: string) => id.charAt(0).toUpperCase() + id.slice(1)
 
+  if (!isOpen) return null
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-[4px] animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-[4px]"
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full max-w-md mx-4 mt-20 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-[80vh] flex flex-col overflow-hidden animate-scale-in"
+        className="max-w-3xl w-full mx-4 mt-16 max-h-[80vh] bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col overflow-hidden animate-scale-in mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
-          <div>
-            <div className="flex items-center gap-2">
-              {expandedSymbol && (
-                <button
-                  onClick={() => setExpandedSymbol(null)}
-                  className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-              )}
-              <h3 className="text-lg font-semibold text-[var(--color-text)]">
-                {expandedSymbol ? `Select ${expandedSymbol} network` : (label || 'Select a token')}
-              </h3>
-            </div>
-            {expandedSymbol && (
-              <div className="text-xs text-[var(--color-text-secondary)] mt-0.5 ml-10">Choose which network to use</div>
+          <h3 className="text-lg font-[family-name:var(--font-sans)] font-semibold text-[var(--color-text)]">{label}</h3>
+          <div className="flex items-center gap-3">
+            {selectedNetwork !== 'all' && (
+              <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                {getNetworkIcon(selectedNetwork) ? (
+                  <img
+                    src={getNetworkIcon(selectedNetwork)}
+                    alt={selectedNetwork}
+                    className="w-5 h-5 rounded-full"
+                  />
+                ) : (
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+                    style={{ backgroundColor: '#666' }}
+                  >
+                    {selectedNetwork.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span>{capitalizeNetwork(selectedNetwork)}</span>
+              </div>
             )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
-        {/* Search + Filters (hidden when viewing network variants) */}
-        {!expandedSymbol && (
-          <div className="p-4 border-b border-[var(--color-border)] space-y-3">
-            <div className="flex gap-2">
-              {/* Search input with icon */}
-              <div className="relative flex-1">
+        {/* Split Panel Layout */}
+        <div className="flex flex-1 min-h-0">
+          {/* LEFT PANEL - Network Selection */}
+          <div className="w-2/5 border-r border-[var(--color-border)] flex flex-col">
+            {/* Network Search */}
+            <div className="p-3 border-b border-[var(--border-subtle)]">
+              <div className="relative">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
-                  ref={searchInputRef}
+                  ref={networkSearchRef}
                   type="text"
-                  placeholder="Search token or network"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-3 text-sm bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] transition-all"
+                  placeholder="Search network"
+                  value={networkSearchTerm}
+                  onChange={(e) => setNetworkSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 text-sm bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] font-[family-name:var(--font-sans)]"
                 />
               </div>
+            </div>
 
-              {/* Network dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
-                  className="h-full px-3 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] hover:bg-[var(--color-hover)] transition-all flex items-center gap-2 whitespace-nowrap"
-                >
-                  <span className="text-sm">
-                    {selectedNetwork === 'all' ? 'All' : capitalizeNetwork(selectedNetwork)}
-                  </span>
-                  <svg className={`w-3.5 h-3.5 transition-transform ${networkDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {networkDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setNetworkDropdownOpen(false)} />
-                    <div className="absolute top-full right-0 mt-1 w-52 bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 max-h-64 overflow-y-auto no-scrollbar animate-fade-in">
-                      <button
-                        onClick={() => {
-                          setSelectedNetwork('all')
-                          setNetworkDropdownOpen(false)
-                        }}
-                        className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[var(--color-hover)] transition-colors flex items-center justify-between ${
-                          selectedNetwork === 'all' ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
-                        }`}
-                      >
-                        All Networks
-                        {selectedNetwork === 'all' && (
-                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                      {uniqueNetworks.map((network) => (
-                        <button
-                          key={network}
-                          onClick={() => {
-                            setSelectedNetwork(network)
-                            setNetworkDropdownOpen(false)
-                          }}
-                          className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[var(--color-hover)] transition-colors flex items-center justify-between ${
-                            selectedNetwork === network ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
-                          }`}
-                        >
-                          {capitalizeNetwork(network)}
-                          {selectedNetwork === network && (
-                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+            {/* Category Tabs */}
+            <div className="p-3 border-b border-[var(--border-subtle)]">
+              <div className="grid grid-cols-4 gap-1">
+                {(['ALL', 'EVM', 'IBC', 'OTHERS'] as const).map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`py-1.5 text-xs font-medium transition-colors font-[family-name:var(--font-sans)] ${
+                      selectedCategory === category
+                        ? 'bg-[var(--color-red)] text-white font-semibold'
+                        : 'bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] hover:text-white'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-[var(--color-border)]">
+            {/* Network List */}
+            <div className="flex-1 overflow-y-auto overscroll-contain no-scrollbar">
               <button
-                onClick={() => { setActiveTab('top'); setExpandedSymbol(null); }}
-                className={`flex-1 py-2 text-sm font-medium transition-colors text-center relative ${
-                  activeTab === 'top'
-                    ? 'text-[var(--color-text)]'
-                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+                onClick={() => handleNetworkSelect('all')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-l-2 ${
+                  selectedNetwork === 'all'
+                    ? 'bg-[var(--color-hover)] text-[var(--color-red)] border-[var(--color-red)]'
+                    : 'border-transparent hover:bg-[var(--color-hover)]'
                 }`}
               >
-                Top
-                {activeTab === 'top' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-red)]" />
-                )}
+                <div className="w-6 h-6 rounded-full bg-[var(--color-red)] flex items-center justify-center text-white text-xs font-semibold">
+                  *
+                </div>
+                <span className="text-sm font-[family-name:var(--font-sans)] font-medium">All Networks</span>
               </button>
-              <button
-                onClick={() => { setActiveTab('all'); setExpandedSymbol(null); }}
-                className={`flex-1 py-2 text-sm font-medium transition-colors text-center relative ${
-                  activeTab === 'all'
-                    ? 'text-[var(--color-text)]'
-                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-                }`}
-              >
-                All
-                {activeTab === 'all' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-red)]" />
-                )}
-              </button>
+              {filteredNetworks.map((network) => {
+                const networkIcon = getNetworkIcon(network)
+                return (
+                  <button
+                    key={network}
+                    onClick={() => handleNetworkSelect(network)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-l-2 ${
+                      selectedNetwork === network
+                        ? 'bg-[var(--color-hover)] text-[var(--color-red)] border-[var(--color-red)]'
+                        : 'border-transparent hover:bg-[var(--color-hover)]'
+                    }`}
+                  >
+                    {networkIcon ? (
+                      <img
+                        src={networkIcon}
+                        alt={network}
+                        className="w-6 h-6 rounded-full"
+                      />
+                    ) : (
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+                        style={{ backgroundColor: '#666' }}
+                      >
+                        {network.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-sm font-[family-name:var(--font-sans)] font-medium">{capitalizeNetwork(network)}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
-        )}
 
-        {/* Token list */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="flex flex-col items-center gap-3">
-                <svg className="animate-spin w-6 h-6 text-[var(--color-red)]" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          {/* RIGHT PANEL - Token Selection */}
+          <div className="w-3/5 flex flex-col">
+            {/* Token Search */}
+            <div className="p-3 border-b border-[var(--border-subtle)]">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="text-sm text-[var(--color-text-secondary)]">Loading tokens...</span>
+                <input
+                  ref={tokenSearchRef}
+                  type="text"
+                  placeholder="Search token or address"
+                  value={tokenSearchTerm}
+                  onChange={(e) => setTokenSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 text-sm bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] font-[family-name:var(--font-sans)]"
+                />
               </div>
             </div>
-          ) : (
-            <TokenList
-              tokens={filteredTokens}
-              onSelect={handleTokenSelect}
-              selectedToken={selectedToken}
-              showNetworkCount={activeTab === 'top' && !expandedSymbol && !searchTerm}
-              getNetworkCount={(symbol) => getNetworkVariants(symbol).length}
-            />
-          )}
-        </div>
 
-        {/* Footer */}
-        <div className="px-4 py-2 border-t border-[var(--color-border)] text-xs text-[var(--color-muted)] text-center flex items-center justify-center gap-2">
-          <span>{filteredTokens.length} tokens</span>
-          {selectedNetwork !== 'all' && (
-            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)] rounded-sm">
-              {capitalizeNetwork(selectedNetwork)}
-            </span>
-          )}
+            {/* Popular Token Pills */}
+            {showPopularPills && (
+              <div className="p-3 border-b border-[var(--border-subtle)]">
+                <div className="flex flex-wrap gap-2">
+                  {popularTokensForPills.map((token) => (
+                    <button
+                      key={token.id}
+                      onClick={() => handlePopularTokenClick(token)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-surface-alt)] border border-[var(--border-subtle)] hover:border-[var(--color-border)] text-sm transition-colors font-[family-name:var(--font-sans)]"
+                    >
+                      <img
+                        src={token.icon_url}
+                        alt={token.token_symbol}
+                        className="w-4 h-4 rounded-full"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }}
+                      />
+                      <span className="text-[var(--color-text)] font-medium">{token.token_symbol}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Token List */}
+            <div className="flex-1 min-h-0">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="flex flex-col items-center gap-3">
+                    <svg className="animate-spin w-6 h-6 text-[var(--color-red)]" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span className="text-sm text-[var(--color-text-secondary)] font-[family-name:var(--font-sans)]">Loading tokens...</span>
+                  </div>
+                </div>
+              ) : (
+                <TokenList
+                  tokens={filteredTokens}
+                  onSelect={handleTokenSelect}
+                  selectedToken={selectedToken}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

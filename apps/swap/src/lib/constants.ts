@@ -20,3 +20,23 @@ export const TERMINAL_STATUSES: SwapStatusValue[] = ['success', 'failed', 'refun
 export const SOCIAL_LINKS = {
   twitter: 'https://x.com/zkira_xyz',
 };
+
+// Network categories for token selector
+export type NetworkCategory = 'ALL' | 'EVM' | 'IBC' | 'OTHERS';
+
+export const EVM_NETWORKS = [
+  'ethereum', 'polygon', 'bsc', 'arbitrum', 'optimism', 'base', 'avalanche',
+  'fantom', 'cronos', 'gnosis', 'moonbeam', 'celo', 'zksync', 'linea',
+  'scroll', 'mantle', 'blast', 'mode', 'polygon_zkevm', 'aurora',
+];
+
+export const IBC_NETWORKS = [
+  'osmosis', 'cosmos', 'injective', 'sei', 'celestia', 'dymension', 'kava',
+];
+
+export function getNetworkCategory(networkId: string): NetworkCategory {
+  const lower = networkId.toLowerCase();
+  if (EVM_NETWORKS.includes(lower)) return 'EVM';
+  if (IBC_NETWORKS.includes(lower)) return 'IBC';
+  return 'OTHERS';
+}
