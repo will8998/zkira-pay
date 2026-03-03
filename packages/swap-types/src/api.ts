@@ -72,6 +72,7 @@ export interface SwapRequest {
   amount: number;
   destinationAddress: string;
   slippage?: number;
+  refundAddress?: string;
 }
 
 export interface SwapResponse {

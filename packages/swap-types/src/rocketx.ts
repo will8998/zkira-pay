@@ -151,6 +151,7 @@ export interface RocketXSwapRequest {
   destinationAddress: string;
   userAddress?: string;  // only for DEX/wallet-connected swaps
   referrerAddress?: string;
+  refundAddress?: string;
 }
 
 export interface RocketXSwapResponse {

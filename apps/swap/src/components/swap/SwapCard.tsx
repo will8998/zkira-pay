@@ -67,6 +67,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
         fromTokenId: selectedRoute.fromTokenId,
         toTokenId: selectedRoute.toTokenId,
         destinationAddress: destinationAddress,
+        ...(selectedRoute.refundAddressRequired && refundAddress ? { refundAddress } : {}),
       }
       const swap = await createSwap(request)
       if (swap) {
@@ -124,7 +125,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
           label="Refund Address"
           value={refundAddress}
           onChange={setRefundAddress}
-          placeholder="Refund address (required for private routes)"
+          placeholder={`Refund address on ${fromToken?.network_id ?? 'source'} network`}
         />
       )}
 

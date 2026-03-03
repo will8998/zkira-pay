@@ -24,6 +24,7 @@ swapRoutes.post('/swap', async (c) => {
     slippage: parsed.data.slippage ?? 1,
     disableEstimate: false,
     destinationAddress: parsed.data.destinationAddress,
+    ...(parsed.data.refundAddress ? { refundAddress: parsed.data.refundAddress } : {}),
   };
 
   try {

@@ -53,6 +53,7 @@ quoteRoutes.get('/quote', async (c) => {
 
   const quotes: RouteQuote[] = data.quotes
     .filter((q) => q.isTxnAllowed)
+    .filter((q) => q.exchangeInfo.walletLess)
     .map(mapQuoteToRouteQuote);
 
   const response: QuotationResponse = { quotes };
