@@ -35,9 +35,9 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
       onClick={handleClick}
       className={`
         flex items-center px-4 h-14 cursor-pointer transition-colors
-        hover:bg-zkira-card-hover
+        hover:bg-[var(--color-hover)]
         ${isSelected
-          ? 'border-l-2 border-zkira-green bg-zkira-card-hover/50'
+          ? 'border-l-2 border-[var(--color-red)] bg-[var(--color-hover)]'
           : 'border-l-2 border-transparent'
         }
       `.trim().replace(/\s+/g, ' ')}
@@ -63,21 +63,21 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-semibold text-zkira-text truncate">
+            <span className="text-sm font-semibold text-[var(--color-text)] truncate">
               {token.token_symbol}
             </span>
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-zkira-input text-zkira-text-secondary border border-zkira-border">
+            <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)]">
               {token.network_id}
             </span>
           </div>
-          <div className="text-xs text-zkira-text-secondary truncate">
+          <div className="text-xs text-[var(--color-text-secondary)] truncate">
             {token.token_name}
           </div>
         </div>
       </div>
 
       {networkCount && (
-        <div className="flex items-center gap-1 text-zkira-text-secondary ml-2">
+        <div className="flex items-center gap-1 text-[var(--color-text-secondary)] ml-2">
           <span className="text-xs">{networkCount} networks</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

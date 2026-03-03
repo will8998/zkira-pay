@@ -16,11 +16,11 @@ function SwapPage() {
   };
 
   return (
-    <div className="pt-12 md:pt-16 lg:pt-20 px-4">
+    <div className="pt-20 md:pt-24 px-4">
       <div className="text-center mb-10 md:mb-12">
         <h1
-          className="font-orbitron font-normal text-4xl md:text-5xl lg:text-6xl text-white leading-tight"
-          style={{ textShadow: '0 0 30px rgba(255, 23, 68, 0.3)' }}
+          className="font-[family-name:var(--font-sans)] font-bold text-4xl md:text-5xl lg:text-6xl text-[var(--color-text)] tracking-wider leading-tight"
+          style={{ textShadow: '0 0 30px rgba(255, 40, 40, 0.3)' }}
         >
           BE UNTRACEABLE.<br />
           BE UNTOUCHABLE.

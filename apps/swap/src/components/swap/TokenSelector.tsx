@@ -120,32 +120,32 @@ export function TokenSelector({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-[4px] animate-fade-in"
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full max-w-md mx-4 mt-20 bg-zkira-card rounded-xl border border-zkira-border max-h-[70vh] flex flex-col overflow-hidden animate-fade-in-up"
+        className="w-full max-w-md mx-4 mt-20 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-[70vh] flex flex-col overflow-hidden animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-zkira-border">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2">
             {expandedSymbol && (
               <button
                 onClick={() => setExpandedSymbol(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-zkira-text-secondary hover:text-zkira-text hover:bg-zkira-card-hover transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
             )}
-            <h3 className="text-lg font-semibold text-zkira-text">
+            <h3 className="text-lg font-semibold text-[var(--color-text)]">
               {expandedSymbol ? `Select ${expandedSymbol} network` : (label || 'Select a token')}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-zkira-text-secondary hover:text-zkira-text hover:bg-zkira-card-hover transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -154,7 +154,7 @@ export function TokenSelector({
         </div>
 
         {!expandedSymbol && (
-          <div className="p-4 border-b border-zkira-border space-y-3">
+          <div className="p-4 border-b border-[var(--color-border)] space-y-3">
             <div className="flex gap-2">
               <input
                 ref={searchInputRef}
@@ -162,12 +162,12 @@ export function TokenSelector({
                 placeholder="Search for a token or address"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 px-3 py-2.5 bg-zkira-input text-white border border-zkira-border rounded-lg placeholder:text-zkira-text-muted focus:outline-none focus:ring-2 focus:ring-zkira-green/50 focus:border-zkira-green/50 transition-all"
+                className="flex-1 px-3 py-2.5 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] transition-all"
               />
               <div className="relative">
                 <button
                   onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
-                  className="px-3 py-2.5 bg-zkira-input text-white border border-zkira-border rounded-lg hover:bg-zkira-card-hover transition-all flex items-center gap-2 whitespace-nowrap"
+                  className="px-3 py-2.5 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] hover:bg-[var(--color-hover)] transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <span className="text-sm">
                     {selectedNetwork === 'all' ? 'All Networks' : selectedNetwork}
@@ -177,14 +177,14 @@ export function TokenSelector({
                   </svg>
                 </button>
                 {networkDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-zkira-card border border-zkira-border rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-[var(--color-bg)] border border-[var(--border-subtle)] shadow-lg z-10 max-h-48 overflow-y-auto">
                     <button
                       onClick={() => {
                         setSelectedNetwork('all')
                         setNetworkDropdownOpen(false)
                       }}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-zkira-card-hover transition-colors ${
-                        selectedNetwork === 'all' ? 'text-zkira-green' : 'text-white'
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors ${
+                        selectedNetwork === 'all' ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
                       }`}
                     >
                       All Networks
@@ -196,8 +196,8 @@ export function TokenSelector({
                           setSelectedNetwork(network)
                           setNetworkDropdownOpen(false)
                         }}
-                        className={`w-full px-3 py-2 text-left text-sm hover:bg-zkira-card-hover transition-colors ${
-                          selectedNetwork === network ? 'text-zkira-green' : 'text-white'
+                        className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors ${
+                          selectedNetwork === network ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
                         }`}
                       >
                         {network}
@@ -214,8 +214,8 @@ export function TokenSelector({
                 onClick={() => { setActiveTab('top'); setExpandedSymbol(null); }}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'top'
-                    ? 'text-zkira-text border-b-2 border-zkira-green'
-                    : 'text-zkira-text-secondary hover:text-zkira-text'
+                    ? 'text-[var(--color-text)] border-b-2 border-[var(--color-red)]'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
                 }`}
               >
                 Top
@@ -224,8 +224,8 @@ export function TokenSelector({
                 onClick={() => { setActiveTab('all'); setExpandedSymbol(null); }}
                 className={`px-4 py-2 text-sm font-medium transition-colors ml-6 ${
                   activeTab === 'all'
-                    ? 'text-zkira-text border-b-2 border-zkira-green'
-                    : 'text-zkira-text-secondary hover:text-zkira-text'
+                    ? 'text-[var(--color-text)] border-b-2 border-[var(--color-red)]'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
                 }`}
               >
                 All
@@ -238,11 +238,11 @@ export function TokenSelector({
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-3">
-                <svg className="animate-spin w-6 h-6 text-zkira-green" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin w-6 h-6 text-[var(--color-red)]" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span className="text-sm text-zkira-text-secondary">Loading tokens...</span>
+                <span className="text-sm text-[var(--color-text-secondary)]">Loading tokens...</span>
               </div>
             </div>
           ) : (
@@ -256,7 +256,7 @@ export function TokenSelector({
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-zkira-border text-xs text-zkira-text-muted text-center">
+        <div className="px-4 py-2 border-t border-[var(--color-border)] text-xs text-[var(--color-muted)] text-center">
           {filteredTokens.length} tokens available
         </div>
       </div>

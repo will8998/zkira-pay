@@ -49,8 +49,8 @@ export default function TokenInput({
   }
 
   return (
-    <div className="bg-zkira-input rounded-lg p-4">
-      <div className="text-xs text-zkira-text-secondary mb-2">
+    <div className="bg-[var(--color-surface)] p-4">
+      <div className="text-xs text-[var(--color-text-secondary)] tracking-wider uppercase mb-2">
         {label}
       </div>
 
@@ -61,12 +61,12 @@ export default function TokenInput({
           onChange={handleAmountChange}
           placeholder={loading ? '' : '0'}
           disabled={readOnly || loading}
-          className="bg-transparent text-white text-3xl font-light flex-1 border-none outline-none placeholder-zkira-text-muted min-w-0"
+          className="bg-transparent text-[var(--color-text)] text-3xl font-light flex-1 border-none outline-none placeholder-[var(--color-muted)] min-w-0"
         />
 
         <button
           onClick={onTokenClick}
-          className="flex items-center gap-3 bg-zkira-border rounded-lg px-3 py-2 hover:bg-zkira-border-light transition-colors"
+          className="flex items-center gap-3 bg-[var(--color-border)] px-3 py-2 hover:bg-[var(--color-border-strong)] transition-colors"
         >
           {token ? (
             <>
@@ -75,34 +75,34 @@ export default function TokenInput({
                   <img
                     src={token.icon_url}
                     alt={token.token_symbol}
-                    className="w-6 h-6 rounded-full"
+                    className="w-6 h-6"
                     onError={() => setImageError(true)}
                   />
                 ) : (
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                    style={{ backgroundColor: getFallbackColor() }}
+                  <div
+                    className="w-6 h-6 flex items-center justify-center text-white text-xs font-semibold"
                   >
                     {getInitial()}
                   </div>
                 )}
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-white font-semibold text-sm">
+                <span className="text-[var(--color-text)] font-semibold text-sm">
                   {token.token_symbol}
                 </span>
-                <span className="text-zkira-text-secondary text-xs">
+                <span className="text-[var(--color-text-secondary)] text-xs">
                   On {token.network_id}
                 </span>
               </div>
             </>
           ) : (
-            <span className="text-zkira-text-secondary">
+            <span className="text-[var(--color-text-secondary)]">
               Select token
             </span>
           )}
           <svg
-            className="w-4 h-4 text-zkira-text-secondary ml-auto"
+            className="w-4 h-4 text-[var(--color-text-secondary)] ml-auto"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -113,18 +113,18 @@ export default function TokenInput({
       </div>
 
       <div className="mt-2">
-        <div className="text-xs text-zkira-text-secondary">
+        <div className="text-xs text-[var(--color-text-secondary)]">
           {usdValue && !loading ? `$${formatNumber(parseFloat(usdValue))}` : ''}
           {loading && (
-            <div className="animate-pulse bg-zkira-border rounded h-3 w-16"></div>
+            <div className="animate-pulse bg-[var(--color-border)] h-3 w-16"></div>
           )}
         </div>
       </div>
 
       {loading && (
-        <div className="absolute inset-0 bg-zkira-input rounded-lg flex items-center justify-center">
-          <div className="animate-pulse text-2xl font-mono text-zkira-text-muted">
-            <div className="bg-zkira-border rounded h-8 w-24"></div>
+        <div className="absolute inset-0 bg-[var(--color-surface)] flex items-center justify-center">
+          <div className="animate-pulse text-2xl font-mono text-[var(--color-muted)]">
+            <div className="bg-[var(--color-border)] h-8 w-24"></div>
           </div>
         </div>
       )}

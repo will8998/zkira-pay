@@ -1,119 +1,384 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-background: #0D0D0D;
-  --color-foreground: #FFFFFF;
-  --color-zkira-bg: #0D0D0D;
-  --color-zkira-card: #1A1A1A;
-  --color-zkira-card-hover: #222222;
-  --color-zkira-border: #2A2A2A;
-  --color-zkira-border-light: #333333;
-  --color-zkira-green: #FF1744;
-  --color-zkira-green-dim: #FF174433;
-  --color-zkira-red: #FF1744;
-  --color-zkira-red-dim: #FF174433;
-  --color-zkira-yellow: #FFD600;
-  --color-zkira-blue: #448AFF;
-  --color-zkira-text: #FFFFFF;
-  --color-zkira-text-secondary: #888888;
-  --color-zkira-text-muted: #555555;
-  --color-zkira-input: #141414;
-  --color-zkira-overlay: #00000099;
+/* ─── Design System Tokens (Cyberpunk Dark) ─── */
+:root {
+  --color-bg: #000000;
+  --color-text: rgba(255, 255, 255, 0.98);
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-tertiary: rgba(255, 255, 255, 0.4);
+  --color-muted: rgba(255, 255, 255, 0.35);
+  --color-border: #282828;
+  --color-border-strong: #3C3C3C;
+  --color-surface: #111111;
+  --color-surface-alt: #1E1E1E;
+  --color-skeleton: #1A1A1A;
+  --color-hover: #1A1A1A;
+  --color-green: #9CDC6A;
+  --color-green-hover: #B5E88A;
+  --color-red: #FF2828;
+  --color-warning-bg: #1A1500;
+  --color-warning-border: #3D3200;
+  --color-warning-text: #FFD146;
+  --color-active-text: #FFFFFF;
+  --color-button: #FF2828;
+  --color-button-hover: #E02020;
+  --color-button-text: #FFFFFF;
+  --color-section-label: rgba(255, 255, 255, 0.25);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-orbitron: var(--font-orbitron);
+  /* Navigation active state */
+  --color-nav-active-bg: rgba(255, 40, 40, 0.12);
+  --color-nav-active-text: #FF2828;
+
+  /* Panel backgrounds */
+  --bg-panel: #0A0A0A;
+  --bg-main: rgba(0, 0, 0, 0.6);
+  --bg-tab-bar: #0A0A0A;
+  
+  /* Cyberpunk Border Tokens */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-subtle-hover: rgba(255, 255, 255, 0.12);
+  --ease-premium: cubic-bezier(0.05, 0.7, 0.1, 1.0);
+  --ease-out-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Mobile Responsive Tokens */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --tab-bar-height: 4rem;
 }
 
-body {
-  background: var(--color-zkira-bg);
-  color: var(--color-zkira-text);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+/* ─── Cyberpunk Effects ─── */
+.neon-glow {
+  box-shadow: 0 0 10px rgba(255, 40, 40, 0.3), 0 0 20px rgba(255, 40, 40, 0.1);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+.neon-glow-strong {
+  box-shadow: 0 0 15px rgba(255, 40, 40, 0.5), 0 0 30px rgba(255, 40, 40, 0.2);
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-zkira-border-light);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-zkira-text-muted);
+.neon-glow-subtle {
+  box-shadow: 0 0 5px rgba(255, 40, 40, 0.2), 0 0 10px rgba(255, 40, 40, 0.1);
 }
 
-/* Animations */
+.cyberpunk-connect {
+  position: relative;
+  background: #FF2828;
+  border: 2px solid #FF2828;
+  color: #FFFFFF;
+  overflow: hidden;
+  box-shadow: 
+    0 0 10px rgba(255, 40, 40, 0.3),
+    0 0 20px rgba(255, 40, 40, 0.15);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: cyber-pulse 2s ease-in-out infinite;
+}
+
+.cyberpunk-connect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.1) 50%, transparent 55%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.cyberpunk-connect:hover::before {
+  transform: translateX(100%);
+}
+
+.cyberpunk-connect:hover {
+  background: #E02020;
+  box-shadow: 
+    0 0 15px rgba(255, 40, 40, 0.4),
+    0 0 30px rgba(255, 40, 40, 0.2);
+  transform: scale(1.05);
+}
+
+.cyberpunk-connect::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #FF2828, #FF4444, #FF2828, #FF0000);
+  background-size: 300% 300%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: cyber-border 3s ease infinite;
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px rgba(255, 40, 40, 0.4),
+      0 0 40px rgba(255, 40, 40, 0.2),
+      inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px rgba(255, 40, 40, 0.6),
+      0 0 60px rgba(255, 40, 40, 0.3),
+      inset 0 0 30px rgba(255, 255, 255, 0.15);
+  }
+}
+
+@keyframes cyber-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.01) 2px, rgba(255, 255, 255, 0.01) 4px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ─── Keyframe Animations ─── */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes checkDraw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
-@keyframes pulse-dot {
+
+@keyframes pulseGreen {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.5; }
 }
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(180deg); }
-}
+
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-.animate-fade-in-up {
-  animation: fadeInUp 0.3s ease-out;
-}
-.animate-slide-down {
-  animation: slideDown 0.2s ease-out;
-}
-.animate-pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-.animate-spin-slow {
-  animation: spin-slow 0.3s ease-in-out;
+@keyframes entranceFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.skeleton {
-  background: linear-gradient(90deg, var(--color-zkira-card) 25%, var(--color-zkira-border) 50%, var(--color-zkira-card) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-/* Number input - remove spinners */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ─── Utility Classes ─── */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out both;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out both;
+  }
+  .animate-check-draw {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: checkDraw 0.4s ease-out 0.2s forwards;
+  }
+  .animate-pulse-green {
+    animation: pulseGreen 2s ease-in-out infinite;
+  }
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+  .delay-400 { animation-delay: 0.4s; }
+  .delay-500 { animation-delay: 0.5s; }
+
+  /* Entrance animation */
+  .animate-entrance {
+    animation: entranceFade 0.4s var(--ease-out-premium) both;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s var(--ease-out-premium) both;
+  }
+
+  /* More delay utilities */
+  .delay-600 { animation-delay: 0.6s; }
+  .delay-700 { animation-delay: 0.7s; }
+  .delay-800 { animation-delay: 0.8s; }
+
+  /* Card utilities */
+  .card-base {
+    background: var(--color-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .card-interactive {
+    background: var(--color-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+    transition: border-color 0.15s ease;
+  }
+  .card-interactive:hover {
+    box-shadow: none;
+    border-color: var(--border-subtle-hover);
+  }
+
+  /* Button press effect */
+  .btn-press {
+    transition: transform 0.1s var(--ease-premium), box-shadow 0.2s ease;
+  }
+  .btn-press:active {
+    transform: scale(0.98);
+  }
+
+  /* Focus ring — applies on keyboard navigation only */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-red);
+  }
+
+  /* Auto focus-visible for all interactive elements */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+  }
+
+  /* Input focus */
+  .input-focus:focus {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 3px var(--border-subtle);
+  }
+
+  /* Tabular nums for financial data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-skeleton);
+    border-radius: 0.25rem;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, var(--color-surface), transparent);
+    opacity: 0.5;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* ─── Mobile Responsive Utilities ─── */
+  .pb-safe {
+    padding-bottom: var(--safe-bottom);
+  }
+  .pb-tab {
+    padding-bottom: calc(var(--tab-bar-height) + var(--safe-bottom));
+  }
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .animate-sheet-up {
+    animation: slideUpSheet 0.3s var(--ease-out-premium) both;
+  }
+}
+
+/* ─── Base Resets ─── */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* ─── Base Typography ─── */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background-color: #FF2828;
+  color: #FFFFFF;
+}
+
 /* Route Card Styles */
 .route-card-selected { 
-  border-color: var(--color-zkira-green); 
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.15); 
+  border-color: var(--color-red); 
+  box-shadow: 0 0 12px rgba(255, 40, 40, 0.15); 
 }
 .route-badge-private { 
-  background: rgba(255, 23, 68, 0.15); 
-  color: var(--color-zkira-green); 
+  background: rgba(255, 40, 40, 0.15); 
+  color: var(--color-red); 
 }
 .route-badge-standard { 
   background: rgba(255, 255, 255, 0.08); 
-  color: var(--color-zkira-text-secondary); 
+  color: var(--color-text-secondary); 
 }

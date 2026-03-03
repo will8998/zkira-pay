@@ -21,17 +21,17 @@ export function DepositInfo({
 
   return (
     <div className="space-y-4">
-      <div className="text-white text-sm">
+      <div className="text-[var(--color-text)] text-sm">
         Send exactly {amount} {tokenSymbol} to:
       </div>
 
-      <div className="bg-zkira-input rounded-lg p-4 relative">
-        <div className="font-mono text-sm break-all pr-10">
+      <div className="bg-[var(--color-surface)] p-4 relative">
+        <div className="font-[family-name:var(--font-mono)] text-sm break-all pr-10">
           {depositAddress}
         </div>
         <button
           onClick={handleCopyAddress}
-          className="absolute top-3 right-3 text-zkira-text-secondary hover:text-zkira-text transition-colors"
+          className="absolute top-3 right-3 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
         >
           <svg
             width="16"
@@ -49,7 +49,7 @@ export function DepositInfo({
         </button>
       </div>
       <div className="flex justify-center">
-        <div className="bg-white p-4 rounded-lg">
+        <div className="bg-white p-4">
           <QRCodeSVG
             value={depositAddress}
             size={180}
@@ -58,7 +58,7 @@ export function DepositInfo({
           />
         </div>
       </div>
-      <div className="text-zkira-yellow text-xs text-center">
+      <div className="text-[var(--color-warning-text)] text-xs text-center">
         Send only {tokenSymbol} to this address
       </div>
     </div>

@@ -26,11 +26,11 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
 
   if (tokens.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 text-zkira-text-secondary">
+      <div className="flex items-center justify-center py-12 text-[var(--color-text-secondary)]">
         <div className="text-center">
           <div className="text-2xl mb-2">&#x1F50D;</div>
           <div className="text-sm">No tokens found</div>
-          <div className="text-xs text-zkira-text-muted mt-1">
+          <div className="text-xs text-[var(--color-muted)] mt-1">
             Try adjusting your search terms
           </div>
         </div>
@@ -41,7 +41,7 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
   return (
     <div
       ref={parentRef}
-      className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-zkira-border scrollbar-track-transparent"
+      className="h-full overflow-y-auto no-scrollbar"
       style={{
         scrollBehavior: 'smooth'
       }}

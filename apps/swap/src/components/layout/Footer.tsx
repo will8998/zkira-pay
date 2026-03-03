@@ -20,27 +20,29 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-zkira-bg border-t border-zkira-border">
-      <div className="flex items-center justify-between h-9 px-6 max-w-7xl mx-auto text-xs">
-        <div className="flex items-center space-x-2">
-          <div className={`w-2 h-2 rounded-full ${isOperational ? 'bg-zkira-green animate-pulse-dot' : 'bg-zkira-red'}`} />
-          <span className={isOperational ? 'text-zkira-green' : 'text-zkira-red'}>
+    <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-panel)]">
+      <div className="flex items-center justify-between h-10 px-4 max-w-7xl mx-auto text-xs">
+        {/* Left: status dot + text */}
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 ${isOperational ? 'bg-[var(--color-green)]' : 'bg-[var(--color-red)]'}`} />
+          <span className={`font-[family-name:var(--font-mono)] text-[11px] tracking-wider ${isOperational ? 'text-[var(--color-green)]' : 'text-[var(--color-red)]'}`}>
             {isOperational ? 'OPERATIONAL' : 'OFFLINE'}
           </span>
         </div>
-        <div className="flex items-center space-x-4">
+        {/* Right: X link */}
+        <div className="flex items-center gap-3">
           <a 
             href="https://x.com/zkira_xyz" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-zkira-text-secondary hover:text-white transition-colors"
+            className="text-[var(--color-muted)] hover:text-white transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
           </a>
         </div>
       </div>
     </footer>
-  )
+  );
 }

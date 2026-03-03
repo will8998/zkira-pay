@@ -11,11 +11,10 @@ export default function SwapButton({ onClick, disabled, loading, label }: SwapBu
       onClick={onClick}
       disabled={disabled}
       className={`
-        w-full py-4 rounded-xl font-semibold text-base transition-all duration-200
-        flex items-center justify-center gap-2
+        w-full py-4 font-semibold text-base flex items-center justify-center gap-2 transition-all
         ${disabled
-          ? 'bg-zkira-border text-zkira-text-muted cursor-not-allowed'
-          : 'bg-zkira-green hover:bg-zkira-green/90 text-white cursor-pointer active:scale-[0.98]'
+          ? 'bg-[var(--color-border)] text-[var(--color-muted)] cursor-not-allowed'
+          : 'cyberpunk-connect cursor-pointer'
         }
       `}
     >

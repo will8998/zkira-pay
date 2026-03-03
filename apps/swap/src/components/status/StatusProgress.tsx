@@ -32,14 +32,14 @@ export function StatusProgress({ currentStatus }: StatusProgressProps) {
   const getStepStyles = (status: 'completed' | 'current' | 'pending' | 'failed') => {
     switch (status) {
       case 'completed':
-        return 'bg-zkira-green';
+        return 'bg-[var(--color-red)]';
       case 'current':
-        return 'bg-zkira-green animate-pulse-dot';
+        return 'bg-[var(--color-red)] animate-pulse';
       case 'failed':
-        return 'bg-zkira-red';
+        return 'bg-[var(--color-red)]';
       case 'pending':
       default:
-        return 'bg-zkira-border-light';
+        return 'bg-[var(--color-border-strong)]';
     }
   };
 
@@ -48,12 +48,12 @@ export function StatusProgress({ currentStatus }: StatusProgressProps) {
     const toStatus = getStepStatus(toIndex);
 
     if (fromStatus === 'completed' && toStatus === 'completed') {
-      return 'bg-zkira-green';
+      return 'bg-[var(--color-red)]';
     }
     if (fromStatus === 'completed' && toStatus === 'current') {
-      return 'bg-gradient-to-r from-zkira-green to-zkira-border-light';
+      return 'bg-gradient-to-r from-[var(--color-red)] to-[var(--color-border-strong)]';
     }
-    return 'bg-zkira-border-light';
+    return 'bg-[var(--color-border-strong)]';
   };
 
   return (
@@ -75,7 +75,7 @@ export function StatusProgress({ currentStatus }: StatusProgressProps) {
                   >
                     <div className="w-3 h-3 rounded-full bg-white" />
                   </div>
-                  <div className="text-xs text-zkira-text-secondary mt-2 text-center max-w-20">
+                  <div className="text-xs text-[var(--color-text-secondary)] font-[family-name:var(--font-mono)] mt-2 text-center max-w-20">
                     {STATUS_LABELS[step] || step}
                   </div>
                 </div>
