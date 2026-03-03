@@ -21,21 +21,21 @@ function mapQuoteToRouteQuote(quote: RocketXQuote): RouteQuote {
     walletLess: quote.exchangeInfo.walletLess,
     allowDiffWallet: quote.exchangeInfo.allow_diff_wallet,
     refundAddressRequired: quote.exchangeInfo.refundAddressRequired ?? false,
-    fromAmount: quote.fromAmount,
-    toAmount: quote.toAmount,
+    fromAmount: quote.fromAmount ?? 0,
+    toAmount: quote.toAmount ?? 0,
     fromTokenSymbol: quote.fromTokenInfo.token_symbol,
     toTokenSymbol: quote.toTokenInfo.token_symbol,
     fromNetwork: quote.fromTokenInfo.network_id,
     toNetwork: quote.toTokenInfo.network_id,
     estimatedTimeSeconds: quote.estTimeInSeconds?.avg ?? 0,
-    gasFeeUsd: quote.gasFeeUsd,
-    platformFeeUsd: quote.platformFeeUsd,
-    platformFeePercent: quote.platformFeeInPercent,
+    gasFeeUsd: quote.gasFeeUsd ?? 0,
+    platformFeeUsd: quote.platformFeeUsd ?? 0,
+    platformFeePercent: quote.platformFeeInPercent ?? 0,
     priceImpact: quote.additionalInfo?.priceImpact ?? 0,
     minReceived: quote.additionalInfo?.minRecieved ?? 0,
     depositAddress: quote.depositAddress,
     allowanceAddress: quote.allowanceAddress,
-    isTxnAllowed: quote.isTxnAllowed,
+    isTxnAllowed: quote.isTxnAllowed ?? false,
     routeType: isPrivate ? 'private' as RouteType : 'standard' as RouteType,
   };
 }
@@ -56,6 +56,7 @@ quoteRoutes.get('/quote', async (c) => {
 
   const quotes: RouteQuote[] = data.quotes
     .filter((q) => q.exchangeInfo.walletLess)
+    .filter((q) => !q.err && q.toAmount != null) // Exclude error quotes (below min amount, etc.)
     .filter((q) => !EXCHANGE_BLACKLIST.includes(q.exchangeInfo.keyword))
     .map(mapQuoteToRouteQuote);
 

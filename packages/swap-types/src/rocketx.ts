@@ -67,20 +67,24 @@ export interface RocketXQuote {
   fromTokenInfo: RocketXTokenInfo;
   toTokenInfo: RocketXTokenInfo;
   estTimeInSeconds: RocketXEstTime | null;
-  type: string; // "transfer", "crosschainswap", etc.
-  fromAmount: number;
-  toAmount: number;
-  platformFeeUsd: number;
-  platformFeeInPercent: number;
-  excludingFee: number;
-  includingFee: number;
-  includingFeeWithPfFee: number;
-  discount: number;
-  isTxnAllowed: boolean;
-  gasFeeUsd: number;
+  type?: string; // "transfer", "crosschainswap", etc.
+  fromAmount?: number;
+  toAmount?: number;
+  platformFeeUsd?: number;
+  platformFeeInPercent?: number;
+  excludingFee?: number;
+  includingFee?: number;
+  includingFeeWithPfFee?: number;
+  discount?: number;
+  isTxnAllowed?: boolean;
+  gasFeeUsd?: number;
   depositAddress?: string;
   allowanceAddress?: string;
   additionalInfo: RocketXAdditionalInfo | null;
+  // Error fields — present when quote has error (e.g., below minimum amount)
+  err?: string | null;
+  code?: number | null;
+  predictedMinAmount?: string;
 }
 
 export interface RocketXPlatformToken {
