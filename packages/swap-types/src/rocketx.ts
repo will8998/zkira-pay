@@ -66,7 +66,7 @@ export interface RocketXQuote {
   exchangeInfo: RocketXExchangeInfo;
   fromTokenInfo: RocketXTokenInfo;
   toTokenInfo: RocketXTokenInfo;
-  estTimeInSeconds: RocketXEstTime;
+  estTimeInSeconds: RocketXEstTime | null;
   type: string; // "transfer", "crosschainswap", etc.
   fromAmount: number;
   toAmount: number;
@@ -80,7 +80,7 @@ export interface RocketXQuote {
   gasFeeUsd: number;
   depositAddress?: string;
   allowanceAddress?: string;
-  additionalInfo: RocketXAdditionalInfo;
+  additionalInfo: RocketXAdditionalInfo | null;
 }
 
 export interface RocketXPlatformToken {
