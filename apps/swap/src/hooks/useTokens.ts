@@ -74,22 +74,52 @@ export function useTokens() {
     }
 
     const lowerQuery = query.toLowerCase();
-    const filtered = tokens.filter(token =>
-      token.token_symbol.toLowerCase().includes(lowerQuery) ||
-      token.token_name.toLowerCase().includes(lowerQuery) ||
-      token.network_id.toLowerCase().includes(lowerQuery)
+
+    // Tier 1: Exact symbol match
+    const exactMatches = tokens.filter(token =>
+      token.token_symbol.toLowerCase() === lowerQuery
     );
 
-    const popularFiltered = filtered.filter(token => POPULAR_TOKENS.includes(token.token_symbol));
-    const otherFiltered = filtered.filter(token => !POPULAR_TOKENS.includes(token.token_symbol));
+    // Tier 2: Starts with matches (symbol or name)
+    const startsWithMatches = tokens.filter(token =>
+      token.token_symbol.toLowerCase() !== lowerQuery && (
+        token.token_symbol.toLowerCase().startsWith(lowerQuery) ||
+        token.token_name.toLowerCase().startsWith(lowerQuery)
+      )
+    );
 
-    popularFiltered.sort((a, b) => {
-      const aIndex = POPULAR_TOKENS.indexOf(a.token_symbol);
-      const bIndex = POPULAR_TOKENS.indexOf(b.token_symbol);
-      return aIndex - bIndex;
-    });
+    // Tier 3: Contains matches (symbol, name, or network)
+    const containsMatches = tokens.filter(token =>
+      !token.token_symbol.toLowerCase().startsWith(lowerQuery) &&
+      !token.token_name.toLowerCase().startsWith(lowerQuery) &&
+      token.token_symbol.toLowerCase() !== lowerQuery && (
+        token.token_symbol.toLowerCase().includes(lowerQuery) ||
+        token.token_name.toLowerCase().includes(lowerQuery) ||
+        token.network_id.toLowerCase().includes(lowerQuery)
+      )
+    );
 
-    return [...popularFiltered, ...otherFiltered];
+    // Sort each tier: popular tokens first
+    const sortTier = (tier: TokenItem[]) => {
+      const popular = tier.filter(token => POPULAR_TOKENS.includes(token.token_symbol));
+      const other = tier.filter(token => !POPULAR_TOKENS.includes(token.token_symbol));
+
+      popular.sort((a, b) => {
+        const aIndex = POPULAR_TOKENS.indexOf(a.token_symbol);
+        const bIndex = POPULAR_TOKENS.indexOf(b.token_symbol);
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        // Within same symbol, sort by network_id for consistency
+        return a.network_id.localeCompare(b.network_id);
+      });
+
+      return [...popular, ...other];
+    };
+
+    return [
+      ...sortTier(exactMatches),
+      ...sortTier(startsWithMatches),
+      ...sortTier(containsMatches)
+    ];
   }, [tokens, sortedTokens]);
 
   /** Get all network variants for a given token symbol */

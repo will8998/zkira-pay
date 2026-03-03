@@ -20,18 +20,20 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
   const virtualizer = useVirtualizer({
     count: tokens.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 56,
-    overscan: 5,
+    estimateSize: () => 64,
+    overscan: 8,
   })
 
   if (tokens.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-[var(--color-text-secondary)]">
         <div className="text-center">
-          <div className="text-2xl mb-2">&#x1F50D;</div>
-          <div className="text-sm">No tokens found</div>
+          <svg className="w-8 h-8 mx-auto mb-3 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          </svg>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <div className="text-sm font-medium">No tokens found</div>
           <div className="text-xs text-[var(--color-muted)] mt-1">
-            Try adjusting your search terms
+            Refine your search or check network filters
           </div>
         </div>
       </div>
@@ -41,10 +43,7 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
   return (
     <div
       ref={parentRef}
-      className="h-full overflow-y-auto no-scrollbar"
-      style={{
-        scrollBehavior: 'smooth'
-      }}
+      className="h-full overflow-y-auto no-scrollbar overscroll-contain"
     >
       <div
         style={{

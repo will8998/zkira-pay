@@ -34,8 +34,8 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
     <div
       onClick={handleClick}
       className={`
-        flex items-center px-4 h-14 cursor-pointer transition-colors
-        hover:bg-[var(--color-hover)]
+        flex items-center px-4 h-16 cursor-pointer transition-all duration-150
+        hover:bg-[var(--color-hover)] active:bg-[var(--color-surface-alt)]
         ${isSelected
           ? 'border-l-2 border-[var(--color-red)] bg-[var(--color-hover)]'
           : 'border-l-2 border-transparent'
@@ -48,12 +48,12 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
             <img
               src={token.icon_url}
               alt={token.token_symbol}
-              className="w-6 h-6 rounded-full"
+              className="w-9 h-9 rounded-full"
               onError={() => setImageError(true)}
             />
           ) : (
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold"
               style={{ backgroundColor: getBackgroundColor() }}
             >
               {getInitial()}
@@ -66,8 +66,8 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
             <span className="text-sm font-semibold text-[var(--color-text)] truncate">
               {token.token_symbol}
             </span>
-            <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)]">
-              {token.network_id}
+            <span className="inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)] rounded-sm">
+              {token.network_id.charAt(0).toUpperCase() + token.network_id.slice(1)}
             </span>
           </div>
           <div className="text-xs text-[var(--color-text-secondary)] truncate">
@@ -77,8 +77,8 @@ export function TokenItemComponent({ token, isSelected, onSelect, networkCount }
       </div>
 
       {networkCount && (
-        <div className="flex items-center gap-1 text-[var(--color-text-secondary)] ml-2">
-          <span className="text-xs">{networkCount} networks</span>
+        <div className="flex items-center gap-1 text-[var(--color-red)] ml-2">
+          <span className="text-xs font-medium">{networkCount} networks</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

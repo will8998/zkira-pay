@@ -118,30 +118,38 @@ export function TokenSelector({
 
   if (!isOpen) return null
 
+  const capitalizeNetwork = (id: string) => id.charAt(0).toUpperCase() + id.slice(1)
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-[4px] animate-fade-in"
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full max-w-md mx-4 mt-20 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-[70vh] flex flex-col overflow-hidden animate-fade-in-up"
+        className="w-full max-w-md mx-4 mt-20 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-[80vh] flex flex-col overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2">
+          <div>
+            <div className="flex items-center gap-2">
+              {expandedSymbol && (
+                <button
+                  onClick={() => setExpandedSymbol(null)}
+                  className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                {expandedSymbol ? `Select ${expandedSymbol} network` : (label || 'Select a token')}
+              </h3>
+            </div>
             {expandedSymbol && (
-              <button
-                onClick={() => setExpandedSymbol(null)}
-                className="w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
+              <div className="text-xs text-[var(--color-text-secondary)] mt-0.5 ml-10">Choose which network to use</div>
             )}
-            <h3 className="text-lg font-semibold text-[var(--color-text)]">
-              {expandedSymbol ? `Select ${expandedSymbol} network` : (label || 'Select a token')}
-            </h3>
           </div>
           <button
             onClick={onClose}
@@ -153,87 +161,116 @@ export function TokenSelector({
           </button>
         </div>
 
+        {/* Search + Filters (hidden when viewing network variants) */}
         {!expandedSymbol && (
           <div className="p-4 border-b border-[var(--color-border)] space-y-3">
             <div className="flex gap-2">
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search for a token or address"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 px-3 py-2.5 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] transition-all"
-              />
+              {/* Search input with icon */}
+              <div className="relative flex-1">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search token or network"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-3 text-sm bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] input-focus placeholder-[var(--color-muted)] transition-all"
+                />
+              </div>
+
+              {/* Network dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
-                  className="px-3 py-2.5 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] hover:bg-[var(--color-hover)] transition-all flex items-center gap-2 whitespace-nowrap"
+                  className="h-full px-3 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border-subtle)] hover:bg-[var(--color-hover)] transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <span className="text-sm">
-                    {selectedNetwork === 'all' ? 'All Networks' : selectedNetwork}
+                    {selectedNetwork === 'all' ? 'All' : capitalizeNetwork(selectedNetwork)}
                   </span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-3.5 h-3.5 transition-transform ${networkDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {networkDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-[var(--color-bg)] border border-[var(--border-subtle)] shadow-lg z-10 max-h-48 overflow-y-auto">
-                    <button
-                      onClick={() => {
-                        setSelectedNetwork('all')
-                        setNetworkDropdownOpen(false)
-                      }}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors ${
-                        selectedNetwork === 'all' ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
-                      }`}
-                    >
-                      All Networks
-                    </button>
-                    {uniqueNetworks.map((network) => (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setNetworkDropdownOpen(false)} />
+                    <div className="absolute top-full right-0 mt-1 w-52 bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 max-h-64 overflow-y-auto no-scrollbar animate-fade-in">
                       <button
-                        key={network}
                         onClick={() => {
-                          setSelectedNetwork(network)
+                          setSelectedNetwork('all')
                           setNetworkDropdownOpen(false)
                         }}
-                        className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors ${
-                          selectedNetwork === network ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
+                        className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[var(--color-hover)] transition-colors flex items-center justify-between ${
+                          selectedNetwork === 'all' ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
                         }`}
                       >
-                        {network}
+                        All Networks
+                        {selectedNetwork === 'all' && (
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
                       </button>
-                    ))}
-                  </div>
+                      {uniqueNetworks.map((network) => (
+                        <button
+                          key={network}
+                          onClick={() => {
+                            setSelectedNetwork(network)
+                            setNetworkDropdownOpen(false)
+                          }}
+                          className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[var(--color-hover)] transition-colors flex items-center justify-between ${
+                            selectedNetwork === network ? 'text-[var(--color-red)]' : 'text-[var(--color-text)]'
+                          }`}
+                        >
+                          {capitalizeNetwork(network)}
+                          {selectedNetwork === network && (
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex">
+            <div className="flex border-b border-[var(--color-border)]">
               <button
                 onClick={() => { setActiveTab('top'); setExpandedSymbol(null); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 text-sm font-medium transition-colors text-center relative ${
                   activeTab === 'top'
-                    ? 'text-[var(--color-text)] border-b-2 border-[var(--color-red)]'
+                    ? 'text-[var(--color-text)]'
                     : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
                 }`}
               >
                 Top
+                {activeTab === 'top' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-red)]" />
+                )}
               </button>
               <button
                 onClick={() => { setActiveTab('all'); setExpandedSymbol(null); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors ml-6 ${
+                className={`flex-1 py-2 text-sm font-medium transition-colors text-center relative ${
                   activeTab === 'all'
-                    ? 'text-[var(--color-text)] border-b-2 border-[var(--color-red)]'
+                    ? 'text-[var(--color-text)]'
                     : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
                 }`}
               >
                 All
+                {activeTab === 'all' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-red)]" />
+                )}
               </button>
             </div>
           </div>
         )}
 
+        {/* Token list */}
         <div className="flex-1 min-h-0 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
@@ -256,8 +293,14 @@ export function TokenSelector({
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-[var(--color-border)] text-xs text-[var(--color-muted)] text-center">
-          {filteredTokens.length} tokens available
+        {/* Footer */}
+        <div className="px-4 py-2 border-t border-[var(--color-border)] text-xs text-[var(--color-muted)] text-center flex items-center justify-center gap-2">
+          <span>{filteredTokens.length} tokens</span>
+          {selectedNetwork !== 'all' && (
+            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border border-[var(--border-subtle)] rounded-sm">
+              {capitalizeNetwork(selectedNetwork)}
+            </span>
+          )}
         </div>
       </div>
     </div>

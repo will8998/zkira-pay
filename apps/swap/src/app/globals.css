@@ -364,6 +364,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Smooth momentum scrolling for all overflow containers */
+[class*="overflow-y-auto"],
+[class*="overflow-auto"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 ::selection {
   background-color: #FF2828;
   color: #FFFFFF;
@@ -403,10 +410,11 @@ body {
   background-size: 60px 60px;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
   animation: gridFloat 20s linear infinite;
 }
 
 @keyframes gridFloat {
-  from { transform: translateY(0); }
-  to { transform: translateY(60px); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 60px, 0); }
 }
