@@ -38,6 +38,7 @@ export function TokenList({ tokens, onSelect, selectedToken, showNetworkCount, g
           </div>
         </div>
       </div>
+    )
   }
 
   return (
