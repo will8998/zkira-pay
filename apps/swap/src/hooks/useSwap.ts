@@ -26,5 +26,9 @@ export function useSwap() {
     }
   }, []);
 
-  return { swap, loading, error, create };
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  return { swap, loading, error, create, clearError };
 }

@@ -32,9 +32,10 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
     setSelectedRoute,
   } = useSwapContext()
 
-  const { create: createSwap, loading: swapLoading, error: swapError } = useSwap()
+  const { create: createSwap, loading: swapLoading, error: swapError, clearError } = useSwap()
   const [tokenSelectorOpen, setTokenSelectorOpen] = useState<'from' | 'to' | null>(null)
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null)
+  const [allRoutesFailed, setAllRoutesFailed] = useState(false)
 
   const getSwapButtonLabel = () => {
     if (swapLoading) return fallbackMessage ?? 'Swapping...'
@@ -63,6 +64,9 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
 
   const handleSwap = async () => {
     if (isSwapDisabled() || !fromToken || !toToken || !selectedRoute) return
+
+    setAllRoutesFailed(false)
+    clearError()
 
     // Build the ordered list: selected route first, then remaining routes
     const orderedRoutes = [
@@ -98,6 +102,7 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
     }
     // All routes failed
     setFallbackMessage(null)
+    setAllRoutesFailed(true)
   }
 
   return (
@@ -208,9 +213,11 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
         />
       </div>
 
-      {swapError && (
+      {(swapError || allRoutesFailed) && (
         <div className="text-[var(--color-red)] text-sm text-center mt-3">
-          {swapError}
+          {allRoutesFailed
+            ? `All ${routes.length} route${routes.length === 1 ? '' : 's'} failed \u2014 try a different token pair or amount`
+            : swapError}
         </div>
       )}
 
