@@ -96,6 +96,7 @@ export default function RoutesPanel() {
   };
 
   const filteredRoutes = getFilteredRoutes();
+  const privateCount = routes.filter(r => r.isPrivate).length;
 
   const filters: { key: RouteFilter; label: string; icon: string }[] = [
     { key: 'best', label: 'Best', icon: '★' },
@@ -116,6 +117,9 @@ export default function RoutesPanel() {
             >
               <span className="mr-1.5">{f.icon}</span>
               {f.label}
+              {f.key === 'private' && privateCount > 0 && (
+                <span className="ml-1.5 bg-[var(--color-red)] text-white text-[10px] px-1.5 py-0.5 font-bold leading-none">{privateCount}</span>
+              )}
             </button>
           ))}
         </div>
@@ -157,8 +161,8 @@ export default function RoutesPanel() {
             </svg>
             {activeFilter === 'private' ? (
               <>
-                <p>No privacy routes for this pair</p>
-                <p className="text-xs mt-1">Try &quot;Best&quot; or &quot;Fastest&quot;</p>
+                <p>No privacy routes available</p>
+                <p className="text-xs mt-1">Not all token pairs support private swaps. Try stablecoin pairs (USDT, USDC) across major networks.</p>
               </>
             ) : amount && parseFloat(amount) > 0 && fromToken && toToken ? (
               <>
