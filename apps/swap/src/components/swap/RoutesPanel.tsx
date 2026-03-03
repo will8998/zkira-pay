@@ -128,8 +128,8 @@ export default function RoutesPanel() {
         {!loading && routes.length === 0 && !error && (
           <div className="text-center py-8 text-[var(--color-text-secondary)]">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
             </svg>
             {amount && parseFloat(amount) > 0 && fromToken && toToken ? (
               <>
@@ -154,9 +154,9 @@ export default function RoutesPanel() {
               key={route.exchangeKeyword || index}
               onClick={() => handleRouteSelect(route)}
               className={`
-                border p-4 cursor-pointer transition-all duration-200 hover:bg-[var(--color-hover)]
+                border p-4 cursor-pointer transition-all duration-200 hover:bg-[var(--color-hover)] hover:scale-[1.01]
                 ${isSelected
-                  ? 'route-card-selected'
+                  ? 'route-card-selected neon-glow-subtle'
                   : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle-hover)]'
                 }
               `}

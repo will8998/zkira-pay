@@ -13,7 +13,7 @@ export default function SwapButton({ onClick, disabled, loading, label }: SwapBu
       className={`
         w-full py-4 font-semibold text-base flex items-center justify-center gap-2 transition-all
         ${disabled
-          ? 'bg-[var(--color-border)] text-[var(--color-muted)] cursor-not-allowed'
+          ? 'bg-transparent border border-[var(--color-border)] text-[var(--color-text-tertiary)] cursor-not-allowed'
           : 'cyberpunk-connect cursor-pointer'
         }
       `}

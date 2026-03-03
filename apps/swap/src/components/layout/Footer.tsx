@@ -31,6 +31,9 @@ export default function Footer() {
         </div>
         {/* Right: X link */}
         <div className="flex items-center gap-3">
+          <span className="text-[var(--color-text-tertiary)] text-[10px] font-[family-name:var(--font-mono)] tracking-wider">
+            POWERED BY ROCKETX
+          </span>
           <a 
             href="https://x.com/zkira_xyz" 
             target="_blank" 

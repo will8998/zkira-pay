@@ -32,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
+        <div className="ambient-bg" />
         <div className="scanlines" />
         <SwapProvider>
           <div className="relative z-10 flex flex-col min-h-screen">
