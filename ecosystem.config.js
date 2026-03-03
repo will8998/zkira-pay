@@ -50,5 +50,26 @@ module.exports = {
         API_URL: "http://localhost:3012",
       },
     },
+    {
+      name: "zkira-swap-api",
+      cwd: "/var/www/zkira-pay/apps/swap-api",
+      script: "node_modules/.bin/tsx",
+      interpreter: "/bin/bash",
+      args: "src/index.ts",
+      env: {
+        NODE_ENV: "production",
+        PORT: 3014,
+      },
+    },
+    {
+      name: "zkira-swap",
+      cwd: "/var/www/zkira-pay/apps/swap",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 3015",
+      env: {
+        NODE_ENV: "production",
+        PORT: 3015,
+      },
+    },
   ],
 };
