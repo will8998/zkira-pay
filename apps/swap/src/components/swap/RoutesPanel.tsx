@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSwapContext } from '@/context/SwapContext';
 import { useQuotes } from '@/hooks/useQuotes';
 import { formatNumber, formatUSD, formatDuration } from '@/lib/utils';
@@ -21,11 +21,27 @@ export default function RoutesPanel() {
     toToken
   });
 
+  // Keep selectedRoute in sync with latest routes data.
+  // Without this, selectedRoute becomes stale after quote refreshes,
+  // causing the "To" field to show outdated amounts.
+  const selectedKeywordRef = useRef<string | null>(null);
+  selectedKeywordRef.current = selectedRoute?.exchangeKeyword ?? null;
+
   useEffect(() => {
-    if (routes.length > 0 && !selectedRoute) {
+    if (routes.length === 0) return;
+
+    const currentKeyword = selectedKeywordRef.current;
+    if (!currentKeyword) {
+      // No route selected yet — pick the best (first)
       setSelectedRoute(routes[0]);
+      return;
     }
-  }, [routes, selectedRoute, setSelectedRoute]);
+
+    // Update selectedRoute with fresh data from the new routes
+    const match = routes.find(r => r.exchangeKeyword === currentKeyword);
+    setSelectedRoute(match ?? routes[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routes, setSelectedRoute]);
 
   const handleRouteSelect = (route: RouteQuote) => {
     setSelectedRoute(route);

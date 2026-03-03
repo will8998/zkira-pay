@@ -75,7 +75,6 @@ export default function SwapCard({ onSwapCreated }: SwapCardProps) {
       const swap = await createSwap(request)
       if (swap) {
         onSwapCreated(swap)
-        onSwapCreated(swap)
       }
     } catch (error) {
       console.error('Swap failed:', error)

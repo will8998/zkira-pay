@@ -39,8 +39,8 @@ export function useQuotes({ amount, fromToken, toToken }: UseQuotesParams) {
 
     try {
       const result = await getQuotation({
-        fromTokenId: fromToken.id,
-        toTokenId: toToken.id,
+        fromToken: fromToken.is_native_token ? undefined : fromToken.contract_address,
+        toToken: toToken.is_native_token ? undefined : toToken.contract_address,
         fromNetwork: fromToken.network_id,
         toNetwork: toToken.network_id,
         amount: debouncedAmount,

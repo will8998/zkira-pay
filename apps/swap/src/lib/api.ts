@@ -61,19 +61,23 @@ export async function getTokens(params?: {
 }
 
 export async function getQuotation(params: {
-  fromTokenId: number;
-  toTokenId: number;
+  fromToken?: string;
+  toToken?: string;
   fromNetwork: string;
   toNetwork: string;
   amount: number;
 }): Promise<QuotationResponse> {
   const searchParams = new URLSearchParams({
-    fromTokenId: params.fromTokenId.toString(),
-    toTokenId: params.toTokenId.toString(),
     fromNetwork: params.fromNetwork,
     toNetwork: params.toNetwork,
     amount: params.amount.toString(),
   });
+  if (params.fromToken) {
+    searchParams.set('fromToken', params.fromToken);
+  }
+  if (params.toToken) {
+    searchParams.set('toToken', params.toToken);
+  }
 
   return fetchJson<QuotationResponse>(`${API_BASE}/quote?${searchParams}`);
 }

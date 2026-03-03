@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const quotationQuerySchema = z.object({
-  fromTokenId: z.coerce.number().int().positive('fromTokenId is required'),
-  toTokenId: z.coerce.number().int().positive('toTokenId is required'),
+  fromToken: z.string().optional(),
+  toToken: z.string().optional(),
   fromNetwork: z.string().min(1, 'fromNetwork is required'),
   toNetwork: z.string().min(1, 'toNetwork is required'),
   amount: z.coerce.number().positive('Amount must be positive'),

@@ -99,16 +99,16 @@ export class RocketXClient {
   }
 
   async getQuotation(params: {
-    fromTokenId: number;
-    toTokenId: number;
+    fromToken?: string;
+    toToken?: string;
     fromNetwork: string;
     toNetwork: string;
     amount: number;
   }): Promise<RocketXQuotationResponse> {
     return this.request<RocketXQuotationResponse>('/v1/quotation', {
       params: {
-        fromTokenId: params.fromTokenId,
-        toTokenId: params.toTokenId,
+        fromToken: params.fromToken,
+        toToken: params.toToken,
         fromNetwork: params.fromNetwork,
         toNetwork: params.toNetwork,
         amount: params.amount,
