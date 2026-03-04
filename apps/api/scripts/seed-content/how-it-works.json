@@ -32,7 +32,7 @@
         {
           "number": "03",
           "title": "CLAIM",
-          "description": "Recipient opens the link and connects their wallet. Our gas relayer sponsors the claim transaction. Funds arrive at a stealth address derived from the recipient's meta-address.",
+          "description": "Recipient opens the link and connects their wallet. Our gas relayer sponsors the claim transaction. Funds arrive at a stealth address. For maximum privacy, use the shielded pool for ZK-proven private withdrawals.",
           "features": [
             "Gas-sponsored claiming",
             "Stealth address delivery",
@@ -72,11 +72,22 @@
         {
           "title": "Gas Relayer",
           "description": "Recipients don't need SOL to claim payments. Our gas relayer sponsors all claim transactions, removing another privacy leak."
+        },
+        {
+          "title": "Shielded Pool",
+          "description": "Fixed-denomination deposits with zero-knowledge proof withdrawals. The shielded pool breaks all on-chain links between deposits and withdrawals using Groth16 ZK proofs verified on Solana."
+        },
+        {
+          "title": "Privacy Network",
+          "description": "Tor hidden service and Nym mixnet integration hide your IP address from RPC nodes. Your network traffic is untraceable."
+        },
+        {
+          "title": "Timing Defenses",
+          "description": "6-hour soak time, Poisson-distributed batch withdrawals, and automated decoy deposits defeat timing analysis attacks."
         }
       ]
     },
     {
-      "type": "section_header",
       "label": "SYSTEM ARCHITECTURE",
       "title": "Three-Layer Architecture",
       "subtitle": "ZKIRA Pay is built as a modular system with clear separation between application, protocol, and network layers."
@@ -100,7 +111,9 @@
         "Anchor Programs",
         "Escrow Contracts",
         "Stealth Addresses",
-        "Gas Relayer"
+        "Gas Relayer",
+        "Shielded Pool",
+        "ZK Proofs (Groth16)"
       ]
     },
     {
@@ -111,11 +124,66 @@
         "Solana",
         "SPL Tokens",
         "Token-2022",
-        "PDAs"
+        "PDAs",
+        "Tor Hidden Service",
+        "Nym Mixnet"
       ]
     },
     {
-      "type": "cta",
+      "type": "section_header",
+      "label": "THREAT MODEL",
+      "title": "What We Protect Against",
+      "subtitle": "Every attack vector we've engineered defenses for — and the adversaries we defeat."
+    },
+    {
+      "type": "cards",
+      "columns": 2,
+      "items": [
+        {
+          "title": "Transaction Graph Analysis",
+          "description": "Shielded pool ZK proofs mathematically break all on-chain links between deposits and withdrawals. No amount of blockchain analysis can reconstruct the transaction graph."
+        },
+        {
+          "title": "Timing Correlation",
+          "description": "6-hour minimum soak time, Poisson-distributed batch withdrawals (~1hr mean), and automated decoy deposits every 30±10 minutes destroy all timing patterns."
+        },
+        {
+          "title": "Amount Correlation",
+          "description": "Fixed 10 USDC denomination means every deposit looks identical. There's nothing to correlate — all transactions are the same size."
+        },
+        {
+          "title": "IP Fingerprinting",
+          "description": "Tor hidden service routes all RPC traffic through .onion addresses. Nym mixnet provides browser-level packet mixing. Your IP never touches Solana."
+        },
+        {
+          "title": "Sender-Recipient Linking",
+          "description": "ECDH stealth addresses generate unique one-time addresses for every payment. Even scanning the entire blockchain reveals nothing about who paid whom."
+        },
+        {
+          "title": "Metadata Leaks",
+          "description": "Zero logs, zero analytics, blind relaying. The relayer only checks programId — it never inspects transaction data. No metadata exists to leak."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "columns": 3,
+      "items": [
+        {
+          "title": "~95%",
+          "description": "Resistance against Arkham Intelligence, Chainalysis, and Solscan. Commercial blockchain forensics cannot trace shielded pool transactions."
+        },
+        {
+          "title": "~70-80%",
+          "description": "Resistance against nation-state adversaries with global network monitoring. The binding constraint is anonymity set size, not cryptography."
+        },
+        {
+          "title": "Unbreakable",
+          "description": "The cryptographic primitives (ECDH, Groth16, Poseidon) cannot be broken by any known computation. The math is provably secure."
+        }
+      ]
+    },
+    {
       "title": "Ready to try it?",
       "description": "Experience confidential payments firsthand. Create your first payment link and see how simple privacy can be.",
       "buttons": [

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 
 const API_URL = '';
@@ -186,6 +187,7 @@ function formatRelativeTime(timestamp: string) {
 }
 
 export default function AnalyticsPage() {
+  const t = useTranslations('analyticsPage');
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,8 +226,8 @@ export default function AnalyticsPage() {
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
       <PageHeader 
-        title="Analytics" 
-        description="ZKIRA Pay protocol statistics — live data" 
+        title={t('title')} 
+        description={t('description')} 
       />
       
       {loading && !data ? (

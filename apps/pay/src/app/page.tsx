@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import Link from 'next/link';
 import { EmptyState } from '@/components/EmptyState';
@@ -27,13 +28,18 @@ interface Invoice {
   status: 'active' | 'claimed' | 'expired' | 'pending';
   createdAt: string;
   claimedAt?: string;
-  claimSecretHex?: string;
+  stealthAddressHex?: string;
   metaAddress?: string;
   tokenMint?: string;
   expiry?: string;
 }
 
 export default function Dashboard() {
+  const tHero = useTranslations('hero');
+  const tDashboard = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
+  const tTable = useTranslations('table');
   const { connected, publicKey } = useWallet();
   const { setShowModal } = useUnifiedWalletContext();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -131,14 +137,14 @@ export default function Dashboard() {
   const recentActivity = [
     ...transactions.map(tx => ({
       id: tx.id || `tx-${tx.timestamp}`,
-      type: tx.type === 'sent' ? 'Payment Sent' : 'Payment Received',
+      type: tx.type === 'sent' ? tDashboard('paymentSent') : tDashboard('paymentReceived'),
       amount: convertAmount(tx.amount),
       status: tx.status,
       date: new Date(tx.timestamp)
     })),
     ...invoices.map(invoice => ({
       id: invoice.id || invoice.invoiceId || `inv-${invoice.createdAt}`,
-      type: 'Invoice',
+      type: tDashboard('invoice'),
       amount: convertAmount(invoice.amount),
       status: invoice.status === 'claimed' ? 'completed' : invoice.status === 'expired' ? 'expired' : 'pending',
       date: new Date(invoice.createdAt)
@@ -170,14 +176,14 @@ export default function Dashboard() {
           {/* Hero Text */}
           <div className="text-center mb-10 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 font-[family-name:var(--font-sans)] tracking-[-0.02em] leading-[1.05]">
-              Stealth Payments
+              {tHero('title')}
               <br />
-              <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">on Solana</span>
+              <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">{tHero('titleHighlight')}</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-[rgba(255,255,255,0.6)] max-w-lg mx-auto leading-relaxed">
-              Send confidential payments with stealth addresses.
+              {tHero('subtitle')}
               <br className="hidden sm:block" />
-              Zero traceability. Instant settlement.
+              {tHero('subtitleLine2')}
             </p>
           </div>
 
@@ -186,18 +192,18 @@ export default function Dashboard() {
             onClick={() => setShowModal(true)}
             className="w-full sm:w-auto bg-[#FF2828] text-white px-8 py-3 text-[15px] font-medium rounded-full hover:bg-[#E02020] transition-all duration-200 font-[family-name:var(--font-sans)] mb-12"
           >
-            Connect Wallet
+            {tCommon('connectWallet')}
           </button>
 
           {/* Feature Labels — minimal and clean */}
           <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[rgba(255,255,255,0.7)]">
-            <span className="text-[13px] font-light tracking-wide">Stealth</span>
+            <span className="text-[13px] font-light tracking-wide">{tHero('featureStealth')}</span>
             <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">Invoices</span>
+            <span className="text-[13px] font-light tracking-wide">{tHero('featureInvoices')}</span>
             <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">Escrow</span>
+            <span className="text-[13px] font-light tracking-wide">{tHero('featureEscrow')}</span>
             <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">Multi-sig</span>
+            <span className="text-[13px] font-light tracking-wide">{tHero('featureMultiSig')}</span>
         </div>
         </div>
       </div>
@@ -209,42 +215,42 @@ export default function Dashboard() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '0ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Total Sent</div>
+          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('totalSent')}</div>
           <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
             {totalSent > 0 ? formatCurrency(totalSent) : '$0.00'}
           </div>
           <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {sentCount > 0 ? `${sentCount} payment${sentCount === 1 ? '' : 's'}` : 'No activity yet'}
+            {sentCount > 0 ? tDashboard('payment', { count: sentCount }) : tCommon('noActivityYet')}
           </div>
         </div>
 
         <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '60ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Total Received</div>
+          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('totalReceived')}</div>
           <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
             {totalReceived > 0 ? formatCurrency(totalReceived) : '$0.00'}
           </div>
           <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {receivedCount > 0 ? `${receivedCount} payment${receivedCount === 1 ? '' : 's'}` : 'No activity yet'}
+            {receivedCount > 0 ? tDashboard('payment', { count: receivedCount }) : tCommon('noActivityYet')}
           </div>
         </div>
 
         <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '120ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Active Escrows</div>
+          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('activeEscrows')}</div>
           <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
             {activeEscrows}
           </div>
           <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {activeEscrows > 0 ? `${activeEscrows} pending escrow${activeEscrows === 1 ? '' : 's'}` : 'No activity yet'}
+            {activeEscrows > 0 ? tDashboard('pendingEscrow', { count: activeEscrows }) : tCommon('noActivityYet')}
           </div>
         </div>
 
         <Link href="/points" className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 hover:border-[var(--border-subtle-hover)] transition-colors" style={{ animationDelay: '180ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">Points</div>
+          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('points')}</div>
           <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
             {parseFloat(userPoints).toLocaleString()}
           </div>
           <div className="text-xs text-[#FF2828] mt-0.5">
-            View rewards →
+            {tDashboard('viewRewards')}
           </div>
         </Link>
       </div>
@@ -258,8 +264,8 @@ export default function Dashboard() {
             </svg>
           </div>
           <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">Send Payment</div>
-            <div className="text-xs text-[var(--color-muted)]">Send confidential payment via stealth address</div>
+            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('sendPayment')}</div>
+            <div className="text-xs text-[var(--color-muted)]">{tDashboard('sendPaymentDesc')}</div>
           </div>
         </Link>
 
@@ -270,8 +276,8 @@ export default function Dashboard() {
             </svg>
           </div>
           <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">Request Payment</div>
-            <div className="text-xs text-[var(--color-muted)]">Generate invoice link for incoming payment</div>
+            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('requestPayment')}</div>
+            <div className="text-xs text-[var(--color-muted)]">{tDashboard('requestPaymentDesc')}</div>
           </div>
         </Link>
 
@@ -282,8 +288,8 @@ export default function Dashboard() {
             </svg>
           </div>
           <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">Create Escrow</div>
-            <div className="text-xs text-[var(--color-muted)]">Set up milestone-based escrow payment</div>
+            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('createEscrow')}</div>
+            <div className="text-xs text-[var(--color-muted)]">{tDashboard('createEscrowDesc')}</div>
           </div>
         </Link>
       </div>
@@ -291,8 +297,8 @@ export default function Dashboard() {
       {/* Recent Activity */}
       <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none overflow-hidden" style={{ animationDelay: '360ms' }}>
         <div className="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold text-[var(--color-text)]">Recent Activity</h2>
-          <Link href="/history" className="text-xs font-medium text-[#FF2828] hover:text-[#E02020]">View all</Link>
+          <h2 className="text-[13px] font-semibold text-[var(--color-text)]">{tDashboard('recentActivity')}</h2>
+          <Link href="/history" className="text-xs font-medium text-[#FF2828] hover:text-[#E02020]">{tCommon('viewAll')}</Link>
         </div>
 
         {recentActivity.length > 0 ? (
@@ -301,10 +307,10 @@ export default function Dashboard() {
             <table className="w-full">
               <thead className="bg-[var(--color-hover)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">Type</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">Amount</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">Status</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">Date</th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('type')}</th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('amount')}</th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('status')}</th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('date')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -322,10 +328,10 @@ export default function Dashboard() {
                           ? 'bg-[rgba(255,209,70,0.15)] text-[#FFD146]'
                           : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828]'
                       }`}>
-                        {item.status === 'completed' ? 'Completed' : 
-                         item.status === 'pending' ? 'Pending' :
-                         item.status === 'active' ? 'Active' : 
-                         item.status === 'expired' ? 'Expired' : 'Failed'}
+                        {item.status === 'completed' ? tStatus('completed') : 
+                         item.status === 'pending' ? tStatus('pending') :
+                         item.status === 'active' ? tStatus('active') : 
+                         item.status === 'expired' ? tStatus('expired') : tStatus('failed')}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-[13px] text-[var(--color-muted)]">
@@ -358,10 +364,10 @@ export default function Dashboard() {
                       ? 'bg-[rgba(255,209,70,0.15)] text-[#FFD146]'
                       : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828]'
                   }`}>
-                    {item.status === 'completed' ? 'Completed' : 
-                     item.status === 'pending' ? 'Pending' :
-                     item.status === 'active' ? 'Active' : 
-                     item.status === 'expired' ? 'Expired' : 'Failed'}
+                    {item.status === 'completed' ? tStatus('completed') : 
+                     item.status === 'pending' ? tStatus('pending') :
+                     item.status === 'active' ? tStatus('active') : 
+                     item.status === 'expired' ? tStatus('expired') : tStatus('failed')}
                   </span>
                   <span className="text-[13px] text-[var(--color-muted)]">
                     {item.date.toLocaleDateString('en-US', { 
@@ -378,9 +384,9 @@ export default function Dashboard() {
         ) : (
           <div className="p-4">
             <EmptyState
-              title="No transactions yet"
-              description="Start by creating a payment or requesting one"
-              actionLabel="Create Payment"
+              title={tDashboard('noTransactions')}
+              description={tDashboard('noTransactionsDesc')}
+              actionLabel={tDashboard('createPayment')}
               actionHref="/create"
               compact
             />

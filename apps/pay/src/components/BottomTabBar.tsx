@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { MoreSheet } from './MoreSheet';
-
 export function BottomTabBar() {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -37,7 +38,7 @@ export function BottomTabBar() {
 
   const tabs = [
     {
-      name: 'Home',
+      name: t('home'),
       href: '/',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -46,7 +47,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: 'Send',
+      name: t('send'),
       href: '/create',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -55,16 +56,16 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: 'Request',
-      href: '/request',
+      name: t('pool'),
+      href: '/pool',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 4.5l-15 15m0 0h11.25m-11.25 0V8.25" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
         </svg>
       ),
     },
     {
-      name: 'Escrow',
+      name: t('escrow'),
       href: '/escrow',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -106,7 +107,7 @@ export function BottomTabBar() {
               </svg>
             </div>
             <span className={`text-[10px] font-medium ${isMoreActive() ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}`}>
-              More
+              {t('more')}
             </span>
           </button>
         </div>

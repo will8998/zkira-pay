@@ -3,6 +3,11 @@ import type {
   RelayClaimRequest,
   RelayClaimResponse,
   RelayStatusResponse,
+  SessionCreateRequest,
+  SessionCreateResponse,
+  SessionTransactionRequest,
+  SessionTransactionResponse,
+  SessionBalanceResponse,
 } from './types.js';
 
 export class RelayerClient {
@@ -27,6 +32,41 @@ export class RelayerClient {
    */
   async getRelayStatus(txSignature: string): Promise<RelayStatusResponse> {
     return this.get<RelayStatusResponse>(`/relay/status/${encodeURIComponent(txSignature)}`);
+  }
+
+  /**
+   * Create a walletless session — creates USDC ATA for the ephemeral keypair.
+   */
+  async createSession(publicKey: string): Promise<SessionCreateResponse> {
+    return this.post<SessionCreateResponse>('/session/create', { publicKey });
+  }
+
+  /**
+   * Co-sign and submit a shielded pool deposit transaction.
+   */
+  async relayDeposit(transaction: string): Promise<SessionTransactionResponse> {
+    return this.post<SessionTransactionResponse>('/session/deposit', { transaction });
+  }
+
+  /**
+   * Co-sign and submit a shielded pool withdrawal transaction.
+   */
+  async relayWithdraw(transaction: string): Promise<SessionTransactionResponse> {
+    return this.post<SessionTransactionResponse>('/session/withdraw', { transaction });
+  }
+
+  /**
+   * Check USDC balance at an address.
+   */
+  async getBalance(address: string): Promise<SessionBalanceResponse> {
+    return this.get<SessionBalanceResponse>(`/session/balance/${encodeURIComponent(address)}`);
+  }
+
+  /**
+   * Co-sign and submit an SPL token transfer transaction.
+   */
+  async relayTransfer(transaction: string): Promise<SessionTransactionResponse> {
+    return this.post<SessionTransactionResponse>('/session/transfer', { transaction });
   }
 
   private async get<T>(path: string): Promise<T> {

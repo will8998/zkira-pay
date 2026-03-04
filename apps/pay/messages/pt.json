@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "Enviar",
+    "request": "Solicitar",
+    "escrow": "Depósito",
+    "learn": "Aprender",
+    "home": "Início",
+    "pool": "Pool",
+    "more": "Mais",
+    "menu": "Menu",
+    "history": "Histórico",
+    "contacts": "Contatos",
+    "points": "Pontos",
+    "leaderboard": "Ranking",
+    "referral": "Indicação",
+    "apiKeys": "Chaves API",
+    "analytics": "Análises",
+    "roadmap": "Roadmap",
+    "batch": "Lote",
+    "multiSig": "Multi-assinatura",
+    "docs": "Docs",
+    "learnHub": "Central de Aprendizado",
+    "documentation": "Documentação",
+    "apiReference": "Referência API",
+    "useCases": "Casos de Uso",
+    "blog": "Blog"
+  },
+  "navSections": {
+    "payments": "PAGAMENTOS",
+    "finance": "FINANÇAS",
+    "activity": "ATIVIDADE",
+    "developers": "DESENVOLVEDORES",
+    "learn": "APRENDER",
+    "rewards": "RECOMPENSAS",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "Conectar Carteira",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "submit": "Enviar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "share": "Compartilhar",
+    "viewAll": "Ver tudo",
+    "noActivityYet": "Nenhuma atividade ainda",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "Pagamentos Stealth",
+    "titleHighlight": "na Solana",
+    "subtitle": "Envie pagamentos confidenciais com endereços stealth.",
+    "subtitleLine2": "Zero rastreabilidade. Liquidação instantânea.",
+    "featureStealth": "Stealth",
+    "featureInvoices": "Faturas",
+    "featureEscrow": "Depósito",
+    "featureMultiSig": "Multi-assinatura"
+  },
+  "dashboard": {
+    "totalSent": "Total Enviado",
+    "totalReceived": "Total Recebido",
+    "activeEscrows": "Depósitos Ativos",
+    "points": "Pontos",
+    "viewRewards": "Ver recompensas →",
+    "payment": "{count, plural, one {# pagamento} other {# pagamentos}}",
+    "pendingEscrow": "{count, plural, one {# depósito pendente} other {# depósitos pendentes}}",
+    "sendPayment": "Enviar Pagamento",
+    "sendPaymentDesc": "Enviar pagamento confidencial via endereço stealth",
+    "requestPayment": "Solicitar Pagamento",
+    "requestPaymentDesc": "Gerar link de fatura para pagamento recebido",
+    "createEscrow": "Criar Depósito",
+    "createEscrowDesc": "Configurar pagamento de depósito baseado em marcos",
+    "recentActivity": "Atividade Recente",
+    "noTransactions": "Nenhuma transação ainda",
+    "noTransactionsDesc": "Comece criando um pagamento ou solicitando um",
+    "createPayment": "Criar Pagamento",
+    "paymentSent": "Pagamento Enviado",
+    "paymentReceived": "Pagamento Recebido",
+    "invoice": "Fatura"
+  },
+  "status": {
+    "completed": "Concluído",
+    "pending": "Pendente",
+    "active": "Ativo",
+    "expired": "Expirado",
+    "failed": "Falhou",
+    "claimed": "Reivindicado"
+  },
+  "table": {
+    "type": "Tipo",
+    "amount": "Valor",
+    "status": "Status",
+    "date": "Data"
+  },
+  "createPage": {
+    "title": "Enviar Pagamento",
+    "description": "Gerar um link de pagamento confidencial",
+    "successDescription": "Pagamento criado com sucesso",
+    "connectNotice": "Conecte sua carteira Solana para criar um pagamento confidencial. Sua carteira assina a transação — nunca armazenamos suas chaves.",
+    "paymentCreated": "Link de pagamento criado"
+  },
+  "claimPage": {
+    "title": "Reivindicar Pagamento",
+    "description": "Reivindicar um pagamento confidencial para sua carteira",
+    "missingInfo": "Informações de Pagamento Ausentes",
+    "missingInfoDesc": "Esta página requer um link de pagamento válido com um endereço de depósito.",
+    "backToDashboard": "Voltar ao Painel"
+  },
+  "requestPage": {
+    "title": "Solicitar Pagamento",
+    "description": "Gerar um link de fatura confidencial",
+    "successDescription": "Fatura criada com sucesso",
+    "invoiceGenerated": "Link de fatura gerado"
+  },
+  "poolPage": {
+    "title": "Pool Blindado",
+    "description": "Depósitos e saques privados com provas de conhecimento zero",
+    "deposit": "Depositar",
+    "withdraw": "Sacar",
+    "notes": "Notas"
+  },
+  "escrowPage": {
+    "title": "Painel de Depósito",
+    "description": "Gerencie seus pagamentos de depósito baseados em marcos",
+    "createNew": "Criar Novo",
+    "noEscrows": "Nenhum depósito ainda",
+    "noEscrowsDesc": "Crie um depósito baseado em marcos para começar",
+    "totalAmount": "Valor Total",
+    "released": "Liberado",
+    "milestones": "Marcos",
+    "releaseMilestone": "Liberar Marco",
+    "refund": "Reembolso",
+    "expired": "Expirado"
+  },
+  "escrowCreatePage": {
+    "title": "Criar Depósito",
+    "description": "Configurar um pagamento de depósito baseado em marcos"
+  },
+  "batchPage": {
+    "title": "Pagamentos em Lote",
+    "description": "Enviar múltiplos pagamentos em uma única transação"
+  },
+  "multisigPage": {
+    "title": "Multi-Assinatura",
+    "description": "Criar e gerenciar carteiras multi-assinatura"
+  },
+  "multisigCreatePage": {
+    "title": "Criar Multi-Assinatura",
+    "description": "Configurar uma nova carteira multi-assinatura"
+  },
+  "contactsPage": {
+    "title": "Contatos",
+    "description": "Gerencie seus endereços de carteira salvos"
+  },
+  "historyPage": {
+    "title": "Histórico de Transações",
+    "description": "Visualizar todas as suas transações passadas"
+  },
+  "pointsPage": {
+    "title": "Pontos",
+    "description": "Ganhe recompensas por usar o ZKIRA Pay"
+  },
+  "leaderboardPage": {
+    "title": "Ranking",
+    "description": "Principais usuários do ZKIRA Pay por pontos"
+  },
+  "referralPage": {
+    "title": "Programa de Indicação",
+    "description": "Convide amigos e ganhe recompensas"
+  },
+  "developersPage": {
+    "title": "Painel do Desenvolvedor",
+    "description": "Gerencie suas chaves API e integrações"
+  },
+  "developerDocsPage": {
+    "title": "Documentação do Desenvolvedor",
+    "description": "Integre o ZKIRA Pay em sua aplicação"
+  },
+  "tokenomicsPage": {
+    "title": "Tokenomics",
+    "description": "Distribuição e economia do token $ZKR"
+  },
+  "analyticsPage": {
+    "title": "Análises",
+    "description": "Acompanhe sua atividade de pagamentos e métricas"
+  },
+  "roadmapPage": {
+    "title": "Roadmap",
+    "description": "Cronograma de desenvolvimento do ZKIRA Pay"
+  },
+  "learnPage": {
+    "title": "Aprender",
+    "description": "Tudo que você precisa saber sobre o ZKIRA Pay",
+    "documentation": "Documentação",
+    "documentationDesc": "Guias completos e referência técnica",
+    "apiReference": "Referência API",
+    "apiReferenceDesc": "Endpoints da API REST e métodos SDK",
+    "useCases": "Casos de Uso",
+    "useCasesDesc": "Aplicações e exemplos do mundo real",
+    "blog": "Blog",
+    "blogDesc": "Atualizações de engenharia e anúncios",
+    "quickLinks": "Links Rápidos",
+    "stealthAddresses": "Endereços Stealth",
+    "stealthAddressesDesc": "Como os endereços stealth baseados em ECDH protegem sua privacidade",
+    "shieldedPool": "Pool Blindado",
+    "shieldedPoolDesc": "Sistema de depósito e saque de conhecimento zero",
+    "privacyTransport": "Transporte de Privacidade",
+    "privacyTransportDesc": "Integração Tor e mixnet Nym para privacidade de rede"
+  },
+  "languageSwitcher": {
+    "label": "Trocar idioma"
+  }
+}

@@ -331,10 +331,8 @@ const status = await client.getPaymentStatus({
 if (status === 'completed') {
   console.log('Payment received! Claiming funds...');
   
-  const claim = await client.claimPayment({
-    paymentId: paymentLink.id,
-    claimSecret: paymentLink.claimSecret,
-    recipient: recipientWallet,
+  const claim = await client.claimStealth({
+    escrowAddress: paymentLink.escrowAddress,
   });
 }`}
         />
@@ -430,6 +428,132 @@ function CheckoutButton({ amount, description }: {
 }`}
           />
         </div>
+      </div>
+
+      {/* Use Case 7: Anonymous Large Transfers */}
+      <div id="anonymous-transfers" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '700ms' }}>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">PRIVACY</span>
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Anonymous Large Transfers</h2>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+          Use the shielded pool for large anonymous transfers by splitting into fixed-denomination deposits, waiting for soak time, then withdrawing to a fresh address. This defeats Arkham Intelligence and on-chain forensics by breaking the transaction graph. Perfect for high-net-worth individuals, institutional transfers, or anyone needing to move significant funds without revealing the source or destination. The protocol automatically generates decoy deposits during soak time, creating plausible deniability. Supports any amount by using multiple fixed denominations and provides cryptographic guarantees of anonymity.
+        </p>
+
+        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
+        <div className="mb-6">
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Connect wallet and initialize the shielded pool client</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Split transfer into fixed 10 USDC deposits, each creating an encrypted note</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Wait for 6-hour soak time — protocol generates decoy deposits automatically</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Generate ZK proof and submit private withdrawal to a fresh recipient address</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Funds arrive within ~1 hour via batched processing — no on-chain link to original deposits</p>
+          </div>
+        </div>
+
+        <CodeBlock
+          language="typescript"
+          title="Anonymous Large Transfer"
+          code={`import { ShieldedPoolClient, createPrivateTransport } from '@zkira/sdk';
+
+// Use privacy transport to hide IP address
+const transport = await createPrivateTransport();
+
+const poolClient = new ShieldedPoolClient(connection, wallet, {
+  programId: SHIELDED_POOL_PROGRAM_ID,
+  tokenMint: USDC_MINT,
+  denomination: 10_000_000, // 10 USDC fixed denomination
+}, { transport });
+
+// Split $1,000 into 100 shielded deposits
+const notes: string[] = [];
+for (let i = 0; i < 100; i++) {
+  const { note } = await poolClient.deposit(USDC_MINT);
+  notes.push(note);
+  // Wait between deposits to avoid timing correlation
+}
+
+// After 6+ hour soak time, withdraw to fresh address
+for (const note of notes) {
+  await poolClient.withdraw(note, freshRecipientAddress);
+  // Each withdrawal queued — processed in ~1 hour batches
+}`}
+        />
+      </div>
+
+      {/* Use Case 8: DAO Treasury Privacy */}
+      <div id="dao-treasury" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '800ms' }}>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">GOVERNANCE</span>
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">DAO Treasury Privacy</h2>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+          DAOs can use shielded pool + stealth addresses together for truly private treasury operations. This prevents competitors from tracking treasury movements, grant distributions, and strategic fund allocation. Essential for DAOs operating in competitive markets where treasury transparency could reveal strategic plans, upcoming partnerships, or investment strategies. Grant recipients receive funds through stealth addresses, protecting their privacy while maintaining DAO accountability through internal records. Supports complex governance workflows and multi-sig approvals while keeping external observers in the dark.
+        </p>
+
+        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
+        <div className="mb-6">
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">DAO initializes shielded pool with multi-sig authority</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Treasury deposits are split into fixed denominations through the shielded pool</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Grant recipients receive encrypted notes via secure channels</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">Recipients generate ZK proofs and withdraw to their stealth addresses</p>
+          </div>
+          <div className="flex gap-3 mb-3">
+            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <p className="text-sm text-[var(--color-text-secondary)]">No on-chain link between DAO treasury and grant recipients — competitors cannot track fund flows</p>
+          </div>
+        </div>
+
+        <CodeBlock
+          language="typescript"
+          title="DAO Treasury Privacy"
+          code={`import { ShieldedPoolClient, ZkiraClient } from '@zkira/sdk';
+
+const poolClient = new ShieldedPoolClient(connection, daoWallet, {
+  programId: SHIELDED_POOL_PROGRAM_ID,
+  tokenMint: USDC_MINT,
+  denomination: 10_000_000,
+});
+
+// DAO deposits treasury funds into shielded pool
+const grantNotes: string[] = [];
+for (let i = 0; i < 50; i++) { // $500 grant
+  const { note } = await poolClient.deposit(USDC_MINT);
+  grantNotes.push(note);
+}
+
+// Securely share notes with grant recipient
+// Recipient withdraws to their stealth address:
+const recipientPool = new ShieldedPoolClient(
+  connection, recipientWallet, poolConfig
+);
+
+for (const note of grantNotes) {
+  await recipientPool.withdraw(note, recipientStealthAddress);
+}`}
+        />
       </div>
     </div>
   );

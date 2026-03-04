@@ -11,7 +11,7 @@ interface MultisigEscrow {
   amount: bigint;
   recipientSpendPubkey: Uint8Array;
   recipientViewPubkey: Uint8Array;
-  claimHash: Uint8Array;
+  stealthAddress: Uint8Array;
   expiry: number;
   approverCount: number;
   requiredApprovals: number;
@@ -29,7 +29,7 @@ interface MultisigEscrowViewProps {
   escrow: MultisigEscrow;
   currentUser: PublicKey | null;
   onApprove: (escrowAddress: PublicKey) => Promise<void>;
-  onExecute: (escrowAddress: PublicKey, claimSecret: Uint8Array) => Promise<void>;
+  onExecute: (escrowAddress: PublicKey) => Promise<void>;
   onRefund: (escrowAddress: PublicKey) => Promise<void>;
 }
 
@@ -43,8 +43,6 @@ export function MultisigEscrowView({
   const [isApproving, setIsApproving] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isRefunding, setIsRefunding] = useState(false);
-  const [showClaimSecret, setShowClaimSecret] = useState(false);
-  const [claimSecret, setClaimSecret] = useState('');
 
   const amount = Number(escrow.amount) / 1_000_000; // Convert from lamports to USDC
   const isExpired = Date.now() / 1000 > escrow.expiry;
@@ -68,15 +66,12 @@ export function MultisigEscrowView({
   };
 
   const handleExecute = async () => {
-    if (!canExecute || !claimSecret.trim()) return;
+    if (!canExecute) return;
     
     setIsExecuting(true);
     try {
-      // Convert hex string to Uint8Array
-      const secretBytes = new Uint8Array(Buffer.from(claimSecret, 'hex'));
-      await onExecute(escrow.address, secretBytes);
-      setShowClaimSecret(false);
-      setClaimSecret('');
+      // Stealth claiming doesn't need a secret - claimer signs with stealth key
+      await onExecute(escrow.address);
     } finally {
       setIsExecuting(false);
     }
@@ -235,54 +230,20 @@ export function MultisigEscrowView({
 
         {/* Execute Button */}
         {canExecute && (
-          <div className="flex items-center gap-2">
-            {!showClaimSecret ? (
-              <button
-                onClick={() => setShowClaimSecret(true)}
-                className="w-full sm:w-auto min-h-[48px] px-4 py-2 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press"
-              >
-                Execute Release
-              </button>
+          <button
+            onClick={handleExecute}
+            disabled={isExecuting}
+            className="w-full sm:w-auto min-h-[48px] px-4 py-2 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 btn-press"
+          >
+            {isExecuting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Executing...
+              </>
             ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                <input
-                  type="text"
-                  placeholder="Enter claim secret (hex)"
-                  value={claimSecret}
-                  onChange={(e) => setClaimSecret(e.target.value)}
-                  className="flex-1 min-h-[48px] px-3 py-2 border border-[var(--color-border)] text-[var(--color-text)] focus:border-[var(--color-button)] focus:ring-0 focus:outline-none transition-colors font-[family-name:var(--font-mono)] text-sm"
-                />
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={handleExecute}
-                    disabled={isExecuting || !claimSecret.trim()}
-                    className="flex-1 sm:flex-initial w-full sm:w-auto min-h-[48px] px-4 py-2 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 btn-press"
-                  >
-                    {isExecuting ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Executing...
-                      </>
-                    ) : (
-                      'Execute'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowClaimSecret(false);
-                      setClaimSecret('');
-                    }}
-                    className="flex-1 sm:flex-initial w-full sm:w-auto min-h-[48px] px-3 py-2 text-[var(--color-text-muted)] hover:text-[var(--color-button)] transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+              'Execute Release'
             )}
-          </div>
+          </button>
         )}
 
         {/* Refund Button */}

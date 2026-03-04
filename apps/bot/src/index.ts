@@ -16,8 +16,6 @@ import { mainMenu } from './keyboards.js';
 import {
   generateMetaAddress,
   encodeMetaAddress,
-  generateClaimSecret,
-  hashClaimSecret,
   bytesToHex,
 } from '@zkira/crypto';
 import { escMd2 } from './utils.js';
@@ -126,12 +124,7 @@ function createBot(token: string): Bot {
       const config = loadConfig();
       const meta = generateMetaAddress();
       const encoded = encodeMetaAddress(meta.spendPubkey, meta.viewPubkey);
-      const secret = generateClaimSecret();
-      const hash = hashClaimSecret(secret);
-      const hashHex = bytesToHex(hash);
-      const secretHex = bytesToHex(secret);
-
-      const url = `${config.payAppUrl}/pay?amount=${amount}&token=${token}&to=${encoded}&hash=${hashHex}&expiry=7`;
+      const url = `${config.payAppUrl}/pay?amount=${amount}&token=${token}&to=${encoded}&expiry=7`;
 
       // Note: API persistence skipped — bot generates crypto locally.
 

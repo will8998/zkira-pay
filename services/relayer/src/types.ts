@@ -1,34 +1,66 @@
-import { PublicKey } from '@solana/web3.js';
-
-// Request/Response types
-export interface RelayClaimRequest {
-  transaction: string; // Base64-encoded serialized transaction (partially signed by claimer)
+// Request/Response types for session routes
+export interface SessionCreateRequest {
+  address: string; // 0x EVM address
 }
 
-export interface RelayClaimResponse {
-  success: true;
-  txSignature: string;
+export interface SessionCreateResponse {
+  success: boolean;
+  address: string;
+  poolAddress: string; // Which pool was assigned
 }
 
-export interface RelayStatusResponse {
-  confirmed: boolean;
-  slot?: number;
+export interface DepositBroadcastRequest {
+  signedTransaction: string; // 0x-prefixed hex of signed tx
+}
+
+export interface WithdrawRelayRequest {
+  proof: string;           // 0x-prefixed hex (256 bytes encoded)
+  root: string;            // bytes32 hex
+  nullifierHash: string;   // bytes32 hex
+  recipient: string;       // 0x address
+  relayer: string;         // 0x address (relayer's own address)
+  fee: string;             // uint256 decimal string
+  refund: string;          // uint256 decimal string (usually "0")
+  referrer: string;        // 0x address (partner referrer, or zero address)
+  poolAddress: string;     // Which pool to withdraw from
+}
+
+export interface RelayResponse {
+  success: boolean;
+  txHash?: string;
   error?: string;
+  code?: string;
 }
 
+export interface ErrorResponse {
+  success: false;
+  error: string;
+  code: string;
+}
+
+// Balance response
+export interface BalanceResponse {
+  balance: string;
+  uiAmount: string;
+}
+
+// Pool status for monitoring
+export interface PoolStatus {
+  address: string;
+  denomination: string;
+  isPaused: boolean;
+  nextIndex: number;
+  balance: string;
+}
+
+// Health check
 export interface HealthResponse {
   status: 'healthy' | 'unhealthy';
   timestamp: number;
   version: string;
-  solanaConnection: boolean;
-  walletBalance?: number;
-}
-
-// Error response type
-export interface ErrorResponse {
-  success: false;
-  error: string;
-  code?: string;
+  arbConnection: boolean;
+  walletBalance?: string;
+  relayerAddress?: string;
 }
 
 // Rate limiting types
@@ -37,44 +69,43 @@ export interface RateLimitEntry {
   resetAt: number;
 }
 
-// Escrow account data structure (manual deserialization)
-export interface PaymentEscrow {
-  creator: PublicKey;
-  tokenMint: PublicKey;
-  amount: bigint;
-  claimHash: Uint8Array; // 32 bytes
-  recipientSpendPubkey: Uint8Array; // 32 bytes
-  recipientViewPubkey: Uint8Array; // 32 bytes
-  expiry: bigint;
-  claimed: boolean;
-  refunded: boolean;
-  nonce: bigint;
-  feeBps: number;
-  bump: number;
-  createdAt: bigint;
+// Transaction status
+export interface TransactionStatusResponse {
+  confirmed: boolean;
+  receipt?: {
+    status: number;
+    gasUsed: string;
+    effectiveGasPrice: string;
+    blockNumber: number;
+  };
+  error?: string;
 }
 
-// Protocol config data structure (manual deserialization)
-export interface ProtocolConfig {
-  admin: PublicKey;
-  feeRecipient: PublicKey;
-  feeBps: number;
-  paused: boolean;
-  bump: number;
+// === Tron-specific types ===
+
+export interface TronWithdrawRelayRequest {
+  proof: string;           // hex encoded proof
+  root: string;            // hex bytes32
+  nullifierHash: string;   // hex bytes32
+  recipient: string;       // base58 Tron address
+  relayer: string;         // base58 Tron address (relayer's own)
+  fee: string;             // uint256 decimal string
+  refund: string;          // uint256 decimal string (usually "0")
+  referrer: string;        // base58 Tron address (or zero)
+  poolAddress: string;     // base58 Tron pool address
 }
 
-// Transaction builder parameters
-export interface BuildClaimTransactionParams {
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  claimerPubkey: PublicKey;
+export interface TronRelayResponse {
+  success: boolean;
+  txId?: string;           // Tron uses txId not txHash
+  error?: string;
+  code?: string;
 }
 
-// Program constants
-export const PAYMENT_ESCROW_PROGRAM_ID = new PublicKey('DvHQCrzhL8ofNQFqxkRHnqf4Gmkejv48DCFAUMGtKHmX');
-export const GHOST_REGISTRY_PROGRAM_ID = new PublicKey('EECGiV8qMJm7BT4HpLw3KBWUAETDDB8H33jaRtTRpe5v');
-
-// PDA seed constants
-export const CONFIG_SEED = 'config';
-export const ESCROW_SEED = 'escrow';
-export const VAULT_SEED = 'vault';
+export interface TronPoolStatus {
+  address: string;         // base58
+  denomination: string;
+  isPaused: boolean;
+  nextIndex: number;
+  balance: string;
+}

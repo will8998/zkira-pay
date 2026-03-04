@@ -1,5 +1,3 @@
-import { PublicKey, Transaction } from '@solana/web3.js';
-
 // Re-export relevant types from @zkira/common
 export type {
   MetaAddress,
@@ -23,326 +21,122 @@ export type {
 } from '@zkira/crypto';
 
 /**
- * Wallet adapter interface for signing transactions.
+ * Wallet adapter interface for EVM wallets.
  */
-export interface WalletAdapter {
-  publicKey: PublicKey;
-  signTransaction: (tx: Transaction) => Promise<Transaction>;
+export interface EVMWalletAdapter {
+  /** EVM address (0x...) */
+  address: string;
+  /** Returns the hex-encoded private key */
+  getPrivateKey(): string;
 }
 
 /**
- * Result of creating a payment link.
+ * Configuration for an Arbitrum ERC20 shielded pool (Tornado Cash style).
  */
-export interface CreatePaymentLinkResult {
-  paymentUrl: string;
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  claimSecretHex: string;
-  nonce: bigint;
+export interface PoolConfig {
+  /** EVM contract address for the ERC20Pool (0x...) */
+  poolAddress: string;
+  /** ERC-20 token address (e.g., USDC on Arbitrum) */
+  tokenAddress: string;
+  /** Fixed denomination in raw token units (e.g., 100_000_000n for 100 USDC) */
+  denomination: bigint;
+  /** URL to the withdraw circuit WASM file */
+  circuitWasmUrl: string;
+  /** URL to the withdraw circuit zkey file */
+  circuitZkeyUrl: string;
+  /** Arbitrum JSON-RPC URL */
+  rpcUrl: string;
 }
 
 /**
- * Result of claiming a payment.
+ * A note representing a deposit in the shielded pool.
+ * Contains the private data needed to later withdraw.
  */
-export interface ClaimPaymentResult {
-  txSignature: string;
+export interface PoolNote {
+  nullifier: bigint;
+  secret: bigint;
+  commitment: bigint;
+  leafIndex: number;
 }
 
 /**
- * Result of refunding a payment.
+ * Result of depositing to the shielded pool.
  */
-export interface RefundPaymentResult {
-  txSignature: string;
+export interface DepositResult {
+  txHash: string;
+  note: PoolNote;
 }
 
 /**
- * Result of registering a meta-address.
+ * Result of building an unsigned deposit transaction for relay submission.
  */
-export interface RegisterMetaAddressResult {
-  txSignature: string;
-  metaAddress: PublicKey;
+export interface DepositForRelayResult {
+  /** Unsigned transaction object (ethers.js TransactionRequest format) */
+  unsignedTx: Record<string, unknown>;
+  note: PoolNote;
 }
 
 /**
- * Parameters for creating a payment link.
+ * Result of withdrawing from the shielded pool.
  */
-export interface CreatePaymentLinkParams {
-  recipientMetaAddress: string; // "zkira:ma:<hex>" encoded
-  amount: bigint;
-  tokenMint: PublicKey;
-  expirySeconds?: number; // default 7 days
+export interface WithdrawResult {
+  txHash: string;
+  nullifierHash: bigint;
 }
 
 /**
- * Parameters for claiming a payment.
+ * Encrypted receipt for shielded pool notes.
+ * Contains encrypted note data that can be decrypted with a password.
  */
-export interface ClaimPaymentParams {
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  claimerTokenAccount?: PublicKey; // auto-derive ATA if not provided
+export interface EncryptedReceipt {
+  /** Receipt format version */
+  v: 1;
+  /** Pool address (0x... EVM address) */
+  pool: string;
+  /** Denomination as string (bigint serialized) */
+  denomination: string;
+  /** AES-256-GCM encrypted payload (base64) */
+  encrypted: string;
+  /** PBKDF2 salt (base64) */
+  salt: string;
+  /** AES-GCM IV (base64) */
+  iv: string;
 }
 
 /**
- * Parameters for refunding a payment.
+ * Tornado Cash formatted proof for EVM/Solidity verification.
  */
-export interface RefundPaymentParams {
-  escrowAddress: PublicKey;
+export interface TornadoFormattedProof {
+  /** ABI-encoded proof bytes: abi.encode(uint256[2] a, uint256[2][2] b, uint256[2] c) */
+  proof: Uint8Array;
+  /** Public inputs: [root, nullifierHash, recipient, relayer, fee, refund] */
+  publicInputs: bigint[];
 }
 
 /**
- * Parameters for registering a meta-address.
+ * Deposit event data from the ERC20Pool contract.
  */
-export interface RegisterMetaAddressParams {
-  spendPubkey: Uint8Array;
-  viewPubkey: Uint8Array;
-  label?: string;
+export interface DepositEvent {
+  commitment: bigint;
+  leafIndex: number;
+  timestamp: number;
 }
 
-/**
- * Parameters for scanning for payments.
- */
-export interface ScanForPaymentsParams {
-  viewPrivkey: Uint8Array;
-  spendPubkey: Uint8Array;
-}
+// === Multi-chain types ===
 
-/**
- * Parameters for creating a register meta-address instruction.
- */
-export interface CreateRegisterMetaAddressIxParams {
-  owner: PublicKey;
-  spendPubkey: Uint8Array;
-  viewPubkey: Uint8Array;
-  label?: string;
-}
+export type { Chain, TokenId, ChainConfig, TokenInfo, PoolEntry } from './registry.js';
 
-/**
- * Parameters for creating a send to stealth instruction.
- */
-export interface CreateSendToStealthIxParams {
-  sender: PublicKey;
-  senderTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  amount: bigint;
-  stealthAddress: Uint8Array;
-  ephemeralPubkey: Uint8Array;
-  encryptedMetadata: Uint8Array;
-}
-
-/**
- * Parameters for creating a create payment instruction.
- */
-export interface CreateCreatePaymentIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  amount: bigint;
-  claimHash: Uint8Array;
-  recipientSpendPubkey: Uint8Array;
-  recipientViewPubkey: Uint8Array;
-  expiry: number; // absolute Unix timestamp (seconds)
-  nonce: bigint;
-}
-
-/**
- * Parameters for creating a claim payment instruction.
- */
-export interface CreateClaimPaymentIxParams {
-  claimer: PublicKey;
-  claimerTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  feeRecipientTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  creator: PublicKey;  // original payment creator (for rent refund)
-}
-
-/**
- * Parameters for creating a refund payment instruction.
- */
-export interface CreateRefundPaymentIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  tokenMint: PublicKey;
-}
-
-/**
- * Parameters for creating a create milestone escrow instruction.
- */
-export interface CreateCreateMilestoneEscrowIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  totalAmount: bigint;
-  claimHash: Uint8Array;
-  recipientSpendPubkey: Uint8Array;
-  recipientViewPubkey: Uint8Array;
-  expiry: number; // absolute Unix timestamp (seconds)
-  nonce: bigint;
-  milestoneAmounts: bigint[];
-}
-
-/**
- * Parameters for creating a release milestone instruction.
- */
-export interface CreateReleaseMilestoneIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  claimer: PublicKey;
-  claimerTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  milestoneIndex: number;
-  claimSecret: Uint8Array;
-  tokenMint: PublicKey;
-}
-
-/**
- * Parameters for creating a refund unreleased instruction.
- */
-export interface CreateRefundUnreleasedIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  tokenMint: PublicKey;
-}
-
-/**
- * Multisig escrow state.
- */
-export interface MultisigEscrow {
-  address: PublicKey;
-  creator: PublicKey;
-  tokenMint: PublicKey;
-  amount: bigint;
-  recipientSpendPubkey: Uint8Array;
-  recipientViewPubkey: Uint8Array;
-  claimHash: Uint8Array;
-  expiry: number;
-  approverCount: number;
-  requiredApprovals: number;
-  currentApprovals: number;
-  approvers: PublicKey[];
-  approvalBitmap: number;
-  released: boolean;
-  refunded: boolean;
-  nonce: bigint;
-  feeBps: number;
-  createdAt: number;
-}
-
-/**
- * Parameters for creating a create multisig escrow instruction.
- */
-export interface CreateCreateMultisigEscrowIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  amount: bigint;
-  claimHash: Uint8Array;
-  recipientSpendPubkey: Uint8Array;
-  recipientViewPubkey: Uint8Array;
-  expiry: number; // absolute Unix timestamp (seconds)
-  nonce: bigint;
-  approverCount: number;
-  requiredApprovals: number;
-  approvers: PublicKey[];
-}
-
-/**
- * Parameters for creating an approve release instruction.
- */
-export interface CreateApproveReleaseIxParams {
-  approver: PublicKey;
-  escrowAddress: PublicKey;
-}
-
-/**
- * Parameters for creating an execute release instruction.
- */
-export interface CreateExecuteReleaseIxParams {
-  claimer: PublicKey;
-  claimerTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  feeRecipientTokenAccount: PublicKey;
-  tokenMint: PublicKey;
-  creator: PublicKey; // original escrow creator (for rent refund)
-}
-
-/**
- * Parameters for creating a refund multisig escrow instruction.
- */
-export interface CreateRefundMultisigEscrowIxParams {
-  creator: PublicKey;
-  creatorTokenAccount: PublicKey;
-  escrowAddress: PublicKey;
-  tokenMint: PublicKey;
-}
-
-/**
- * Parameters for creating a multisig escrow.
- */
-export interface CreateMultisigEscrowParams {
-  recipientMetaAddress: string; // "zkira:ma:<hex>" encoded
-  amount: bigint;
-  tokenMint: PublicKey;
-  expirySeconds?: number; // default 7 days
-  requiredApprovals: number;
-  approvers: PublicKey[];
-}
-
-/**
- * Result of creating a multisig escrow.
- */
-export interface CreateMultisigEscrowResult {
-  escrowUrl: string;
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  claimSecretHex: string;
-  nonce: bigint;
-}
-
-/**
- * Parameters for approving a multisig release.
- */
-export interface ApproveMultisigReleaseParams {
-  escrowAddress: PublicKey;
-}
-
-/**
- * Result of approving a multisig release.
- */
-export interface ApproveMultisigReleaseResult {
-  txSignature: string;
-}
-
-/**
- * Parameters for executing a multisig release.
- */
-export interface ExecuteMultisigReleaseParams {
-  escrowAddress: PublicKey;
-  claimSecret: Uint8Array;
-  claimerTokenAccount?: PublicKey; // auto-derive ATA if not provided
-}
-
-/**
- * Result of executing a multisig release.
- */
-export interface ExecuteMultisigReleaseResult {
-  txSignature: string;
-}
-
-/**
- * Parameters for refunding a multisig escrow.
- */
-export interface RefundMultisigEscrowParams {
-  escrowAddress: PublicKey;
-}
-
-/**
- * Result of refunding a multisig escrow.
- */
-export interface RefundMultisigEscrowResult {
-  txSignature: string;
+export interface TronPoolConfig {
+  /** Tron full host (e.g., https://api.trongrid.io) */
+  tronFullHost: string;
+  /** Pool contract address (base58 Tron address) */
+  poolAddress: string;
+  /** USDT token address (base58 Tron address) */
+  tokenAddress: string;
+  /** Denomination in raw units */
+  denomination: bigint;
+  /** Path to withdraw circuit WASM */
+  circuitWasmUrl: string;
+  /** Path to withdraw circuit zkey */
+  circuitZkeyUrl: string;
 }

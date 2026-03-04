@@ -232,6 +232,9 @@ export default function APIReferencePage() {
       <section id="sdk-reference" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
           <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">SDK Reference</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+            TypeScript SDK with ZkiraClient for confidential payments and ShieldedPoolClient for privacy pools.
+          </p>
           
           <div className="mb-6">
             <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">ZkiraClient Class</h3>
@@ -255,9 +258,9 @@ export default function APIReferencePage() {
                   
                   <div>
                     <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                      claimPayment(params: ClaimPaymentParams): Promise&lt;ClaimPaymentResult&gt;
+                      claimStealth(params: ClaimStealthParams): Promise&lt;ClaimStealthResult&gt;
                     </code>
-                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Claim a payment from escrow to recipient wallet</p>
+                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Claim a stealth payment from escrow to recipient wallet</p>
                   </div>
                   
                   <div>
@@ -265,13 +268,6 @@ export default function APIReferencePage() {
                       refundPayment(params: RefundPaymentParams): Promise&lt;RefundPaymentResult&gt;
                     </code>
                     <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Refund an unclaimed payment back to creator</p>
-                  </div>
-                  
-                  <div>
-                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                      registerMetaAddress(params: RegisterMetaAddressParams): Promise&lt;RegisterMetaAddressResult&gt;
-                    </code>
-                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Register a meta-address for payment announcements</p>
                   </div>
                   
                   <div>
@@ -306,6 +302,167 @@ export default function APIReferencePage() {
         </div>
       </section>
 
+      {/* ShieldedPoolClient SDK */}
+      <section id="shielded-pool-client" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">ShieldedPoolClient SDK</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+            Privacy-focused client for shielded deposits and private withdrawals using zero-knowledge proofs.
+          </p>
+          
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">ShieldedPoolClient Class</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Constructor</h4>
+                <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                  new ShieldedPoolClient(connection: Connection, wallet: WalletAdapter, poolConfig: PoolConfig, options?: ClientOptions)
+                </code>
+                <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Initialize client with Solana connection, wallet, and pool configuration</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Methods</h4>
+                <div className="space-y-3">
+                  <div>
+                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                      deposit(tokenMint: PublicKey): Promise&lt;DepositResult&gt;
+                    </code>
+                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Create a shielded deposit - generates commitment and encrypted note for withdrawal</p>
+                  </div>
+                  
+                  <div>
+                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                      withdraw(note: string, recipient: PublicKey): Promise&lt;{'{'}txSignature: string{'}'}&gt;
+                    </code>
+                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Private withdrawal - generates ZK proof (~3 seconds) and queues withdrawal for batched processing</p>
+                  </div>
+                  
+                  <div>
+                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                      getPoolState(): Promise&lt;PoolState&gt;
+                    </code>
+                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Get current pool statistics including total deposits and pending withdrawals</p>
+                  </div>
+                  
+                  <div>
+                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                      rebuildTree(): Promise&lt;void&gt;
+                    </code>
+                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Rebuild local Merkle tree from on-chain commitments (required after extended offline periods)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">TypeScript Interfaces</h3>
+            <div className="space-y-3">
+              <CodeBlock 
+                code={`interface PoolConfig {
+  programId: PublicKey;     // Shielded pool program ID
+  tokenMint: PublicKey;     // Token mint (e.g., USDC)
+  denomination: number;     // Fixed deposit amount in lamports
+}
+
+interface PoolState {
+  totalDeposits: number;        // Total number of deposits
+  pendingWithdrawals: number;   // Queued withdrawals count
+  merkleRoot: string;           // Current Merkle tree root
+}
+
+interface DepositResult {
+  txSignature: string;  // Transaction signature
+  note: string;         // Encrypted note (save securely for withdrawal)
+}`} 
+                language="typescript"
+                title="ShieldedPoolClient Types"
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">Usage Example</h3>
+            <CodeBlock 
+              code={`import { ShieldedPoolClient } from '@zkira/sdk';
+import { Connection, PublicKey } from '@solana/web3.js';
+
+// Initialize client
+const poolClient = new ShieldedPoolClient(connection, wallet, {
+  programId: SHIELDED_POOL_PROGRAM_ID,
+  tokenMint: USDC_MINT,
+  denomination: 10_000_000, // 10 USDC
+});
+
+// Shielded deposit
+const { txSignature, note } = await poolClient.deposit(USDC_MINT);
+console.log('Deposit confirmed:', txSignature);
+// IMPORTANT: Save 'note' securely - needed for withdrawal
+
+// Private withdrawal (generates ZK proof)
+const result = await poolClient.withdraw(note, recipientAddress);
+console.log('Withdrawal queued:', result.txSignature);
+// Funds arrive within ~1 hour via batched processing
+
+// Check pool state
+const state = await poolClient.getPoolState();
+console.log('Pool deposits:', state.totalDeposits);`} 
+              language="typescript"
+              title="ShieldedPoolClient Example"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy Transport */}
+      <section id="privacy-transport" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Privacy Transport</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+            Enhanced privacy transport layer using Nym mixnet for metadata protection.
+          </p>
+          
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">createPrivateTransport Function</h3>
+            <div className="space-y-4">
+              <div>
+                <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
+                  createPrivateTransport(): Promise&lt;Transport&gt;
+                </code>
+                <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">Creates Nym mixnet transport for enhanced metadata privacy, falls back to direct connection if mixnet unavailable</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">Usage Example</h3>
+            <CodeBlock 
+              code={`import { createPrivateTransport, ShieldedPoolClient, ZkiraClient } from '@zkira/sdk';
+
+// Create privacy transport
+const transport = await createPrivateTransport();
+
+// Use with ShieldedPoolClient
+const poolClient = new ShieldedPoolClient(connection, wallet, poolConfig, {
+  transport
+});
+
+// Use with ZkiraClient
+const zkiraClient = new ZkiraClient(connection, wallet, {
+  transport
+});
+
+// All network requests now route through Nym mixnet
+// for enhanced metadata privacy and traffic analysis resistance`} 
+              language="typescript"
+              title="Privacy Transport Example"
+            />
+          </div>
+        </div>
+      </section>
+
+
       {/* Webhooks */}
       <section id="webhooks" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
@@ -321,6 +478,9 @@ export default function APIReferencePage() {
                 <li>• <code>payment.completed</code> - Payment claimed by recipient</li>
                 <li>• <code>payment.expired</code> - Payment expired without claim</li>
                 <li>• <code>escrow.claimed</code> - Escrow successfully claimed</li>
+                <li>• <code>pool.deposited</code> - Shielded deposit confirmed</li>
+                <li>• <code>pool.withdrawal_queued</code> - Private withdrawal proof verified, queued for processing</li>
+                <li>• <code>pool.withdrawal_processed</code> - Batched withdrawal executed on-chain</li>
               </ul>
             </div>
           </div>

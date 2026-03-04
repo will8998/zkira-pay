@@ -7,6 +7,10 @@ import { CommandPaletteProvider, CommandPalette } from '@/components/CommandPale
 import { Toaster } from 'sonner';
 import './globals.css';
 import { BottomTabBar } from '@/components/BottomTabBar';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+import { isRtl } from '@/i18n/config';
+import type { Locale } from '@/i18n/config';
 
 const chakraPetch = Chakra_Petch({
   subsets: ['latin'],
@@ -46,13 +50,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale() as Locale;
+  const messages = await getMessages();
+  const dir = isRtl(locale) ? 'rtl' : 'ltr';
+
   return (
-    <html lang="en" data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
+    <html lang={locale} dir={dir} data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
         <div className="scanlines" />
         <video
@@ -65,28 +73,30 @@ export default function RootLayout({
           <source src="/huly_laser_remix.webm" type="video/webm" />
           <source src="/huly_laser_remix.mp4" type="video/mp4" />
         </video>
-        <NetworkProvider>
-          <WalletContextProvider>
-            <CommandPaletteProvider>
-              <div className="relative z-10 flex flex-col h-dvh overflow-hidden">
-                <TopBar />
-                <Toaster
-                  position="top-center"
-                  richColors
-                  theme="dark"
-                  toastOptions={{
-                    className: 'font-[family-name:var(--font-sans)]',
-                  }}
-                />
-                <main className="flex-1 overflow-y-auto bg-[var(--bg-main)] pb-20 md:pb-0">
-                  {children}
-                </main>
-              </div>
-              <CommandPalette />
-            </CommandPaletteProvider>
-            <BottomTabBar />
-          </WalletContextProvider>
-        </NetworkProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <NetworkProvider>
+            <WalletContextProvider>
+              <CommandPaletteProvider>
+                <div className="relative z-10 flex flex-col h-dvh overflow-hidden">
+                  <TopBar />
+                  <Toaster
+                    position="top-center"
+                    richColors
+                    theme="dark"
+                    toastOptions={{
+                      className: 'font-[family-name:var(--font-sans)]',
+                    }}
+                  />
+                  <main className="flex-1 overflow-y-auto bg-[var(--bg-main)] pb-20 md:pb-0">
+                    {children}
+                  </main>
+                </div>
+                <CommandPalette />
+              </CommandPaletteProvider>
+              <BottomTabBar />
+            </WalletContextProvider>
+          </NetworkProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

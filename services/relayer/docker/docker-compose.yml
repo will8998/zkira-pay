@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  relayer-tor:
+    build:
+      context: ../../..
+      dockerfile: services/relayer/docker/Dockerfile.tor
+    ports:
+      - "3013:3013"
+    environment:
+      - NODE_ENV=production
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      - RELAYER_PRIVATE_KEY=${RELAYER_PRIVATE_KEY}
+      - PORT=3013
+    volumes:
+      - tor-data:/var/lib/tor/hidden_service
+    restart: unless-stopped
+
+volumes:
+  tor-data:
+    driver: local

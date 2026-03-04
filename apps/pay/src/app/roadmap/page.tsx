@@ -1,14 +1,16 @@
 'use client';
 
 import { PageHeader } from '@/components/PageHeader';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export default function RoadmapPage() {
+  const t = useTranslations('roadmapPage');
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
-        title="Roadmap" 
-        description="Our journey from private devnet to public TGE and beyond" 
+        title={t('title')} 
+        description={t('description')} 
       />
 
       {/* Hero Section */}
@@ -60,6 +62,10 @@ export default function RoadmapPage() {
                 <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Escrow services</li>
                 <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Invoice creation</li>
                 <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Points earning system</li>
+                <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Shielded pool deposits & withdrawals</li>
+                <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Zero-knowledge proof verification (Groth16)</li>
+                <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Tor hidden service & Nym privacy network</li>
+                <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Batched timing defenses & protocol decoys</li>
               </ul>
             </div>
             <div>
@@ -110,6 +116,9 @@ export default function RoadmapPage() {
                     <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Stealth address payments live</li>
                     <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Points programme active — earn rewards for usage</li>
                     <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Community building & early adopter rewards</li>
+                    <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Shielded pool with ZK proof verification</li>
+                    <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Privacy transport (Tor + Nym mixnet)</li>
+                    <li className="text-[13px] text-[var(--color-muted)] leading-relaxed">• Timing defense system (soak time, batch processing, decoys)</li>
                   </ul>
                 </div>
               </div>

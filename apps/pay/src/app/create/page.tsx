@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useWallet, useConnection } from '@/components/WalletProvider';
 import { PublicKey } from '@solana/web3.js';
 import { ZkiraClient } from '@zkira/sdk';
@@ -10,9 +11,11 @@ import { generateMetaAddress, encodeMetaAddress } from '@zkira/crypto';
 import { CreatePaymentForm } from '@/components/CreatePaymentForm';
 import { PaymentSuccess } from '@/components/PaymentSuccess';
 import { PageHeader } from '@/components/PageHeader';
-import { encryptAndStore } from '@/lib/payment-link-crypto';
+import { encryptAndStore, storeEncryptedData, retrieveEncryptedData } from '@/lib/payment-link-crypto';
 
 export default function CreatePage() {
+  const t = useTranslations('createPage');
+  const tCommon = useTranslations('common');
   const { connected, publicKey, signTransaction, signMessage } = useWallet();
   const { connection } = useConnection();
   const [isLoading, setIsLoading] = useState(false);
@@ -55,34 +58,64 @@ export default function CreatePage() {
         expirySeconds,
       });
 
-      // Record transaction in localStorage
+      // Encrypt and store transaction in localStorage
       try {
-        const existing = JSON.parse(localStorage.getItem('zkira_transactions') || '[]');
-        existing.push({
-          type: 'sent',
-          amount: String(amount),
-          tokenMint: data.tokenMint,
-          txSignature: result.claimSecretHex ? 'pending' : '',
-          escrowAddress: result.escrowAddress.toBase58(),
-          timestamp: new Date().toISOString(),
-          status: 'pending',
-        });
-        localStorage.setItem('zkira_transactions', JSON.stringify(existing));
+        if (signMessage) {
+          const existing = await retrieveEncryptedData<any>('zkira_transactions', signMessage, publicKey.toBase58()) || [];
+          existing.push({
+            type: 'sent',
+            amount: String(amount),
+            tokenMint: data.tokenMint,
+            txSignature: 'pending',
+            escrowAddress: result.escrowAddress.toBase58(),
+            timestamp: new Date().toISOString(),
+            status: 'pending',
+          });
+          await storeEncryptedData('zkira_transactions', existing, signMessage, publicKey.toBase58());
+        }
       } catch (e) {
-        console.error('Failed to save transaction:', e);
+        // Fallback to unencrypted if encryption fails
+        try {
+          const existing = JSON.parse(localStorage.getItem('zkira_transactions') || '[]');
+          existing.push({
+            type: 'sent',
+            amount: String(amount),
+            tokenMint: data.tokenMint,
+            txSignature: 'pending',
+            escrowAddress: result.escrowAddress.toBase58(),
+            timestamp: new Date().toISOString(),
+            status: 'pending',
+          });
+          localStorage.setItem('zkira_transactions', JSON.stringify(existing));
+        } catch (fallbackErr) {
+          // Silent fallback
+        }
       }
 
-      // Persist payment link URL so user can copy/resend from history
+      // Encrypt and store payment link in localStorage
       try {
-        const paymentLinks = JSON.parse(localStorage.getItem('zkira_payment_links') || '[]');
-        paymentLinks.push({
-          escrowAddress: result.escrowAddress.toBase58(),
-          paymentUrl: `${window.location.origin}${result.paymentUrl}`,
-          createdAt: new Date().toISOString(),
-        });
-        localStorage.setItem('zkira_payment_links', JSON.stringify(paymentLinks));
+        if (signMessage) {
+          const paymentLinks = await retrieveEncryptedData<any>('zkira_payment_links', signMessage, publicKey.toBase58()) || [];
+          paymentLinks.push({
+            escrowAddress: result.escrowAddress.toBase58(),
+            paymentUrl: `${window.location.origin}${result.paymentUrl}`,
+            createdAt: new Date().toISOString(),
+          });
+          await storeEncryptedData('zkira_payment_links', paymentLinks, signMessage, publicKey.toBase58());
+        }
       } catch (e) {
-        console.error('Failed to save payment link:', e);
+        // Fallback to unencrypted if encryption fails
+        try {
+          const paymentLinks = JSON.parse(localStorage.getItem('zkira_payment_links') || '[]');
+          paymentLinks.push({
+            escrowAddress: result.escrowAddress.toBase58(),
+            paymentUrl: `${window.location.origin}${result.paymentUrl}`,
+            createdAt: new Date().toISOString(),
+          });
+          localStorage.setItem('zkira_payment_links', JSON.stringify(paymentLinks));
+        } catch (fallbackErr) {
+          // Silent fallback
+        }
       }
 
       // Encrypt and store on server (non-blocking, best-effort)
@@ -100,7 +133,7 @@ export default function CreatePage() {
 
       setPaymentUrl(`${window.location.origin}${result.paymentUrl}`);
       setCreatedAmount(data.amount);
-      toast.success('Payment link created');
+      toast.success(t('paymentCreated'));
     } catch (err) {
       console.error('Failed to create payment:', err);
       setError(getErrorMessage(err));
@@ -113,7 +146,7 @@ export default function CreatePage() {
   if (paymentUrl) {
     return (
       <div className="px-4 py-4 md:px-6 md:py-6 max-w-2xl mx-auto animate-fade-in">
-        <PageHeader title="Send Payment" description="Payment created successfully" />
+        <PageHeader title={t('title')} description={t('successDescription')} />
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 md:p-6">
           <PaymentSuccess type="created" paymentUrl={paymentUrl} amount={createdAmount} senderAddress={publicKey?.toBase58()} />
         </div>
@@ -123,11 +156,11 @@ export default function CreatePage() {
 
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-2xl mx-auto animate-fade-in">
-      <PageHeader title="Send Payment" description="Generate a confidential payment link" />
+      <PageHeader title={t('title')} description={t('description')} />
 
       {!connected && (
         <div className="border-l-2 border-[var(--color-green)] bg-[var(--color-surface)] px-4 py-3 mb-6">
-          <p className="text-[var(--color-text-secondary)] text-sm">Connect your Solana wallet to create a confidential payment. Your wallet signs the transaction — we never store your keys.</p>
+          <p className="text-[var(--color-text-secondary)] text-sm">{t('connectNotice')}</p>
         </div>
       )}
 

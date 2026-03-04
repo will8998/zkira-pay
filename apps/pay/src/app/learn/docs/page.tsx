@@ -41,7 +41,7 @@ export default function DocsPage() {
                 </li>
                 <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
                   <span className="text-[var(--color-accent)] mt-1">•</span>
-                  <span><strong>Payment Escrows:</strong> Secure fund holding with claim secrets and expiry mechanisms</span>
+                  <span><strong>Payment Escrows:</strong> Secure fund holding with stealth address claiming and expiry mechanisms</span>
                 </li>
                 <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
                   <span className="text-[var(--color-accent)] mt-1">•</span>
@@ -55,6 +55,22 @@ export default function DocsPage() {
                   <span className="text-[var(--color-accent)] mt-1">•</span>
                   <span><strong>Batch Payments:</strong> Process multiple payments efficiently in single transactions</span>
                 </li>
+                <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
+                  <span className="text-[var(--color-accent)] mt-1">•</span>
+                  <span><strong>Shielded Pool:</strong> Fixed-denomination deposits with zero-knowledge proof withdrawals for enhanced privacy</span>
+                </li>
+                <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
+                  <span className="text-[var(--color-accent)] mt-1">•</span>
+                  <span><strong>ZK Proofs:</strong> Groth16 zero-knowledge proofs for private fund withdrawals without revealing deposit history</span>
+                </li>
+                <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
+                  <span className="text-[var(--color-accent)] mt-1">•</span>
+                  <span><strong>Privacy Transport:</strong> Tor hidden service and Nym mixnet integration for network-level anonymity</span>
+                </li>
+                <li className="text-[var(--color-text-secondary)] text-sm flex items-start gap-2">
+                  <span className="text-[var(--color-accent)] mt-1">•</span>
+                  <span><strong>Timing Defenses:</strong> Soak times, Poisson batching, and decoy transactions to prevent timing analysis</span>
+                </li>
               </ul>
             </div>
           </div>
@@ -62,15 +78,17 @@ export default function DocsPage() {
           <div>
             <h3 className="text-base font-medium text-[var(--color-text)] mb-2">How It Works</h3>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
-              ZKIRA Pay operates through a three-step process: First, the sender derives a one-time stealth address using the recipient's 
+              ZKIRA Pay operates through multiple layers of privacy protection: First, the sender derives a one-time stealth address using the recipient's 
               published meta-address (a pair of public keys). The funds are then locked in an escrow account controlled by this stealth 
-              address, with a claim secret embedded in the payment link. Finally, the recipient scans for incoming payments using their 
+              address. For enhanced privacy, users can deposit funds into the shielded pool, which uses zero-knowledge proofs and fixed 
+              denominations to break transaction linkability. Finally, the recipient scans for incoming payments using their 
               view key, identifies payments addressed to them, and claims the funds using the derived stealth private key.
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
-              This architecture ensures that only the sender and recipient are aware of the payment relationship, while observers see 
+              This multi-layered architecture ensures that only the sender and recipient are aware of the payment relationship, while observers see 
               only seemingly random addresses and transactions. The protocol maintains a transparent audit trail for compliance while 
-              protecting user privacy through cryptographic unlinkability.
+              protecting user privacy through cryptographic unlinkability, network-level anonymity via Tor and Nym mixnet, and timing 
+              defenses that prevent correlation attacks.
             </p>
           </div>
 
@@ -203,27 +221,11 @@ const client = new ZkiraClient(connection, wallet);`}
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               The claiming process is designed to be atomic and secure, preventing front-running attacks and ensuring that only the legitimate 
-              recipient can access the funds. The protocol includes additional safeguards such as claim secrets and time-locked refund 
+              recipient can access the funds. The protocol includes additional safeguards such as stealth address verification and time-locked refund 
               mechanisms to handle edge cases and provide recourse for failed transactions.
             </p>
           </div>
 
-          <div>
-            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Meta-Address Registration</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
-              Register your stealth meta-address to receive private payments:
-            </p>
-            
-            <CodeBlock 
-              code={`const result = await client.registerMetaAddress({
-  spendPubkey: spendKeypair.publicKey.toBytes(),
-  viewPubkey: viewKeypair.publicKey.toBytes(),
-  label: 'My Stealth Address',
-});`}
-              language="typescript"
-              title="Meta-Address Registration"
-            />
-          </div>
         </div>
       </section>
 
@@ -242,9 +244,8 @@ const client = new ZkiraClient(connection, wallet);`}
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               During payment creation, the protocol generates several critical components: the ephemeral keypair for ECDH, the derived 
-              stealth address, the escrow account to hold funds, and a claim secret that serves as an additional authentication factor. 
-              These components work together to ensure that funds can only be accessed by someone with knowledge of both the recipient's 
-              private keys and the claim secret, providing defense-in-depth security.
+              stealth address, and the escrow account to hold funds. The stealth address cryptographically ensures that funds can only be 
+              accessed by the intended recipient who possesses the corresponding stealth private key, providing robust security.
             </p>
             
             <CodeBlock 
@@ -264,13 +265,13 @@ const payment = await client.createPaymentLink({
             <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Payment Link Generation</h3>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               Once the payment escrow is created and funds are locked, ZKIRA Pay generates a claim URL that can be safely shared with 
-              the recipient through any communication channel. The claim URL contains the escrow address in the path and the claim secret 
-              in the URL fragment (after the # symbol), ensuring that the secret is never transmitted to servers and remains client-side only.
+              the recipient through any communication channel. The claim URL contains the escrow address, allowing the recipient to 
+              identify and claim their payment using their stealth private key.
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               This design allows for flexible payment distribution - senders can share payment links via email, messaging apps, QR codes, 
-              or any other communication method. The URL structure ensures that even if communication channels are monitored, the claim 
-              secret remains protected through browser security mechanisms that prevent URL fragments from being included in HTTP requests.
+              or any other communication method. The stealth address system ensures that only the intended recipient can identify and claim 
+              the payment, providing privacy without requiring additional secrets or authentication factors.
             </p>
           </div>
 
@@ -278,21 +279,19 @@ const payment = await client.createPaymentLink({
             <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Claiming a Payment</h3>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               Recipients claim payments by accessing the payment link and using their wallet to interact with the ZKIRA client. The 
-              claiming process involves several verification steps: first, the client extracts the claim secret from the URL fragment; 
-              second, it identifies the stealth address and derives the corresponding private key using the recipient's spend key; 
-              finally, it constructs and submits a transaction that transfers the escrowed funds to the recipient's chosen destination address.
+              claiming process involves deriving the stealth private key from the recipient's spend key and the payment's ephemeral public key, 
+              then constructing and submitting a transaction that transfers the escrowed funds to the recipient's chosen destination address.
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
-              The claiming transaction includes cryptographic proofs that verify both the recipient's ownership of the stealth address 
-              and their knowledge of the claim secret. This dual-factor authentication ensures that funds cannot be claimed by unauthorized 
-              parties even if they gain access to either the claim URL or the recipient's keys independently.
+              The claiming transaction includes cryptographic proofs that verify the recipient's ownership of the stealth address 
+              through their possession of the corresponding stealth private key. This ensures that funds cannot be claimed by unauthorized 
+              parties who do not possess the recipient's private keys.
             </p>
             
             <CodeBlock 
               code={`// Claim payment
-const claim = await client.claimPayment({
+const claim = await client.claimStealth({
   escrowAddress: payment.escrowAddress,
-  claimSecret: payment.claimSecret,
 });`}
               language="typescript"
               title="Payment Claiming"
@@ -423,14 +422,14 @@ const refund = await client.refundPayment({
             </div>
 
             <p className="text-[var(--color-text-secondary)] text-sm mb-3 leading-relaxed">
-              <strong>Returns:</strong> Promise&lt;{`{escrowAddress: string, claimUrl: string, claimSecret: string}`}&gt;
+              <strong>Returns:</strong> Promise&lt;{`{escrowAddress: string, claimUrl: string, stealthAddress: string}`}&gt;
             </p>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-[var(--color-text)] mb-3">claimPayment(params)</h4>
+            <h4 className="text-sm font-medium text-[var(--color-text)] mb-3">claimStealth(params)</h4>
             <p className="text-[var(--color-text-secondary)] text-sm mb-3 leading-relaxed">
-              Claims a payment from an escrow using the recipient's private keys and claim secret.
+              Claims a payment from an escrow using the recipient's stealth private key.
             </p>
             
             <div className="bg-[var(--color-hover)] p-4 mb-4">
@@ -449,9 +448,9 @@ const refund = await client.refundPayment({
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Payment escrow account address</td>
                   </tr>
                   <tr>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">claimSecret</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">string</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Secret from payment URL fragment</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">claimerTokenAccount</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">PublicKey (optional)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Destination token account (auto-derived if not provided)</td>
                   </tr>
                 </tbody>
               </table>
@@ -492,45 +491,6 @@ const refund = await client.refundPayment({
             </p>
           </div>
 
-          <div>
-            <h4 className="text-sm font-medium text-[var(--color-text)] mb-3">registerMetaAddress(params)</h4>
-            <p className="text-[var(--color-text-secondary)] text-sm mb-3 leading-relaxed">
-              Registers a stealth meta-address on-chain for receiving private payments.
-            </p>
-            
-            <div className="bg-[var(--color-hover)] p-4 mb-4">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-[var(--color-hover)]">
-                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Parameter</th>
-                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Type</th>
-                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-[var(--border-subtle)]">
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">spendPubkey</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Uint8Array</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Public key for spending funds</td>
-                  </tr>
-                  <tr className="border-b border-[var(--border-subtle)]">
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">viewPubkey</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Uint8Array</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Public key for scanning payments</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">label</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">string</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Human-readable label</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <p className="text-[var(--color-text-secondary)] text-sm mb-3 leading-relaxed">
-              <strong>Returns:</strong> Promise&lt;{`{signature: string, metaAddress: string}`}&gt;
-            </p>
-          </div>
 
           <div>
             <h4 className="text-sm font-medium text-[var(--color-text)] mb-3">scanForPayments(params)</h4>
@@ -585,11 +545,6 @@ const refund = await client.refundPayment({
                 </thead>
                 <tbody>
                   <tr className="border-b border-[var(--border-subtle)]">
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">findMetaAddress</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives meta-address PDA</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">owner: PublicKey</td>
-                  </tr>
-                  <tr className="border-b border-[var(--border-subtle)]">
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">findEscrow</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives escrow PDA</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">creator: PublicKey, nonce: number</td>
@@ -599,10 +554,25 @@ const refund = await client.refundPayment({
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives escrow vault PDA</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">escrow: PublicKey</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">findConfig</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives protocol config PDA</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">None</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">findPoolState</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives shielded pool state PDA</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">None</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">findDepositLeaf</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives deposit leaf PDA in Merkle tree</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">commitment: PublicKey</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">findWithdrawalQueue</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Derives withdrawal queue PDA</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">batch: number</td>
                   </tr>
                 </tbody>
               </table>
@@ -820,8 +790,8 @@ function PaymentButton() {
             </p>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
               The program handles payment creation by validating sender credentials, locking funds in secure vault accounts, and 
-              recording necessary metadata for claim verification. During claiming operations, it verifies both stealth address 
-              ownership and claim secret knowledge through cryptographic proofs, ensuring dual-factor authentication for fund access. 
+              recording necessary metadata for claim verification. During claiming operations, it verifies stealth address 
+              ownership through cryptographic proofs of the stealth private key, ensuring secure authentication for fund access.
               The refund mechanism provides time-locked recovery for expired payments while preventing abuse through careful validation 
               of refund eligibility.
             </p>
@@ -830,6 +800,28 @@ function PaymentButton() {
               stealth address validation, support for multiple SPL tokens through standardized interfaces, and comprehensive event 
               logging for payment tracking and analytics. The program implements strict state machine logic to ensure payment 
               integrity and prevent double-spending or other attack vectors.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Shielded Pool Program</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The Shielded Pool program implements zero-knowledge privacy features that provide enhanced anonymity beyond stealth 
+              addresses alone. It manages fixed-denomination deposits (10 USDC) that break the link between deposit and withdrawal 
+              amounts, using a Poseidon Merkle tree to store cryptographic commitments and Groth16 zero-knowledge proofs for 
+              private withdrawals without revealing which specific deposit is being claimed.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The program maintains a 20-level Merkle tree where each leaf represents a deposit commitment computed as 
+              Poseidon(nullifier, secret). When users withdraw, they generate a Groth16 proof demonstrating knowledge of valid 
+              secret values without revealing which commitment corresponds to their deposit. The on-chain verification process 
+              consumes less than 200,000 compute units, making it efficient for Solana's execution environment.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Key security features include mandatory 6-hour soak times to prevent rapid deposit-withdrawal cycles, Poisson-distributed 
+              batch processing for withdrawal timing privacy, and integration with the protocol's decoy transaction system. The program 
+              also implements nullifier tracking to prevent double-spending and provides efficient tree rebuilding mechanisms for 
+              optimal proof generation performance.
             </p>
           </div>
 
@@ -953,11 +945,6 @@ function PaymentButton() {
                 <tbody>
                   <tr className="border-b border-[var(--border-subtle)]">
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Ghost Registry</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">RegisterMetaAddress</td>
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Register stealth meta-address</td>
-                  </tr>
-                  <tr className="border-b border-[var(--border-subtle)]">
-                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Ghost Registry</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">AnnouncePayment</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Record stealth address announcement</td>
                   </tr>
@@ -995,6 +982,579 @@ function PaymentButton() {
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Multisig Escrow</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">ApproveTransaction</td>
                     <td className="py-2 px-3 text-[var(--color-text-secondary)]">Add signature approval</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: Shielded Pool */}
+      <section id="shielded-pool" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Shielded Pool</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Understanding Shielded Deposits</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The Shielded Pool provides an additional layer of privacy beyond stealth addresses by implementing fixed-denomination 
+              deposits that break the link between deposit and withdrawal amounts. Users deposit exactly 10 USDC into the pool, 
+              receiving an encrypted note that proves their deposit without revealing their identity. This creates a large anonymity 
+              set where all deposits look identical, making it impossible to trace specific funds through the pool.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The pool uses a Poseidon Merkle tree to store cryptographic commitments of each deposit. When you deposit, your 
+              commitment (a hash of your secret values) is added to the tree, but the actual secret values remain private. This 
+              mathematical structure allows you to later prove you made a valid deposit without revealing which specific deposit 
+              was yours, providing strong privacy guarantees through zero-knowledge cryptography.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Making a Shielded Deposit</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Creating a shielded deposit is straightforward - simply specify the token you want to deposit (currently USDC) and 
+              the SDK handles all the complex cryptography. Behind the scenes, the system generates a random nullifier and secret, 
+              computes your commitment using the Poseidon hash function, and submits it to the Merkle tree. You receive an encrypted 
+              note containing your secret values that you'll need for withdrawal.
+            </p>
+            
+            <CodeBlock 
+              code={`// Create shielded deposit
+const poolClient = new ShieldedPoolClient(connection, wallet, poolConfig);
+
+// Deposit 10 USDC into the pool
+const { txSignature, note } = await poolClient.deposit(USDC_MINT);
+
+// Save the encrypted note securely - you need this to withdraw!
+console.log('Deposit successful:', txSignature);
+console.log('Withdrawal note:', note); // Keep this safe!`}
+              language="typescript"
+              title="Shielded Pool Deposit"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Zero-Knowledge Proof Generation</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              When withdrawing from the shielded pool, you must generate a zero-knowledge proof that demonstrates you made a valid 
+              deposit without revealing which deposit was yours. The system uses Groth16 proofs, which are compact and fast to verify 
+              on-chain (under 200,000 compute units). The proof generation happens locally in your browser and takes about 3 seconds.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The proof verifies several things: that you know the secret values for a commitment in the Merkle tree, that you 
+              haven't already withdrawn these funds (nullifier hasn't been used), and that you're withdrawing to a valid address. 
+              All of this verification happens without revealing your original deposit, providing mathematical privacy guarantees.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Private Withdrawals</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Withdrawals from the shielded pool are processed in batches approximately every hour to provide additional timing 
+              privacy. When you initiate a withdrawal, your request joins a queue with other users' withdrawals, and they're all 
+              processed together. This batching makes it difficult for observers to correlate specific deposits with withdrawals 
+              based on timing patterns.
+            </p>
+            
+            <CodeBlock 
+              code={`// Withdraw from shielded pool
+// Note: This queues the withdrawal for batch processing
+const result = await poolClient.withdraw(note, recipientAddress);
+
+console.log('Withdrawal queued:', result.queuePosition);
+console.log('Estimated processing time: ~1 hour');
+
+// Check pool statistics
+const state = await poolClient.getPoolState();
+console.log('Total deposits:', state.totalDeposits);
+console.log('Pending withdrawals:', state.pendingWithdrawals);`}
+              language="typescript"
+              title="Shielded Pool Withdrawal"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Pool Management</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The shielded pool maintains a Merkle tree of all deposits and requires periodic maintenance to ensure optimal 
+              performance. The tree can be rebuilt when needed to optimize proof generation times, and the pool tracks various 
+              statistics to help users understand anonymity set sizes and processing times.
+            </p>
+            
+            <CodeBlock 
+              code={`// Pool maintenance and statistics
+// Rebuild Merkle tree for optimal performance
+await poolClient.rebuildTree();
+
+// Get detailed pool state
+const state = await poolClient.getPoolState();
+console.log('Anonymity set size:', state.totalDeposits);
+console.log('Tree height:', state.treeHeight);
+console.log('Next batch processing:', state.nextBatchTime);`}
+              language="typescript"
+              title="Pool Management"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Security Considerations</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The shielded pool implements several security measures to protect user privacy and funds. The 6-hour minimum soak 
+              time prevents rapid deposit-withdrawal cycles that could be used for timing analysis. The fixed denomination ensures 
+              all deposits look identical, and the Groth16 proof system provides cryptographic guarantees that only valid deposit 
+              holders can withdraw funds.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Users should securely store their withdrawal notes, as losing the note means losing access to deposited funds. The 
+              system cannot recover lost notes since the privacy guarantees depend on the protocol not having access to user secrets. 
+              Always backup your notes in multiple secure locations before making deposits.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 8: Privacy Transport */}
+      <section id="privacy-transport" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Privacy Transport</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Network-Level Privacy</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              While ZKIRA Pay's cryptographic protocols protect transaction content and recipient identity, network-level privacy 
+              requires additional measures to prevent observers from correlating IP addresses with blockchain activity. The Privacy 
+              Transport system provides multiple layers of network anonymity to ensure your location and identity remain private 
+              when interacting with the Solana blockchain.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The system automatically selects the best available privacy transport based on your environment and requirements. 
+              For maximum privacy, it uses the Nym mixnet to route traffic through multiple encrypted hops, making it extremely 
+              difficult for network observers to trace connections back to your real IP address. When Nym is unavailable, it 
+              falls back to Tor hidden services for robust anonymity.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Tor Hidden Service Integration</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              ZKIRA Pay operates a Tor hidden service (.onion address) that provides anonymous access to Solana RPC endpoints. 
+              When you connect through Tor, your traffic is encrypted and routed through multiple relays, making it virtually 
+              impossible for network observers to determine your real IP address or location. This is particularly important for 
+              users in regions with restrictive internet policies or those requiring maximum privacy.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The Tor integration is seamless - simply enable privacy transport in your client configuration and the SDK will 
+              automatically route all blockchain interactions through the hidden service. This includes transaction submission, 
+              account queries, and payment scanning operations, ensuring comprehensive network-level privacy for all ZKIRA Pay activities.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Nym Mixnet for Browsers</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              For browser-based applications, ZKIRA Pay integrates with the Nym mixnet to provide cutting-edge network privacy. 
+              The Nym network uses advanced cryptographic techniques including Sphinx packet format and Poisson mixing to provide 
+              stronger anonymity guarantees than traditional proxy networks. Your traffic is encrypted multiple times and mixed 
+              with other users' traffic, making timing correlation attacks extremely difficult.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The Nym integration provides metadata protection that goes beyond simple IP address hiding. It protects against 
+              traffic analysis, timing correlation, and other sophisticated surveillance techniques that can compromise privacy 
+              even when using traditional VPNs or proxy services. This makes it ideal for users requiring the highest levels of 
+              network anonymity.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Configuring Privacy Transport</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Setting up privacy transport is simple with the createPrivateTransport() function. The system automatically detects 
+              your environment and selects the best available privacy method. In browsers, it prefers Nym mixnet when available, 
+              falling back to direct connections if needed. For Node.js applications, it can use Tor SOCKS proxies for enhanced privacy.
+            </p>
+            
+            <CodeBlock 
+              code={`// Enable privacy transport
+import { createPrivateTransport } from '@zkira/sdk';
+
+// Automatically selects best privacy method
+const transport = await createPrivateTransport();
+
+// Use with ZKIRA client
+const client = new ZkiraClient(connection, wallet, {
+  transport: transport
+});
+
+// All operations now use privacy transport
+const payment = await client.createPaymentLink({
+  recipientMetaAddress: 'zkira1...',
+  amount: 1_000_000,
+  tokenMint: USDC_MINT,
+  expirySeconds: 7 * 24 * 60 * 60
+});`}
+              language="typescript"
+              title="Privacy Transport Setup"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Transport Selection and Fallbacks</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The privacy transport system implements intelligent fallback mechanisms to ensure reliable connectivity while 
+              maximizing privacy. It first attempts to connect via Nym mixnet for the strongest anonymity guarantees. If Nym is 
+              unavailable or experiencing issues, it falls back to Tor hidden services. As a final fallback, it uses direct 
+              connections to ensure your transactions can always be processed.
+            </p>
+            
+            <CodeBlock 
+              code={`// Advanced transport configuration
+const transport = await createPrivateTransport({
+  preferredMethod: 'nym', // 'nym', 'tor', or 'direct'
+  timeout: 30000, // Connection timeout in ms
+  retries: 3, // Number of retry attempts
+  fallbackEnabled: true // Allow fallback to less private methods
+});
+
+// Check active transport method
+console.log('Active transport:', transport.getActiveMethod());
+console.log('Privacy level:', transport.getPrivacyLevel());`}
+              language="typescript"
+              title="Advanced Transport Configuration"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Privacy vs Performance Trade-offs</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Using privacy transport involves trade-offs between anonymity and performance. Nym mixnet provides the strongest 
+              privacy but may have higher latency due to the mixing process. Tor offers good anonymity with moderate latency, 
+              while direct connections provide the fastest performance but no network-level privacy. The system allows you to 
+              choose the appropriate balance for your use case.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              For most users, the automatic transport selection provides an optimal balance of privacy and usability. High-security 
+              applications should explicitly configure Nym or Tor transport, while applications prioritizing speed can use direct 
+              connections and rely on ZKIRA Pay's cryptographic privacy features alone.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 9: Timing Defenses */}
+      <section id="timing-defenses" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Timing Defenses</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Understanding Timing Analysis</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Even with strong cryptographic privacy and network anonymity, transaction timing patterns can reveal information 
+              about user behavior and potentially compromise privacy. Timing analysis attacks look for correlations between when 
+              deposits and withdrawals occur, the frequency of transactions, and other temporal patterns that might link different 
+              activities to the same user or reveal sensitive information about payment flows.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              ZKIRA Pay implements comprehensive timing defenses to protect against these sophisticated attacks. The system uses 
+              multiple techniques including mandatory soak times, randomized processing delays, and automated decoy transactions 
+              to obscure real user activity within a larger pool of seemingly random blockchain events.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Soak Time Protection</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              All shielded pool deposits must remain in the pool for a minimum of 6 hours before they become eligible for 
+              withdrawal. This soak time prevents rapid deposit-withdrawal cycles that could be used to trace funds through the 
+              system. During the soak period, your deposit becomes mixed with other users' deposits, making it increasingly 
+              difficult to correlate your withdrawal with your original deposit.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The 6-hour minimum was chosen to balance privacy protection with user convenience. It's long enough to ensure 
+              meaningful mixing with other deposits while short enough to be practical for most use cases. Users planning to 
+              use the shielded pool should factor this delay into their payment timing requirements.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Poisson Batch Processing</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Withdrawals from the shielded pool are processed in batches using Poisson-distributed timing to prevent observers 
+              from correlating withdrawal requests with actual withdrawal transactions. Instead of processing withdrawals immediately 
+              or at fixed intervals, the system uses random delays that follow a Poisson distribution with an average interval 
+              of approximately one hour.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              This randomization makes it extremely difficult for attackers to determine when a specific withdrawal request was 
+              submitted based on when the withdrawal transaction appears on the blockchain. The Poisson distribution ensures that 
+              batch timing appears natural and unpredictable while maintaining reasonable processing times for users.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Protocol Decoy System</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              To further obscure real user activity, ZKIRA Pay automatically generates decoy deposits and other protocol 
+              transactions at regular intervals. These decoy transactions are indistinguishable from real user transactions 
+              but are generated by the protocol itself to create background noise that masks genuine user activity patterns.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Decoy deposits occur approximately every 30 minutes with a random variation of ±10 minutes to prevent predictable 
+              patterns. These transactions consume real gas fees and interact with the same smart contracts as user transactions, 
+              making them cryptographically indistinguishable from genuine deposits. The decoy system ensures that the blockchain 
+              always shows consistent activity levels regardless of actual user behavior.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Timing Defense Configuration</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              While timing defenses operate automatically to protect all users, advanced users can configure certain aspects 
+              of the timing protection system. This includes setting custom soak times longer than the minimum 6 hours for 
+              enhanced privacy, or adjusting withdrawal batch preferences for specific security requirements.
+            </p>
+            
+            <CodeBlock 
+              code={`// Configure timing defenses
+const poolClient = new ShieldedPoolClient(connection, wallet, {
+  minSoakTime: 8 * 60 * 60, // 8 hours instead of default 6
+  preferLargerBatches: true, // Wait for larger withdrawal batches
+  maxBatchWait: 2 * 60 * 60, // Maximum 2 hour wait for batching
+});
+
+// Check timing status
+const deposit = await poolClient.deposit(USDC_MINT);
+const soakStatus = await poolClient.getSoakStatus(deposit.note);
+
+console.log('Soak time remaining:', soakStatus.remainingTime);
+console.log('Eligible for withdrawal:', soakStatus.eligible);
+console.log('Next batch estimate:', soakStatus.nextBatchEstimate);`}
+              language="typescript"
+              title="Timing Defense Configuration"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">User Experience Impact</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The timing defense system is designed to provide strong privacy protection while minimizing impact on user 
+              experience. Most users will only notice two changes: a brief 3-second loading spinner during proof generation 
+              for shielded pool operations, and a message indicating that funds will arrive within approximately 1 hour for 
+              withdrawals due to batch processing.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              All the complex timing protection mechanisms operate transparently in the background. Users don't need to understand 
+              Poisson distributions or decoy transactions - they simply experience enhanced privacy with minimal additional 
+              friction. The system is designed so that privacy protection feels natural and doesn't require users to change 
+              their normal payment workflows.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Advanced Timing Analysis Resistance</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              ZKIRA Pay's timing defenses are designed to resist sophisticated timing analysis attacks including traffic 
+              correlation, frequency analysis, and pattern recognition. The combination of soak times, Poisson batching, and 
+              decoy transactions creates multiple layers of temporal obfuscation that make it extremely difficult for attackers 
+              to extract meaningful information from transaction timing patterns.
+            </p>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              The system continuously monitors and adjusts its timing parameters based on network activity and threat models. 
+              This adaptive approach ensures that timing defenses remain effective against evolving attack techniques while 
+              maintaining optimal user experience. Regular security audits and research collaborations help identify and address 
+              new timing-based privacy threats as they emerge.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 10: Security Guarantees & Attack Resistance */}
+      <section id="security-guarantees" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Section 10: Security Guarantees & Attack Resistance</h2>
+        
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Attack Resistance Table</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              ZKIRA Pay provides comprehensive protection against known privacy attacks through multiple defense layers:
+            </p>
+            
+            <div className="bg-[var(--color-hover)] p-4 mb-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[var(--color-hover)]">
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Attack Vector</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">How ZKIRA Defeats It</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Protection Layer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Transaction graph analysis</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Shielded pool ZK proofs break all on-chain links</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Shielded Pool</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Timing correlation</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">6-hour soak + Poisson batch processing + decoys</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Timing Defenses</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Amount correlation</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Fixed 10 USDC denominations — all deposits identical</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Shielded Pool</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">IP fingerprinting</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Tor hidden service + Nym mixnet</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Privacy Transport</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">RPC metadata leaks</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Blind relaying — relayer never inspects tx data</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Data Hygiene</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Browser fingerprinting</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Client-side proof generation in Web Worker</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">SDK</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Sender-recipient linking</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">One-time stealth addresses via ECDH</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Stealth Addresses</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Balance tracking</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Deposits/withdrawals go through pool, not direct</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Shielded Pool</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Resistance Levels</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              ZKIRA Pay provides quantifiable privacy protection against different classes of adversaries:
+            </p>
+            <ul className="space-y-2">
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-green-500 mr-2 mt-0.5">•</span>
+                <span><strong>~95% resistance</strong> against commercial forensics (Arkham Intelligence, Chainalysis, Solscan)</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-yellow-500 mr-2 mt-0.5">•</span>
+                <span><strong>~70-80% resistance</strong> against nation-state adversaries with global network monitoring</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-blue-500 mr-2 mt-0.5">•</span>
+                <span><strong>The binding constraint</strong> is anonymity set size, NOT cryptographic weakness</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-purple-500 mr-2 mt-0.5">•</span>
+                <span><strong>The cryptography is mathematically unbreakable</strong> — ECDH on Ed25519, Groth16 on BN254, Poseidon hash</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">What's NOT Protected</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              Honest disclosure of ZKIRA Pay's limitations and attack vectors that remain outside our protection scope:
+            </p>
+            <ul className="space-y-2">
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-red-500 mr-2 mt-0.5">•</span>
+                <span>Physical coercion / $5 wrench attack</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-red-500 mr-2 mt-0.5">•</span>
+                <span>Endpoint compromise (malware on your device)</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-red-500 mr-2 mt-0.5">•</span>
+                <span>Behavioral correlation (same amounts at same times repeatedly)</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-red-500 mr-2 mt-0.5">•</span>
+                <span>Small anonymity sets during early adoption</span>
+              </li>
+              <li className="text-[var(--color-text-secondary)] text-sm flex items-start">
+                <span className="text-red-500 mr-2 mt-0.5">•</span>
+                <span>Voluntary disclosure by either party</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Comparison to Other Privacy Solutions</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4 leading-relaxed">
+              How ZKIRA Pay compares to other privacy-focused payment systems:
+            </p>
+            
+            <div className="bg-[var(--color-hover)] p-4 mb-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[var(--color-hover)]">
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Feature</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">ZKIRA</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Tornado Cash</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Monero</th>
+                    <th className="text-left py-2 px-3 text-[var(--color-text)] font-medium">Zcash</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Chain</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Solana</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Ethereum</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Own chain</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Own chain</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Proof system</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Groth16</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Groth16</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Ring signatures</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Groth16</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Timing defenses</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✓ (Poisson + decoys)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✗</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Partial</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✗</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Network privacy</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✓ (Tor + Nym)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✗</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✓ (Dandelion++)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✗</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Fixed denominations</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✓ (10 USDC)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">✓ (0.1/1/10/100 ETH)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">N/A (all private)</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Optional</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">On-chain verification</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">&lt;200k CU</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">~300k gas</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">N/A</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">~4s</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">UX impact</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">3s spinner + ~1hr withdrawal</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Instant but manual</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">Native</td>
+                    <td className="py-2 px-3 text-[var(--color-text-secondary)]">40s proving</td>
                   </tr>
                 </tbody>
               </table>

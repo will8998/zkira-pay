@@ -29,13 +29,6 @@ export {
   decryptMetadata,
 } from './encryption.js';
 
-// Payment link claim secrets
-export {
-  generateClaimSecret,
-  hashClaimSecret,
-  verifyClaimSecret,
-} from './claim.js';
-
 // Byte utilities
 export {
   bytesToHex,
@@ -45,3 +38,10 @@ export {
   concatBytes,
   randomBytes,
 } from './utils.js';
+
+
+// Poseidon Merkle Tree for ZK circuits
+export {
+  PoseidonMerkleTree,
+} from './poseidon.js';
+export type { MerkleProof } from './poseidon.js';

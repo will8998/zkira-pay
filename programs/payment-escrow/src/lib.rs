@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::hash::hashv;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, TransferChecked};
 
@@ -47,7 +46,7 @@ pub mod payment_escrow {
     pub fn create_payment(
         ctx: Context<CreatePayment>,
         nonce: u64,
-        claim_hash: [u8; 32],
+        stealth_address: [u8; 32],
         amount: u64,
         expiry: i64,
         recipient_spend_pubkey: [u8; 32],
@@ -70,7 +69,7 @@ pub mod payment_escrow {
         escrow.creator = ctx.accounts.creator.key();
         escrow.token_mint = ctx.accounts.token_mint.key();
         escrow.amount = amount;
-        escrow.claim_hash = claim_hash;
+        escrow.stealth_address = stealth_address;
         escrow.recipient_spend_pubkey = recipient_spend_pubkey;
         escrow.recipient_view_pubkey = recipient_view_pubkey;
         escrow.expiry = expiry;
@@ -101,7 +100,7 @@ pub mod payment_escrow {
         Ok(())
     }
 
-    pub fn claim_payment(ctx: Context<ClaimPayment>, claim_secret: Vec<u8>) -> Result<()> {
+    pub fn claim_stealth(ctx: Context<ClaimStealth>) -> Result<()> {
         let escrow = &mut ctx.accounts.escrow;
         let clock = Clock::get()?;
 
@@ -110,29 +109,24 @@ pub mod payment_escrow {
         require!(!escrow.refunded, EscrowError::AlreadyRefunded);
         require!(clock.unix_timestamp < escrow.expiry, EscrowError::PaymentExpired);
 
-        // Verify claim secret
-        let domain = b"priv_claim";
-        let computed_hash = hashv(&[domain, &claim_secret]);
+        // Verify claimer IS the stealth address — no secrets needed, just wallet ownership
         require!(
-            computed_hash.to_bytes() == escrow.claim_hash,
-            EscrowError::InvalidClaimSecret
+            ctx.accounts.claimer.key().to_bytes() == escrow.stealth_address,
+            EscrowError::InvalidStealthAddress
         );
 
-        // Calculate fee
-        let fee_amount = escrow
-            .amount
+        // Calculate fee (same as before)
+        let fee_amount = escrow.amount
             .checked_mul(escrow.fee_bps as u64)
             .ok_or(EscrowError::Overflow)?
             .checked_div(10000)
             .ok_or(EscrowError::Overflow)?;
 
-        let claim_amount = escrow
-            .amount
+        let claim_amount = escrow.amount
             .checked_sub(fee_amount)
             .ok_or(EscrowError::Overflow)?;
 
         // Transfer claim amount to claimer
-        let _escrow_key = escrow.key();
         let seeds = &[
             b"escrow",
             escrow.creator.as_ref(),
@@ -152,7 +146,6 @@ pub mod payment_escrow {
                 },
                 signer,
             );
-
             token_interface::transfer_checked(
                 transfer_ctx,
                 claim_amount,
@@ -172,7 +165,6 @@ pub mod payment_escrow {
                 },
                 signer,
             );
-
             token_interface::transfer_checked(
                 transfer_ctx,
                 fee_amount,
@@ -190,11 +182,9 @@ pub mod payment_escrow {
             },
             signer,
         );
-
         anchor_spl::token_interface::close_account(close_ctx)?;
 
         escrow.claimed = true;
-
         Ok(())
     }
 
@@ -272,7 +262,7 @@ pub struct PaymentEscrow {
     pub creator: Pubkey,
     pub token_mint: Pubkey,
     pub amount: u64,
-    pub claim_hash: [u8; 32],
+    pub stealth_address: [u8; 32],
     pub recipient_spend_pubkey: [u8; 32],
     pub recipient_view_pubkey: [u8; 32],
     pub expiry: i64,
@@ -355,7 +345,7 @@ pub struct CreatePayment<'info> {
 }
 
 #[derive(Accounts)]
-pub struct ClaimPayment<'info> {
+pub struct ClaimStealth<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump
@@ -446,8 +436,8 @@ pub enum EscrowError {
     AlreadyClaimed,
     #[msg("Payment already refunded")]
     AlreadyRefunded,
-    #[msg("Invalid claim secret")]
-    InvalidClaimSecret,
+    #[msg("Invalid stealth address — signer does not match")]
+    InvalidStealthAddress,
     #[msg("Invalid expiry time")]
     InvalidExpiry,
     #[msg("Amount must be greater than zero")]

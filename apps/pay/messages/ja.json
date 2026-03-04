@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "送信",
+    "request": "リクエスト",
+    "escrow": "エスクロー",
+    "learn": "学習",
+    "home": "ホーム",
+    "pool": "プール",
+    "more": "その他",
+    "menu": "メニュー",
+    "history": "履歴",
+    "contacts": "連絡先",
+    "points": "ポイント",
+    "leaderboard": "リーダーボード",
+    "referral": "紹介",
+    "apiKeys": "APIキー",
+    "analytics": "分析",
+    "roadmap": "ロードマップ",
+    "batch": "バッチ",
+    "multiSig": "マルチシグ",
+    "docs": "ドキュメント",
+    "learnHub": "学習ハブ",
+    "documentation": "ドキュメント",
+    "apiReference": "APIリファレンス",
+    "useCases": "使用例",
+    "blog": "ブログ"
+  },
+  "navSections": {
+    "payments": "支払い",
+    "finance": "金融",
+    "activity": "アクティビティ",
+    "developers": "開発者",
+    "learn": "学習",
+    "rewards": "報酬",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "ウォレット接続",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "share": "共有",
+    "viewAll": "すべて表示",
+    "noActivityYet": "まだアクティビティがありません",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "ステルス支払い",
+    "titleHighlight": "Solana上で",
+    "subtitle": "ステルスアドレスで機密支払いを送信。",
+    "subtitleLine2": "ゼロトレーサビリティ。即座の決済。",
+    "featureStealth": "ステルス",
+    "featureInvoices": "請求書",
+    "featureEscrow": "エスクロー",
+    "featureMultiSig": "マルチシグ"
+  },
+  "dashboard": {
+    "totalSent": "送信総額",
+    "totalReceived": "受信総額",
+    "activeEscrows": "アクティブエスクロー",
+    "points": "ポイント",
+    "viewRewards": "報酬を表示 →",
+    "payment": "{count, plural, one {# 件の支払い} other {# 件の支払い}}",
+    "pendingEscrow": "{count, plural, one {# 件の保留中エスクロー} other {# 件の保留中エスクロー}}",
+    "sendPayment": "支払い送信",
+    "sendPaymentDesc": "ステルスアドレス経由で機密支払いを送信",
+    "requestPayment": "支払いリクエスト",
+    "requestPaymentDesc": "受信支払い用の請求書リンクを生成",
+    "createEscrow": "エスクロー作成",
+    "createEscrowDesc": "マイルストーンベースのエスクロー支払いを設定",
+    "recentActivity": "最近のアクティビティ",
+    "noTransactions": "まだトランザクションがありません",
+    "noTransactionsDesc": "支払いを作成するかリクエストして開始",
+    "createPayment": "支払い作成",
+    "paymentSent": "支払い送信済み",
+    "paymentReceived": "支払い受信済み",
+    "invoice": "請求書"
+  },
+  "status": {
+    "completed": "完了",
+    "pending": "保留中",
+    "active": "アクティブ",
+    "expired": "期限切れ",
+    "failed": "失敗",
+    "claimed": "請求済み"
+  },
+  "table": {
+    "type": "タイプ",
+    "amount": "金額",
+    "status": "ステータス",
+    "date": "日付"
+  },
+  "createPage": {
+    "title": "支払い送信",
+    "description": "機密支払いリンクを生成",
+    "successDescription": "支払いが正常に作成されました",
+    "connectNotice": "機密支払いを作成するためにSolanaウォレットを接続してください。あなたのウォレットがトランザクションに署名します — 私たちはあなたの鍵を保存することはありません。",
+    "paymentCreated": "支払いリンクが作成されました"
+  },
+  "claimPage": {
+    "title": "支払い請求",
+    "description": "機密支払いをあなたのウォレットに請求",
+    "missingInfo": "支払い情報が不足",
+    "missingInfoDesc": "このページにはエスクローアドレス付きの有効な支払いリンクが必要です。",
+    "backToDashboard": "ダッシュボードに戻る"
+  },
+  "requestPage": {
+    "title": "支払いリクエスト",
+    "description": "機密請求書リンクを生成",
+    "successDescription": "請求書が正常に作成されました",
+    "invoiceGenerated": "請求書リンクが生成されました"
+  },
+  "poolPage": {
+    "title": "シールドプール",
+    "description": "ゼロ知識証明による秘匿預金・出金",
+    "deposit": "預金",
+    "withdraw": "出金",
+    "notes": "ノート"
+  },
+  "escrowPage": {
+    "title": "エスクローダッシュボード",
+    "description": "マイルストーンベースのエスクロー支払いを管理",
+    "createNew": "新規作成",
+    "noEscrows": "まだエスクローがありません",
+    "noEscrowsDesc": "開始するためにマイルストーンベースのエスクローを作成",
+    "totalAmount": "総額",
+    "released": "リリース済み",
+    "milestones": "マイルストーン",
+    "releaseMilestone": "マイルストーンをリリース",
+    "refund": "返金",
+    "expired": "期限切れ"
+  },
+  "escrowCreatePage": {
+    "title": "エスクロー作成",
+    "description": "マイルストーンベースのエスクロー支払いを設定"
+  },
+  "batchPage": {
+    "title": "バッチ支払い",
+    "description": "単一トランザクションで複数の支払いを送信"
+  },
+  "multisigPage": {
+    "title": "マルチシグネチャ",
+    "description": "マルチシグウォレットの作成と管理"
+  },
+  "multisigCreatePage": {
+    "title": "マルチシグ作成",
+    "description": "新しいマルチシグウォレットを設定"
+  },
+  "contactsPage": {
+    "title": "連絡先",
+    "description": "保存されたウォレットアドレスを管理"
+  },
+  "historyPage": {
+    "title": "トランザクション履歴",
+    "description": "過去のすべてのトランザクションを表示"
+  },
+  "pointsPage": {
+    "title": "ポイント",
+    "description": "ZKIRA Payの使用で報酬を獲得"
+  },
+  "leaderboardPage": {
+    "title": "リーダーボード",
+    "description": "ポイント別のトップZKIRA Payユーザー"
+  },
+  "referralPage": {
+    "title": "紹介プログラム",
+    "description": "友達を招待して報酬を獲得"
+  },
+  "developersPage": {
+    "title": "開発者ダッシュボード",
+    "description": "APIキーと統合を管理"
+  },
+  "developerDocsPage": {
+    "title": "開発者ドキュメント",
+    "description": "あなたのアプリケーションにZKIRA Payを統合"
+  },
+  "tokenomicsPage": {
+    "title": "トークノミクス",
+    "description": "$ZKRトークンの配布と経済学"
+  },
+  "analyticsPage": {
+    "title": "分析",
+    "description": "支払いアクティビティとメトリクスを追跡"
+  },
+  "roadmapPage": {
+    "title": "ロードマップ",
+    "description": "ZKIRA Pay開発タイムライン"
+  },
+  "learnPage": {
+    "title": "学習",
+    "description": "ZKIRA Payについて知っておくべきすべて",
+    "documentation": "ドキュメント",
+    "documentationDesc": "完全なガイドと技術リファレンス",
+    "apiReference": "APIリファレンス",
+    "apiReferenceDesc": "REST APIエンドポイントとSDKメソッド",
+    "useCases": "使用例",
+    "useCasesDesc": "実世界のアプリケーションと例",
+    "blog": "ブログ",
+    "blogDesc": "エンジニアリング更新とお知らせ",
+    "quickLinks": "クイックリンク",
+    "stealthAddresses": "ステルスアドレス",
+    "stealthAddressesDesc": "ECDHベースのステルスアドレスがあなたのプライバシーを保護する方法",
+    "shieldedPool": "シールドプール",
+    "shieldedPoolDesc": "ゼロ知識預金・出金システム",
+    "privacyTransport": "プライバシートランスポート",
+    "privacyTransportDesc": "ネットワークプライバシーのためのTorとNym mixnet統合"
+  },
+  "languageSwitcher": {
+    "label": "言語を切り替え"
+  }
+}

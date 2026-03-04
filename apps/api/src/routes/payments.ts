@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateMetaAddress, encodeMetaAddress, generateClaimSecret, hashClaimSecret, bytesToHex } from '@zkira/crypto';
+import { generateMetaAddress, encodeMetaAddress, deriveStealthAddress, decodeMetaAddress, bytesToHex } from '@zkira/crypto';
 import { AccountIndexer } from '../services/indexer.js';
 import { db } from '../db/index.js';
 import { payments as paymentsTable } from '../db/schema.js';
@@ -44,15 +44,16 @@ payments.post('/api/payments/create', async (c) => {
     // Generate payment ID
     const paymentId = generatePaymentId();
 
-    // Generate crypto primitives
-    const claimSecret = generateClaimSecret();
-    const claimHash = hashClaimSecret(claimSecret);
-    const claimHashHex = bytesToHex(claimHash);
+    // Generate recipient meta address (stealth address)
+    const recipientMetaAddressKeypair = generateMetaAddress();
+    const recipientMetaAddress = encodeMetaAddress(recipientMetaAddressKeypair.spendPubkey, recipientMetaAddressKeypair.viewPubkey);
     
-    // Generate meta address (stealth address)
-    const metaAddressKeypair = generateMetaAddress();
-    const metaAddress = encodeMetaAddress(metaAddressKeypair.spendPubkey, metaAddressKeypair.viewPubkey);
-
+    // Derive stealth address for this payment
+    const { stealthPubkey, ephemeralPubkey } = deriveStealthAddress(
+      recipientMetaAddressKeypair.spendPubkey,
+      recipientMetaAddressKeypair.viewPubkey
+    );
+    const stealthAddressHex = bytesToHex(stealthPubkey);
     // Calculate expiry
     const expiresAt = new Date(Date.now() + (expiryDays * 24 * 60 * 60 * 1000));
 
@@ -61,8 +62,7 @@ payments.post('/api/payments/create', async (c) => {
       paymentId,
       amount: amount.toString(),
       tokenMint,
-      claimHash: claimHashHex,
-      metaAddress,
+      metaAddress: recipientMetaAddress,
       expiresAt,
     });
 
@@ -83,8 +83,8 @@ payments.post('/api/payments/create', async (c) => {
     const basePayUrl = process.env.NODE_ENV === 'production' ? 'https://app.zkira.xyz' : 'http://localhost:3001';
     const baseClaimUrl = process.env.NODE_ENV === 'production' ? 'https://app.zkira.xyz' : 'http://localhost:3001';
     
-    const payUrl = `${basePayUrl}?amount=${amount}&token=${tokenMint}&meta=${metaAddress}`;
-    const claimUrl = `${baseClaimUrl}/claim#secret=${bytesToHex(claimSecret)}`;
+    const payUrl = `${basePayUrl}?amount=${amount}&token=${tokenMint}&meta=${recipientMetaAddress}`;
+    const claimUrl = `${baseClaimUrl}/claim?payment=${paymentId}`;
 
     // Return payment data
     return c.json({
@@ -93,8 +93,8 @@ payments.post('/api/payments/create', async (c) => {
       payUrl,
       amount,
       tokenMint,
-      claimHash: claimHashHex,
-      metaAddress,
+      stealthAddress: stealthAddressHex,
+      metaAddress: recipientMetaAddress,
       expiresAt: expiresAt.toISOString(),
     });
 

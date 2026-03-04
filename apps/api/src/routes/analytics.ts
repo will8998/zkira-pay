@@ -84,17 +84,7 @@ analyticsRoutes.get('/api/analytics', async (c) => {
         .orderBy(desc(count())),
     ]);
 
-    // ── Recent activity (anonymized — no wallet addresses) ──
-    const recentTransactions = await db.select({
-      type: transactions.type,
-      amount: transactions.amount,
-      tokenMint: transactions.tokenMint,
-      status: transactions.status,
-      createdAt: transactions.createdAt,
-    })
-      .from(transactions)
-      .orderBy(desc(transactions.createdAt))
-      .limit(20);
+    // Removed recentActivity field for privacy — no individual transaction data exposed
 
     return c.json({
       stats: {
@@ -117,13 +107,7 @@ analyticsRoutes.get('/api/analytics', async (c) => {
         paymentStatus: paymentStatusBreakdown,
         userTiers: topTiers,
       },
-      recentActivity: recentTransactions.map((tx) => ({
-        type: tx.type,
-        amount: tx.amount,
-        tokenMint: tx.tokenMint,
-        status: tx.status,
-        createdAt: tx.createdAt,
-      })),
+      // recentActivity removed for privacy
     });
   } catch (error) {
     console.error('Failed to get public analytics:', error);

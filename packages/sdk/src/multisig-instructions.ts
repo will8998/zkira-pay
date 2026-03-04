@@ -80,7 +80,7 @@ export function createCreateMultisigEscrowIx(params: CreateCreateMultisigEscrowI
     creatorTokenAccount,
     tokenMint,
     amount,
-    claimHash,
+    stealthAddress,
     recipientSpendPubkey,
     recipientViewPubkey,
     expiry,
@@ -94,11 +94,11 @@ export function createCreateMultisigEscrowIx(params: CreateCreateMultisigEscrowI
   const discriminator = getInstructionDiscriminator('create_multisig_escrow');
 
   // Serialize instruction data matching Anchor instruction order:
-  // nonce: u64, claim_hash: [u8; 32], amount: u64, expiry: i64,
+  // nonce: u64, stealth_address: [u8; 32], amount: u64, expiry: i64,
   // recipient_spend_pubkey: [u8; 32], recipient_view_pubkey: [u8; 32],
   // approver_count: u8, required_approvals: u8, approvers: Vec<Pubkey>
   const nonceBytes = serializeU64(nonce);
-  const claimHashBytes = new Uint8Array(claimHash);
+  const stealthAddressBytes = new Uint8Array(stealthAddress);
   const amountBytes = serializeU64(amount);
   const expiryBytes = serializeI64(BigInt(expiry));
   const recipientSpendPubkeyBytes = new Uint8Array(recipientSpendPubkey);
@@ -113,7 +113,7 @@ export function createCreateMultisigEscrowIx(params: CreateCreateMultisigEscrowI
   const data = concatBytes(
     discriminator,
     nonceBytes,
-    claimHashBytes,
+    stealthAddressBytes,
     amountBytes,
     expiryBytes,
     recipientSpendPubkeyBytes,
@@ -182,7 +182,7 @@ export function createExecuteReleaseIx(params: CreateExecuteReleaseIxParams): Tr
     claimer, 
     claimerTokenAccount, 
     escrowAddress, 
-    claimSecret, 
+    // No claimSecret needed for stealth - claimer signs with stealth key
     feeRecipientTokenAccount, 
     tokenMint, 
     creator 
@@ -191,11 +191,9 @@ export function createExecuteReleaseIx(params: CreateExecuteReleaseIxParams): Tr
   // Compute discriminator
   const discriminator = getInstructionDiscriminator('execute_release');
 
-  // Serialize instruction data — claim_secret is Vec<u8> in Anchor (4-byte length prefix)
-  const claimSecretBytes = new Uint8Array(claimSecret);
-  const claimSecretLenBytes = serializeU32(claimSecretBytes.length);
+  // No additional data — claimer proves identity by signing with stealth key
 
-  const data = concatBytes(discriminator, claimSecretLenBytes, claimSecretBytes);
+  const data = discriminator;
 
   // Derive PDAs
   const [vault] = findMultisigVault(escrowAddress);

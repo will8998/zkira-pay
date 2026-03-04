@@ -1,6 +1,7 @@
 'use client';
 
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 
 interface EndpointExample {
@@ -114,6 +115,7 @@ const endpoints: EndpointExample[] = [
 ];
 
 export default function DeveloperDocsPage() {
+  const t = useTranslations('developerDocsPage');
   const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
     toast.success('Copied to clipboard');
@@ -133,8 +135,8 @@ export default function DeveloperDocsPage() {
   return (
     <div className="px-6 py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
-        title="API Documentation" 
-        description="Complete reference for the ZKIRA Pay payment API"
+        title={t('title')} 
+        description={t('description')}
       />
 
       <div className="space-y-4">

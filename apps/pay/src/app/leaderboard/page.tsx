@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useWallet } from '@/components/WalletProvider';
 import { PageHeader } from '@/components/PageHeader';
-
 interface LeaderboardEntry {
   rank: number;
   wallet: string;
@@ -48,6 +48,7 @@ function formatPercentile(percentile: number): string {
 }
 
 export default function LeaderboardPage() {
+  const t = useTranslations('leaderboardPage');
   const { connected, publicKey } = useWallet();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
@@ -113,8 +114,8 @@ export default function LeaderboardPage() {
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
       <PageHeader 
-        title="Leaderboard" 
-        description="Top ZKIRA Pay users by points" 
+        title={t('title')} 
+        description={t('description')} 
       />
       
       {loading ? (

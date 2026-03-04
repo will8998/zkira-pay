@@ -1,127 +1,103 @@
 import { Hono } from 'hono';
-import { Connection, Transaction } from '@solana/web3.js';
-import { sha256 } from '@noble/hashes/sha256';
+import { Contract } from 'ethers';
 import { RelayerWallet } from '../services/wallet.js';
-import { TransactionBuilder } from '../services/transaction.js';
-import { PAYMENT_ESCROW_PROGRAM_ID } from '../types.js';
-import type { RelayClaimRequest, ErrorResponse } from '../types.js';
+import { TransactionValidator } from '../services/transaction.js';
+import type { RelayerConfig } from '../config.js';
+import type {
+  WithdrawRelayRequest,
+  RelayResponse,
+  TransactionStatusResponse,
+  ErrorResponse,
+} from '../types.js';
 
-const CLAIM_DISCRIMINATOR = sha256('global:claim_payment').slice(0, 8);
+const POOL_ABI = [
+  'function withdraw(bytes calldata _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient, address payable _relayer, uint256 _fee, uint256 _refund, address _referrer) external payable',
+  'function denomination() external view returns (uint256)',
+  'function nextIndex() external view returns (uint32)',
+  'function isSpent(bytes32 _nullifierHash) external view returns (bool)',
+  'function paused() external view returns (bool)',
+  'event Deposit(bytes32 indexed commitment, uint32 leafIndex, uint256 timestamp)',
+];
 
-function arraysEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-}
-
-export function createRelayRoutes(connection: Connection, wallet: RelayerWallet) {
+export function createRelayRoutes(wallet: RelayerWallet, config: RelayerConfig): Hono {
   const relay = new Hono();
-  const txBuilder = new TransactionBuilder(connection, wallet);
+  const txValidator = new TransactionValidator(config);
 
-  relay.post('/claim', async (c) => {
+  // POST /withdraw — Direct withdraw relay for advanced users
+  relay.post('/withdraw', async (c) => {
     try {
-      const body = await c.req.json<RelayClaimRequest>();
+      const body = await c.req.json<WithdrawRelayRequest>();
 
-      // Validate request
-      if (!body.transaction || typeof body.transaction !== 'string') {
+      // Validate all fields
+      const validation = txValidator.validateWithdrawRequest(body);
+      if (!validation.valid) {
         const error: ErrorResponse = {
           success: false,
-          error: 'Missing or invalid transaction field',
+          error: validation.error ?? 'Validation failed',
           code: 'INVALID_REQUEST',
         };
         return c.json(error, 400);
       }
 
-      // Decode base64 transaction
-      let txBytes: Buffer;
-      try {
-        txBytes = Buffer.from(body.transaction, 'base64');
-      } catch {
+      // Verify the relayer address matches ours
+      if (body.relayer.toLowerCase() !== wallet.address.toLowerCase()) {
         const error: ErrorResponse = {
           success: false,
-          error: 'Invalid base64-encoded transaction',
-          code: 'INVALID_TRANSACTION',
+          error: 'Relayer address does not match this relayer',
+          code: 'RELAYER_MISMATCH',
         };
         return c.json(error, 400);
       }
 
-      // Deserialize transaction
-      let transaction: Transaction;
-      try {
-        transaction = Transaction.from(txBytes);
-      } catch {
+      // Check gas price safety cap
+      const feeData = await wallet.provider.getFeeData();
+      if (feeData.gasPrice && feeData.gasPrice > config.maxGasPrice) {
         const error: ErrorResponse = {
           success: false,
-          error: 'Failed to deserialize transaction',
-          code: 'INVALID_TRANSACTION',
+          error: 'Current gas price exceeds safety cap',
+          code: 'GAS_PRICE_TOO_HIGH',
         };
-        return c.json(error, 400);
+        return c.json(error, 503);
       }
 
-      // Verify the transaction contains exactly one instruction targeting payment-escrow
-      if (transaction.instructions.length === 0) {
-        const error: ErrorResponse = {
-          success: false,
-          error: 'Transaction contains no instructions',
-          code: 'INVALID_TRANSACTION',
-        };
-        return c.json(error, 400);
-      }
+      // Normalize hex values (ensure 0x prefix)
+      const proof = body.proof.startsWith('0x') ? body.proof : `0x${body.proof}`;
+      const root = body.root.startsWith('0x') ? body.root : `0x${body.root}`;
+      const nullifierHash = body.nullifierHash.startsWith('0x') ? body.nullifierHash : `0x${body.nullifierHash}`;
 
-      // Find the claim instruction
-      const claimIx = transaction.instructions.find(
-        (ix) => ix.programId.equals(PAYMENT_ESCROW_PROGRAM_ID)
+      // Build and send withdraw transaction via the pool contract
+      const poolContract = new Contract(body.poolAddress, POOL_ABI, wallet.wallet);
+
+      const tx = await poolContract.withdraw(
+        proof,
+        root,
+        nullifierHash,
+        body.recipient,
+        body.relayer,
+        body.fee,
+        body.refund,
+        body.referrer,
+        { value: body.refund },
       );
 
-      if (!claimIx) {
+      // Wait for 1 confirmation
+      const receipt = await tx.wait(1);
+
+      if (!receipt) {
         const error: ErrorResponse = {
           success: false,
-          error: 'No payment-escrow instruction found',
-          code: 'INVALID_TRANSACTION',
+          error: 'Withdraw transaction was not confirmed',
+          code: 'TX_NOT_CONFIRMED',
         };
-        return c.json(error, 400);
+        return c.json(error, 500);
       }
 
-      // Verify it's a claim_payment instruction (check discriminator)
-      if (claimIx.data.length < 8 || !arraysEqual(claimIx.data.slice(0, 8), CLAIM_DISCRIMINATOR)) {
-        const error: ErrorResponse = {
-          success: false,
-          error: 'Transaction does not contain a claim_payment instruction',
-          code: 'INVALID_INSTRUCTION',
-        };
-        return c.json(error, 400);
-      }
-
-      // Set relayer as fee payer
-      transaction.feePayer = wallet.publicKey;
-
-      // Get fresh blockhash
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-
-      // Sign with relayer keypair (as fee payer)
-      wallet.sign(transaction);
-
-      // Send raw transaction
-      const rawTx = transaction.serialize({ requireAllSignatures: false });
-      const txSignature = await connection.sendRawTransaction(rawTx, {
-        skipPreflight: false,
-        preflightCommitment: 'confirmed',
-      });
-
-      // Wait for confirmation
-      await connection.confirmTransaction({
-        signature: txSignature,
-        blockhash,
-        lastValidBlockHeight,
-      });
-
-      return c.json({
+      const response: RelayResponse = {
         success: true,
-        txSignature,
-      });
+        txHash: receipt.hash,
+      };
+
+      return c.json(response);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       const error: ErrorResponse = {
@@ -133,35 +109,53 @@ export function createRelayRoutes(connection: Connection, wallet: RelayerWallet)
     }
   });
 
-  relay.get('/status/:signature', async (c) => {
-    const signature = c.req.param('signature');
-
+  // GET /status/:txHash — Check transaction status
+  relay.get('/status/:txHash', async (c) => {
     try {
-      const status = await connection.getSignatureStatus(signature, {
-        searchTransactionHistory: true,
-      });
+      const txHash = c.req.param('txHash');
 
-      if (!status.value) {
-        return c.json({
-          confirmed: false,
-          error: 'Transaction not found',
-        });
+      // Validate txHash format (0x + 64 hex characters)
+      if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+        const error: ErrorResponse = {
+          success: false,
+          error: 'Invalid transaction hash format (expected 0x + 64 hex characters)',
+          code: 'INVALID_TX_HASH',
+        };
+        return c.json(error, 400);
       }
 
-      const confirmed = status.value.confirmationStatus === 'confirmed' ||
-                        status.value.confirmationStatus === 'finalized';
+      const receipt = await wallet.provider.getTransactionReceipt(txHash);
 
-      return c.json({
+      // If receipt is null, the transaction is not found or still pending
+      if (!receipt) {
+        const response: TransactionStatusResponse = {
+          confirmed: false,
+          error: 'Transaction not found or still pending',
+        };
+        return c.json(response);
+      }
+
+      const confirmed = receipt.status === 1;
+
+      const response: TransactionStatusResponse = {
         confirmed,
-        slot: status.value.slot,
-        error: status.value.err ? JSON.stringify(status.value.err) : undefined,
-      });
+        receipt: {
+          status: receipt.status ?? 0,
+          gasUsed: receipt.gasUsed.toString(),
+          effectiveGasPrice: receipt.gasPrice.toString(),
+          blockNumber: receipt.blockNumber,
+        },
+        error: confirmed ? undefined : 'Transaction reverted',
+      };
+
+      return c.json(response);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      return c.json({
+      const response: TransactionStatusResponse = {
         confirmed: false,
         error: message,
-      }, 500);
+      };
+      return c.json(response, 500);
     }
   });
 

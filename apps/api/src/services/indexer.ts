@@ -4,13 +4,11 @@ import { GHOST_REGISTRY_PROGRAM_ID, PAYMENT_ESCROW_PROGRAM_ID } from '@zkira/com
 import {
   deserializeAnnouncement,
   deserializePaymentEscrow,
-  deserializeMetaAddress,
   DeserializedAnnouncement,
   DeserializedEscrow,
-  DeserializedMetaAddress,
 } from './deserializer.js';
 import { db } from '../db/index.js';
-import { escrowsCache, announcementsCache, metaAddressesCache } from '../db/schema.js';
+import { escrowsCache, announcementsCache } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { awardPoints } from './points.js';
 import { activateReferral } from './referrals.js';
@@ -18,7 +16,6 @@ import { activateReferral } from './referrals.js';
 export class AccountIndexer {
   private announcements: Map<string, DeserializedAnnouncement> = new Map();
   private escrows: Map<string, DeserializedEscrow> = new Map();
-  private metaAddresses: Map<string, DeserializedMetaAddress> = new Map();
   private failedAccounts: Set<string> = new Set();
   private intervalId?: ReturnType<typeof setInterval>;
 
@@ -28,10 +25,10 @@ export class AccountIndexer {
   ) {}
 
   start(): void {
-    console.log(`Starting account indexer with ${this.intervalMs}ms interval`);
-    this.refresh().catch(console.error);
+    // Indexer started
+    this.refresh().catch(() => {});
     this.intervalId = setInterval(() => {
-      this.refresh().catch(console.error);
+      this.refresh().catch(() => {});
     }, this.intervalMs);
   }
 
@@ -39,13 +36,13 @@ export class AccountIndexer {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = undefined;
-      console.log('Account indexer stopped');
+      // Indexer stopped
     }
   }
 
   private async refresh(): Promise<void> {
     try {
-      console.log('Refreshing account data...');
+      // Refreshing account data
       
       // Fetch all program accounts in parallel
       const [ghostAccounts, escrowAccounts] = await Promise.all([
@@ -88,32 +85,9 @@ export class AccountIndexer {
               },
             }).catch(console.warn);
             
-          } else if (this.isMetaAddressDiscriminator(discriminatorHex)) {
-            const metaAddress = deserializeMetaAddress(data);
-            this.metaAddresses.set(metaAddress.owner, metaAddress);
-            
-            // Upsert to database cache
-            await db.insert(metaAddressesCache).values({
-              owner: metaAddress.owner,
-              spendPubkey: metaAddress.spendPubkey,
-              viewPubkey: metaAddress.viewPubkey,
-              label: metaAddress.label,
-              bump: metaAddress.bump,
-              createdAt: metaAddress.createdAt,
-            }).onConflictDoUpdate({
-              target: metaAddressesCache.owner,
-              set: {
-                spendPubkey: metaAddress.spendPubkey,
-                viewPubkey: metaAddress.viewPubkey,
-                label: metaAddress.label,
-                bump: metaAddress.bump,
-                createdAt: metaAddress.createdAt,
-                updatedAt: new Date(),
-              },
-            }).catch(console.warn);
           }
         } catch (error) {
-          console.warn(`Failed to deserialize ghost registry account ${account.pubkey.toBase58()}:`, error);
+          // Failed to deserialize ghost registry account
         }
       }
 
@@ -125,7 +99,7 @@ export class AccountIndexer {
           // Minimum escrow account size: 8 (discriminator) + 32 (creator) + 32 (tokenMint) + 8 (amount) + 32 (claimHash) + 32 (recipientSpend) + 32 (recipientView) + 8 (expiry) + 1 + 1 + 8 + 2 + 1 + 8 = 205 bytes
           if (data.length < 205) {
             if (!this.failedAccounts.has(pubkey)) {
-              console.warn(`Skipping escrow account ${pubkey}: data too short (${data.length} bytes, need ≥205)`);
+              // Skipping escrow account: data too short
               this.failedAccounts.add(pubkey);
             }
             continue;
@@ -140,9 +114,9 @@ export class AccountIndexer {
             creator: escrow.creator,
             tokenMint: escrow.tokenMint,
             amount: escrow.amount,
-            claimHash: escrow.claimHash,
-            recipientSpendPubkey: escrow.recipientSpendPubkey,
-            recipientViewPubkey: escrow.recipientViewPubkey,
+            // claimHash removed for privacy
+            // recipientSpendPubkey removed for privacy
+            // recipientViewPubkey removed for privacy
             expiry: escrow.expiry,
             claimed: escrow.claimed,
             refunded: escrow.refunded,
@@ -155,9 +129,9 @@ export class AccountIndexer {
               creator: escrow.creator,
               tokenMint: escrow.tokenMint,
               amount: escrow.amount,
-              claimHash: escrow.claimHash,
-              recipientSpendPubkey: escrow.recipientSpendPubkey,
-              recipientViewPubkey: escrow.recipientViewPubkey,
+              // claimHash removed for privacy
+              // recipientSpendPubkey removed for privacy
+              // recipientViewPubkey removed for privacy
               expiry: escrow.expiry,
               claimed: escrow.claimed,
               refunded: escrow.refunded,
@@ -181,22 +155,22 @@ export class AccountIndexer {
               }).then(result => {
                 if (result) {
                   activateReferral(escrow.creator).catch(err =>
-                    console.warn('Failed to activate referral:', err)
+                    () => {}
                   );
                 }
-              }).catch(err => console.warn('Failed to award PAYMENT_RECEIVED points:', err));
+              }).catch(() => {});
             }
           }
           
         } catch (error) {
           if (!this.failedAccounts.has(pubkey)) {
-            console.warn(`Failed to deserialize escrow account ${pubkey}:`, error instanceof Error ? error.message : error);
+            // Failed to deserialize escrow account
             this.failedAccounts.add(pubkey);
           }
         }
       }
 
-      console.log(`Indexed ${this.announcements.size} announcements, ${this.escrows.size} escrows, ${this.metaAddresses.size} meta addresses`);
+      // Account indexing complete
     } catch (error) {
       console.error('Failed to refresh account data:', error);
     }
@@ -208,11 +182,6 @@ export class AccountIndexer {
     return hex === expected;
   }
 
-  private isMetaAddressDiscriminator(hex: string): boolean {
-    // Anchor discriminator: SHA256("account:MetaAddress")[0..8]
-    const expected = Buffer.from(sha256('account:MetaAddress').slice(0, 8)).toString('hex');
-    return hex === expected;
-  }
 
   getAnnouncements(): DeserializedAnnouncement[] {
     return Array.from(this.announcements.values());
@@ -230,7 +199,4 @@ export class AccountIndexer {
     return Array.from(this.escrows.values()).filter(escrow => escrow.creator === creator);
   }
 
-  getMetaAddress(owner: string): DeserializedMetaAddress | undefined {
-    return this.metaAddresses.get(owner);
-  }
 }

@@ -1,0 +1,13 @@
+# Build artifacts - exclude large files but keep verification keys
+build/*.ptau
+build/*.zkey
+build/withdraw.r1cs
+build/withdraw.sym
+build/withdraw_js/
+
+# Keep these files for commit:
+!build/verification_key.json
+!build/verifying_key.rs
+*.ptau
+*.zkey
+node_modules/

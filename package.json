@@ -13,7 +13,8 @@
   "devDependencies": {
     "tsx": "^4.21.0",
     "turbo": "^2.4.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "snarkjs": "^0.7.5"
   },
   "pnpm": {
     "overrides": {

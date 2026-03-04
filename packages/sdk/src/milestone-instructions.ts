@@ -77,7 +77,7 @@ export function createCreateMilestoneEscrowIx(params: CreateCreateMilestoneEscro
     creatorTokenAccount,
     tokenMint,
     totalAmount,
-    claimHash,
+    stealthAddress,
     recipientSpendPubkey,
     recipientViewPubkey,
     expiry,
@@ -89,11 +89,11 @@ export function createCreateMilestoneEscrowIx(params: CreateCreateMilestoneEscro
   const discriminator = getInstructionDiscriminator('create_milestone_escrow');
 
   // Serialize instruction data matching Anchor instruction order:
-  // nonce: u64, claim_hash: [u8; 32], total_amount: u64, expiry: i64,
+  // nonce: u64, stealth_address: [u8; 32], total_amount: u64, expiry: i64,
   // recipient_spend_pubkey: [u8; 32], recipient_view_pubkey: [u8; 32],
   // milestone_count: u8, milestone_amounts: Vec<u64>
   const nonceBytes = serializeU64(nonce);
-  const claimHashBytes = new Uint8Array(claimHash);
+  const stealthAddressBytes = new Uint8Array(stealthAddress);
   const totalAmountBytes = serializeU64(totalAmount);
   const expiryBytes = serializeI64(BigInt(expiry));
   const recipientSpendPubkeyBytes = new Uint8Array(recipientSpendPubkey);
@@ -111,7 +111,7 @@ export function createCreateMilestoneEscrowIx(params: CreateCreateMilestoneEscro
   const data = concatBytes(
     discriminator,
     nonceBytes,
-    claimHashBytes,
+    stealthAddressBytes,
     totalAmountBytes,
     expiryBytes,
     recipientSpendPubkeyBytes,
@@ -157,19 +157,17 @@ export function createReleaseMilestoneIx(params: CreateReleaseMilestoneIxParams)
     claimerTokenAccount, 
     escrowAddress, 
     milestoneIndex, 
-    claimSecret, 
+    // No claimSecret needed for stealth - claimer signs with stealth key
     tokenMint 
   } = params;
 
   // Compute discriminator
   const discriminator = getInstructionDiscriminator('release_milestone');
 
-  // Serialize instruction data — milestone_index: u8, claim_secret: Vec<u8>
+  // Serialize instruction data — milestone_index: u8 (no claim_secret for stealth)
   const milestoneIndexBytes = serializeU8(milestoneIndex);
-  const claimSecretBytes = new Uint8Array(claimSecret);
-  const claimSecretLenBytes = serializeU32(claimSecretBytes.length);
 
-  const data = concatBytes(discriminator, milestoneIndexBytes, claimSecretLenBytes, claimSecretBytes);
+  const data = concatBytes(discriminator, milestoneIndexBytes);
 
   // Derive PDAs
   const [vault] = findMilestoneVault(escrowAddress);

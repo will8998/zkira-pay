@@ -30,7 +30,7 @@ export const payments = pgTable('payments', {
   creatorWallet: text('creator_wallet'),
   amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
   tokenMint: text('token_mint').notNull(),
-  claimHash: text('claim_hash').notNull(),
+  // claimHash removed for privacy
   metaAddress: text('meta_address').notNull(),
   escrowAddress: text('escrow_address'),
   status: text('status').default('pending').notNull(), // pending/claimed/expired/refunded
@@ -50,7 +50,7 @@ export const invoices = pgTable('invoices', {
   creatorWallet: text('creator_wallet').notNull(),
   amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
   tokenMint: text('token_mint').notNull(),
-  claimSecretHash: text('claim_secret_hash'),
+  // claimSecretHash removed for privacy
   metaAddress: text('meta_address'),
   status: text('status').default('pending').notNull(), // pending/paid/expired
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -110,9 +110,9 @@ export const escrowsCache = pgTable('escrows_cache', {
   creator: text('creator').notNull(),
   tokenMint: text('token_mint').notNull(),
   amount: text('amount').notNull(),
-  claimHash: text('claim_hash').notNull(),
-  recipientSpendPubkey: text('recipient_spend_pubkey'),
-  recipientViewPubkey: text('recipient_view_pubkey'),
+  // claimHash removed for privacy
+  // recipientSpendPubkey removed for privacy
+  // recipientViewPubkey removed for privacy
   expiry: bigint('expiry', { mode: 'number' }),
   claimed: boolean('claimed').default(false).notNull(),
   refunded: boolean('refunded').default(false).notNull(),

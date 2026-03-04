@@ -9,6 +9,7 @@ conditional_escrow = "ET3eDt2vfvXXeUaDC4wJ1od9EZ2r6DGMmwiBzXJLAovJ"
 ghost_registry = "EECGiV8qMJm7BT4HpLw3KBWUAETDDB8H33jaRtTRpe5v"
 multisig_escrow = "yLGC8fizXAfvxT8AnQaVFCjEAScz5o4zqmBHoPVs3bu"
 payment_escrow = "DvHQCrzhL8ofNQFqxkRHnqf4Gmkejv48DCFAUMGtKHmX"
+shielded_pool = "6g5RquPcpe81VzB6CtmuS8pzbXs7nZ5CT7gZt4fLKedx"
 
 [registry]
 url = "https://api.apr.dev"

@@ -148,7 +148,7 @@ async function main() {
 
   info(`Payment URL: ${result.paymentUrl}`);
   info(`Escrow: ${result.escrowAddress.toBase58()}`);
-  info(`Claim secret (hex): ${result.claimSecretHex.slice(0, 16)}...`);
+  info(`Ephemeral pubkey: ${Buffer.from(result.ephemeralPubkey).toString('hex').slice(0, 16)}...`);
   ok('Payment created on-chain');
 
   // 6. Verify escrow exists
@@ -174,16 +174,15 @@ async function main() {
   }
   ok(`Escrow verified: amount=${Number(escrow.amount) / 1e6}, claimed=${escrow.claimed}, refunded=${escrow.refunded}`);
 
-  // 7. Claim payment (using same wallet as claimer for simplicity)
-  console.log('\n▸ Step 7: Claim payment');
+  // 7. Claim stealth payment (using same wallet as claimer for simplicity)
+  console.log('\n▸ Step 7: Claim stealth payment');
   let claimResult;
   try {
-    claimResult = await client.claimPayment({
+    claimResult = await client.claimStealth({
       escrowAddress: result.escrowAddress,
-      claimSecret: result.claimSecret,
     });
   } catch (err) {
-    fail(`claimPayment failed: ${err}`);
+    fail(`claimStealth failed: ${err}`);
   }
   info(`Claim tx: ${claimResult.txSignature}`);
   ok('Payment claimed successfully');

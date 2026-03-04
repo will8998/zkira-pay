@@ -7,7 +7,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useBalance } from './useBalance';
 import { useWallet, useConnection } from './WalletProvider';
 import { useNetwork, getUsdcMint } from '@/lib/network-config';
-import { generateMetaAddress, generateClaimSecret, hashClaimSecret, bytesToHex } from '@zkira/crypto';
+import { generateMetaAddress, encodeMetaAddress, deriveStealthAddress, decodeMetaAddress, bytesToHex } from '@zkira/crypto';
 import { createCreatePaymentIx, findEscrow } from '@zkira/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { PublicKey, Transaction } from '@solana/web3.js';
@@ -165,15 +165,16 @@ export function BatchPaymentForm() {
           const batchData: Array<{
             payment: ProcessedPayment;
             meta: ReturnType<typeof generateMetaAddress>;
-            claimSecret: Uint8Array;
+            stealthAddress: Uint8Array;
+            ephemeralPubkey: Uint8Array;
             nonce: bigint;
             escrowAddress: PublicKey;
           }> = [];
 
           for (const payment of batch) {
             const meta = generateMetaAddress();
-            const claimSecret = generateClaimSecret();
-            const claimHash = hashClaimSecret(claimSecret);
+            const metaAddress = encodeMetaAddress(meta.spendPubkey, meta.viewPubkey);
+            const { stealthPubkey, ephemeralPubkey } = deriveStealthAddress(meta.spendPubkey, meta.viewPubkey);
             const nonce = BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
             const [escrowAddress] = findEscrow(publicKey, nonce);
 
@@ -182,7 +183,7 @@ export function BatchPaymentForm() {
               creatorTokenAccount: creatorAta,
               tokenMint: new PublicKey(getUsdcMint(network)),
               amount: BigInt(Math.round(parseFloat(payment.amount) * 1_000_000)),
-              claimHash,
+              stealthAddress: stealthPubkey,
               recipientSpendPubkey: meta.spendPubkey,
               recipientViewPubkey: meta.viewPubkey,
               expiry: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
@@ -196,7 +197,8 @@ export function BatchPaymentForm() {
               batchData.push({
                 payment: processedPayment,
                 meta,
-                claimSecret,
+                stealthAddress: stealthPubkey,
+                ephemeralPubkey,
                 nonce,
                 escrowAddress
               });
@@ -215,14 +217,14 @@ export function BatchPaymentForm() {
             lastValidBlockHeight 
           });
 
-          batchData.forEach(({ payment, escrowAddress, claimSecret }) => {
+          batchData.forEach(({ payment, escrowAddress }) => {
             payment.status = 'success';
-            payment.claimLink = `${window.location.origin}/claim?escrow=${escrowAddress.toBase58()}&secret=${bytesToHex(claimSecret)}`;
+            payment.claimLink = `${window.location.origin}/claim?escrow=${escrowAddress.toBase58()}`;
             payment.txSignature = sig;
           });
 
         } catch (error) {
-          console.error('Batch payment failed:', error);
+          // Batch payment processing error
           batchProcessed.forEach(p => {
             p.status = 'failed';
             p.error = getErrorMessage(error);
@@ -234,7 +236,7 @@ export function BatchPaymentForm() {
       }
 
     } catch (error) {
-      console.error('Batch payment execution failed:', error);
+      // Batch payment execution error
     } finally {
       const successCount = processedPayments.filter(p => p.status === 'success').length;
       if (successCount > 0) {

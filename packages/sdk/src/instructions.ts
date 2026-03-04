@@ -2,12 +2,11 @@ import { PublicKey, TransactionInstruction, AccountMeta, SystemProgram, SYSVAR_R
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { sha256 } from '@noble/hashes/sha256';
 import { GHOST_REGISTRY_PROGRAM_ID, PAYMENT_ESCROW_PROGRAM_ID } from '@zkira/common';
-import { findMetaAddress, findAnnouncement, findEscrow, findEscrowVault, findConfig } from './pda.js';
+import { findAnnouncement, findEscrow, findEscrowVault, findConfig } from './pda.js';
 import type {
-  CreateRegisterMetaAddressIxParams,
   CreateSendToStealthIxParams,
   CreateCreatePaymentIxParams,
-  CreateClaimPaymentIxParams,
+  CreateClaimStealthIxParams,
   CreateRefundPaymentIxParams,
 } from './types.js';
 
@@ -106,38 +105,6 @@ function concatBytes(...arrays: Uint8Array[]): Uint8Array {
   return result;
 }
 
-/**
- * Creates a register meta-address instruction for the ghost-registry program.
- */
-export function createRegisterMetaAddressIx(params: CreateRegisterMetaAddressIxParams): TransactionInstruction {
-  const { owner, spendPubkey, viewPubkey, label } = params;
-
-  // Compute discriminator
-  const discriminator = getInstructionDiscriminator('register_meta_address');
-
-  // Serialize instruction data
-  const spendPubkeyBytes = new Uint8Array(spendPubkey);
-  const viewPubkeyBytes = new Uint8Array(viewPubkey);
-  const labelBytes = serializeOption(label, serializeString);
-
-  const data = concatBytes(discriminator, spendPubkeyBytes, viewPubkeyBytes, labelBytes);
-
-  // Derive PDAs
-  const [metaAddress] = findMetaAddress(owner);
-
-  // Build accounts
-  const accounts: AccountMeta[] = [
-    { pubkey: owner, isSigner: true, isWritable: false },
-    { pubkey: metaAddress, isSigner: false, isWritable: true },
-    { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-  ];
-
-  return new TransactionInstruction({
-    keys: accounts,
-    programId: GHOST_REGISTRY_PROGRAM_ID,
-    data: Buffer.from(data),
-  });
-}
 
 /**
  * Creates a send to stealth instruction for the ghost-registry program.
@@ -195,7 +162,7 @@ export function createCreatePaymentIx(params: CreateCreatePaymentIxParams): Tran
     creatorTokenAccount,
     tokenMint,
     amount,
-    claimHash,
+    stealthAddress,
     recipientSpendPubkey,
     recipientViewPubkey,
     expiry,
@@ -206,10 +173,10 @@ export function createCreatePaymentIx(params: CreateCreatePaymentIxParams): Tran
   const discriminator = getInstructionDiscriminator('create_payment');
 
   // Serialize instruction data matching Anchor instruction order:
-  // nonce: u64, claim_hash: [u8; 32], amount: u64, expiry: i64,
+  // nonce: u64, stealth_address: [u8; 32], amount: u64, expiry: i64,
   // recipient_spend_pubkey: [u8; 32], recipient_view_pubkey: [u8; 32]
   const nonceBytes = serializeU64(nonce);
-  const claimHashBytes = new Uint8Array(claimHash);
+  const stealthAddressBytes = new Uint8Array(stealthAddress);
   const amountBytes = serializeU64(amount);
   const expiryBytes = serializeI64(BigInt(expiry));
   const recipientSpendPubkeyBytes = new Uint8Array(recipientSpendPubkey);
@@ -218,7 +185,7 @@ export function createCreatePaymentIx(params: CreateCreatePaymentIxParams): Tran
   const data = concatBytes(
     discriminator,
     nonceBytes,
-    claimHashBytes,
+    stealthAddressBytes,
     amountBytes,
     expiryBytes,
     recipientSpendPubkeyBytes,
@@ -253,27 +220,22 @@ export function createCreatePaymentIx(params: CreateCreatePaymentIxParams): Tran
 }
 
 /**
- * Creates a claim payment instruction for the payment-escrow program.
+ * Creates a claim stealth instruction for the payment-escrow program.
  */
-export function createClaimPaymentIx(params: CreateClaimPaymentIxParams): TransactionInstruction {
-  const { claimer, claimerTokenAccount, escrowAddress, claimSecret, feeRecipientTokenAccount, tokenMint, creator } = params;
+export function createClaimStealthIx(params: CreateClaimStealthIxParams): TransactionInstruction {
+  const { claimer, claimerTokenAccount, escrowAddress, feeRecipientTokenAccount, tokenMint, creator } = params;
 
-  // Compute discriminator
-  const discriminator = getInstructionDiscriminator('claim_payment');
+  // Compute discriminator for 'claim_stealth'
+  const discriminator = getInstructionDiscriminator('claim_stealth');
 
-  // Serialize instruction data — claim_secret is Vec<u8> in Anchor (4-byte length prefix)
-  const claimSecretBytes = new Uint8Array(claimSecret);
-  const claimSecretLenBytes = serializeU32(claimSecretBytes.length);
-
-  const data = concatBytes(discriminator, claimSecretLenBytes, claimSecretBytes);
+  // No additional data — claimer proves identity by signing
+  const data = discriminator;
 
   // Derive PDAs
   const [vault] = findEscrowVault(escrowAddress);
   const [config] = findConfig();
 
-  // Build accounts — order MUST match Anchor ClaimPayment struct:
-  // config, escrow, vault, token_mint, claimer_ata, fee_recipient_ata,
-  // creator, claimer, token_program, associated_token_program, system_program
+  // Build accounts — order MUST match Anchor ClaimStealth struct
   const accounts: AccountMeta[] = [
     { pubkey: config, isSigner: false, isWritable: false },
     { pubkey: escrowAddress, isSigner: false, isWritable: true },

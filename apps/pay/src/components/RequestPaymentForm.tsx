@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import PrivacyCallout from '@/components/PrivacyCallout';
 import InfoTooltip from '@/components/InfoTooltip';
-import { generateMetaAddress, encodeMetaAddress, generateClaimSecret, hashClaimSecret, bytesToHex } from '@zkira/crypto';
+import { generateMetaAddress, encodeMetaAddress, deriveStealthAddress, bytesToHex } from '@zkira/crypto';
 import { useNetwork, getUsdcMint } from '@/lib/network-config';
 
 interface RequestPaymentData {
@@ -59,16 +59,18 @@ export function RequestPaymentForm({ onSuccess }: RequestPaymentFormProps) {
       try {
         // 1. Generate a meta-address
         const meta = generateMetaAddress();
+        const metaAddress = encodeMetaAddress(meta.spendPubkey, meta.viewPubkey);
         
-        // 2. Generate a claim secret
-        const claimSecret = generateClaimSecret();
+        // 2. Derive stealth address for this invoice
+        const { stealthPubkey, ephemeralPubkey } = deriveStealthAddress(meta.spendPubkey, meta.viewPubkey);
         
         // 3. Store invoice data in localStorage
         const invoiceId = `inv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         const invoiceData = {
           invoiceId,
-          claimSecretHex: bytesToHex(claimSecret),
-          metaAddress: encodeMetaAddress(meta.spendPubkey, meta.viewPubkey),
+          stealthAddressHex: bytesToHex(stealthPubkey),
+          ephemeralPubkeyHex: bytesToHex(ephemeralPubkey),
+          metaAddress,
           amount: String(BigInt(Math.floor(parseFloat(formData.amount) * 1_000_000))),
           tokenMint: formData.tokenMint,
           expiry: formData.expiry,
@@ -79,10 +81,8 @@ export function RequestPaymentForm({ onSuccess }: RequestPaymentFormProps) {
         existing.push(invoiceData);
         localStorage.setItem('zkira_invoices', JSON.stringify(existing));
         
-        // 4. Build the invoice URL
-        const claimHashHex = bytesToHex(hashClaimSecret(claimSecret));
-        const metaAddr = encodeMetaAddress(meta.spendPubkey, meta.viewPubkey);
-        const invoiceUrl = `${window.location.origin}/pay?amount=${formData.amount}&to=${encodeURIComponent(metaAddr)}&hash=${claimHashHex}&expiry=${formData.expiry}`;
+        // 4. Build the invoice URL (no hash needed for stealth)
+        const invoiceUrl = `${window.location.origin}/pay?amount=${formData.amount}&to=${encodeURIComponent(metaAddress)}&expiry=${formData.expiry}`;
         
         // 5. Call onSuccess
         onSuccess(invoiceUrl, formData.amount);

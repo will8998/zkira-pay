@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "Send",
+    "request": "Request",
+    "escrow": "Escrow",
+    "learn": "Learn",
+    "home": "Home",
+    "pool": "Pool",
+    "more": "More",
+    "menu": "Menu",
+    "history": "History",
+    "contacts": "Contacts",
+    "points": "Points",
+    "leaderboard": "Leaderboard",
+    "referral": "Referral",
+    "apiKeys": "API Keys",
+    "analytics": "Analytics",
+    "roadmap": "Roadmap",
+    "batch": "Batch",
+    "multiSig": "Multi-sig",
+    "docs": "Docs",
+    "learnHub": "Learn Hub",
+    "documentation": "Documentation",
+    "apiReference": "API Reference",
+    "useCases": "Use Cases",
+    "blog": "Blog"
+  },
+  "navSections": {
+    "payments": "PAYMENTS",
+    "finance": "FINANCE",
+    "activity": "ACTIVITY",
+    "developers": "DEVELOPERS",
+    "learn": "LEARN",
+    "rewards": "REWARDS",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "Connect Wallet",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "share": "Share",
+    "viewAll": "View all",
+    "noActivityYet": "No activity yet",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "Stealth Payments",
+    "titleHighlight": "on Solana",
+    "subtitle": "Send confidential payments with stealth addresses.",
+    "subtitleLine2": "Zero traceability. Instant settlement.",
+    "featureStealth": "Stealth",
+    "featureInvoices": "Invoices",
+    "featureEscrow": "Escrow",
+    "featureMultiSig": "Multi-sig"
+  },
+  "dashboard": {
+    "totalSent": "Total Sent",
+    "totalReceived": "Total Received",
+    "activeEscrows": "Active Escrows",
+    "points": "Points",
+    "viewRewards": "View rewards →",
+    "payment": "{count, plural, one {# payment} other {# payments}}",
+    "pendingEscrow": "{count, plural, one {# pending escrow} other {# pending escrows}}",
+    "sendPayment": "Send Payment",
+    "sendPaymentDesc": "Send confidential payment via stealth address",
+    "requestPayment": "Request Payment",
+    "requestPaymentDesc": "Generate invoice link for incoming payment",
+    "createEscrow": "Create Escrow",
+    "createEscrowDesc": "Set up milestone-based escrow payment",
+    "recentActivity": "Recent Activity",
+    "noTransactions": "No transactions yet",
+    "noTransactionsDesc": "Start by creating a payment or requesting one",
+    "createPayment": "Create Payment",
+    "paymentSent": "Payment Sent",
+    "paymentReceived": "Payment Received",
+    "invoice": "Invoice"
+  },
+  "status": {
+    "completed": "Completed",
+    "pending": "Pending",
+    "active": "Active",
+    "expired": "Expired",
+    "failed": "Failed",
+    "claimed": "Claimed"
+  },
+  "table": {
+    "type": "Type",
+    "amount": "Amount",
+    "status": "Status",
+    "date": "Date"
+  },
+  "createPage": {
+    "title": "Send Payment",
+    "description": "Generate a confidential payment link",
+    "successDescription": "Payment created successfully",
+    "connectNotice": "Connect your Solana wallet to create a confidential payment. Your wallet signs the transaction — we never store your keys.",
+    "paymentCreated": "Payment link created"
+  },
+  "claimPage": {
+    "title": "Claim Payment",
+    "description": "Claim a confidential payment to your wallet",
+    "missingInfo": "Missing Payment Info",
+    "missingInfoDesc": "This page requires a valid payment link with an escrow address.",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "requestPage": {
+    "title": "Request Payment",
+    "description": "Generate a confidential invoice link",
+    "successDescription": "Invoice created successfully",
+    "invoiceGenerated": "Invoice link generated"
+  },
+  "poolPage": {
+    "title": "Shielded Pool",
+    "description": "Private deposits & withdrawals with zero-knowledge proofs",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "notes": "Notes"
+  },
+  "escrowPage": {
+    "title": "Escrow Dashboard",
+    "description": "Manage your milestone-based escrow payments",
+    "createNew": "Create New",
+    "noEscrows": "No escrows yet",
+    "noEscrowsDesc": "Create a milestone-based escrow to get started",
+    "totalAmount": "Total Amount",
+    "released": "Released",
+    "milestones": "Milestones",
+    "releaseMilestone": "Release Milestone",
+    "refund": "Refund",
+    "expired": "Expired"
+  },
+  "escrowCreatePage": {
+    "title": "Create Escrow",
+    "description": "Set up a milestone-based escrow payment"
+  },
+  "batchPage": {
+    "title": "Batch Payments",
+    "description": "Send multiple payments in a single transaction"
+  },
+  "multisigPage": {
+    "title": "Multi-Signature",
+    "description": "Create and manage multi-signature wallets"
+  },
+  "multisigCreatePage": {
+    "title": "Create Multi-Sig",
+    "description": "Set up a new multi-signature wallet"
+  },
+  "contactsPage": {
+    "title": "Contacts",
+    "description": "Manage your saved wallet addresses"
+  },
+  "historyPage": {
+    "title": "Transaction History",
+    "description": "View all your past transactions"
+  },
+  "pointsPage": {
+    "title": "Points",
+    "description": "Earn rewards for using ZKIRA Pay"
+  },
+  "leaderboardPage": {
+    "title": "Leaderboard",
+    "description": "Top ZKIRA Pay users by points"
+  },
+  "referralPage": {
+    "title": "Referral Program",
+    "description": "Invite friends and earn rewards"
+  },
+  "developersPage": {
+    "title": "Developer Dashboard",
+    "description": "Manage your API keys and integrations"
+  },
+  "developerDocsPage": {
+    "title": "Developer Documentation",
+    "description": "Integrate ZKIRA Pay into your application"
+  },
+  "tokenomicsPage": {
+    "title": "Tokenomics",
+    "description": "$ZKR token distribution and economics"
+  },
+  "analyticsPage": {
+    "title": "Analytics",
+    "description": "Track your payment activity and metrics"
+  },
+  "roadmapPage": {
+    "title": "Roadmap",
+    "description": "ZKIRA Pay development timeline"
+  },
+  "learnPage": {
+    "title": "Learn",
+    "description": "Everything you need to know about ZKIRA Pay",
+    "documentation": "Documentation",
+    "documentationDesc": "Complete guides and technical reference",
+    "apiReference": "API Reference",
+    "apiReferenceDesc": "REST API endpoints and SDK methods",
+    "useCases": "Use Cases",
+    "useCasesDesc": "Real-world applications and examples",
+    "blog": "Blog",
+    "blogDesc": "Engineering updates and announcements",
+    "quickLinks": "Quick Links",
+    "stealthAddresses": "Stealth Addresses",
+    "stealthAddressesDesc": "How ECDH-based stealth addresses protect your privacy",
+    "shieldedPool": "Shielded Pool",
+    "shieldedPoolDesc": "Zero-knowledge deposit and withdrawal system",
+    "privacyTransport": "Privacy Transport",
+    "privacyTransportDesc": "Tor and Nym mixnet integration for network privacy"
+  },
+  "languageSwitcher": {
+    "label": "Switch language"
+  }
+}

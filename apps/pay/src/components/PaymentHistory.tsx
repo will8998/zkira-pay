@@ -9,7 +9,7 @@ import { EmptyState } from './EmptyState';
 import { SkeletonTable, SkeletonMetric } from './Skeleton';
 import { type SolanaNetwork, useNetwork, getUsdcMint } from '@/lib/network-config';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { fetchAndDecrypt, migrateLocalStorageToServer } from '@/lib/payment-link-crypto';
+import { fetchAndDecrypt, migrateLocalStorageToServer, retrieveEncryptedData, storeEncryptedData } from '@/lib/payment-link-crypto';
 
 // ─── Types ─── 
 interface EscrowData {
@@ -17,7 +17,7 @@ interface EscrowData {
   creator: string;
   tokenMint: string;
   amount: string; // BigInt as string
-  claimHash: string;
+  stealthAddress: string;
   expiry: string; // Unix seconds as string
   claimed: boolean;
   refunded: boolean;
@@ -32,7 +32,7 @@ interface EscrowResponse {
 
 interface Invoice {
   invoiceId: string;
-  claimSecretHex: string;
+  stealthAddressHex: string;
   metaAddress: string;
   amount: string;
   tokenMint: string;
@@ -45,7 +45,7 @@ interface ClaimedTransaction {
   txSignature: string;
   amount: string;
   tokenMint: string;
-  claimHash?: string;
+  stealthAddress?: string;
   timestamp: string;
 }
 
@@ -505,6 +505,8 @@ export function PaymentHistory() {
   const [escrows, setEscrows] = useState<EscrowData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [decryptedInvoices, setDecryptedInvoices] = useState<Invoice[]>([]);
+  const [decryptedTransactions, setDecryptedTransactions] = useState<ClaimedTransaction[]>([]);
   const [serverPaymentLinks, setServerPaymentLinks] = useState<Map<string, string>>(new Map());
 
   const itemsPerPage = 25;
@@ -546,7 +548,13 @@ export function PaymentHistory() {
   // ─── Helper: Get contact name from localStorage ───
   const getContactName = (address: string): string | null => {
     try {
-      const contacts = JSON.parse(localStorage.getItem('zkira_contacts') || '[]');
+      const stored = localStorage.getItem('zkira_contacts');
+      if (!stored) return null;
+      try {
+        const { encryptedData, iv } = JSON.parse(stored);
+        if (encryptedData && iv) return null;
+      } catch {}
+      const contacts = JSON.parse(stored);
       const match = contacts.find((c: { address: string }) => c.address === address);
       return match?.name || null;
     } catch {

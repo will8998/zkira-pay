@@ -1,55 +1,59 @@
 'use client';
 
-import { useMemo } from 'react';
-import {
-  ConnectionProvider,
-  useWallet as useWalletAdapter,
-  useConnection as useConnectionAdapter,
-} from '@solana/wallet-adapter-react';
-import {
-  UnifiedWalletProvider,
-  useUnifiedWalletContext,
-} from '@jup-ag/wallet-adapter';
-import type { Adapter } from '@solana/wallet-adapter-base';
-import { useNetwork, getRpcUrl, type SolanaNetwork } from '@/lib/network-config';
+import { createContext, useContext, type ReactNode } from 'react';
 
-// Re-export standard hooks — consumers don't need to change imports
-export { useUnifiedWalletContext };
-export const useWallet = useWalletAdapter;
-export const useConnection = useConnectionAdapter;
+/**
+ * Stub WalletProvider — Solana wallet integration removed.
+ * The new EVM flow uses BrowserWalletProvider instead.
+ * These exports maintain API compatibility for legacy components.
+ */
 
-function mapNetworkToCluster(network: SolanaNetwork): 'devnet' | 'testnet' | 'mainnet-beta' {
-  return network;
+interface WalletState {
+  connected: boolean;
+  publicKey: null;
+  signTransaction: null;
+  disconnect: () => void;
 }
 
-function InnerProvider({ children }: { children: React.ReactNode }) {
-  const { network } = useNetwork();
-  const endpoint = useMemo(() => getRpcUrl(network), [network]);
-  const wallets: Adapter[] = useMemo(() => [], []); // Wallet Standard auto-discovers
+interface ConnectionState {
+  connection: null;
+}
 
+const walletStub: WalletState = {
+  connected: false,
+  publicKey: null,
+  signTransaction: null,
+  disconnect: () => {},
+};
+
+const connectionStub: ConnectionState = {
+  connection: null,
+};
+
+const WalletContext = createContext(walletStub);
+const ConnectionContext = createContext(connectionStub);
+const UnifiedWalletContext = createContext({ setShowModal: (_show: boolean) => {} });
+
+export function useWallet() {
+  return useContext(WalletContext);
+}
+
+export function useConnection() {
+  return useContext(ConnectionContext);
+}
+
+export function useUnifiedWalletContext() {
+  return useContext(UnifiedWalletContext);
+}
+
+export function WalletContextProvider({ children }: { children: ReactNode }) {
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <UnifiedWalletProvider
-        wallets={wallets}
-        config={{
-          autoConnect: true,
-          env: mapNetworkToCluster(network),
-          metadata: {
-            name: 'ZKIRA Pay',
-            description: 'Confidential Payments on Solana',
-            url: 'https://app.zkira.xyz',
-            iconUrls: ['/icon.svg'],
-          },
-          theme: 'dark',
-          lang: 'en',
-        }}
-      >
-        {children}
-      </UnifiedWalletProvider>
-    </ConnectionProvider>
+    <WalletContext.Provider value={walletStub}>
+      <ConnectionContext.Provider value={connectionStub}>
+        <UnifiedWalletContext.Provider value={{ setShowModal: () => {} }}>
+          {children}
+        </UnifiedWalletContext.Provider>
+      </ConnectionContext.Provider>
+    </WalletContext.Provider>
   );
-}
-
-export function WalletContextProvider({ children }: { children: React.ReactNode }) {
-  return <InnerProvider>{children}</InnerProvider>;
 }

@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useWallet } from './WalletProvider';
 import { useBalance } from './useBalance';
 
 import { WalletPill } from './WalletPill';
-
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function TopBar() {
+  const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const pathname = usePathname();
   const { connected } = useWallet();
   const { sol, usdc, loading } = useBalance();
@@ -27,16 +30,16 @@ export function TopBar() {
 
   // Center navigation - only main actions
   const centerNavigation = [
-    { name: 'Send', href: '/create' },
-    { name: 'Request', href: '/request' },
-    { name: 'Escrow', href: '/escrow' },
-    { name: 'Learn', href: '/learn' },
+    { name: t('send'), href: '/create', key: 'nav.send' },
+    { name: t('request'), href: '/request', key: 'nav.request' },
+    { name: t('escrow'), href: '/escrow', key: 'nav.escrow' },
+    { name: t('learn'), href: '/learn', key: 'nav.learn' },
   ];
 
   // Profile dropdown items
   const profileItems = [
     { 
-      name: 'History', 
+      name: t('history'),
       href: '/history',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -45,7 +48,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'Contacts', 
+      name: t('contacts'),
       href: '/contacts',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -54,7 +57,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'Points', 
+      name: t('points'),
       href: '/points',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -63,7 +66,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'Leaderboard', 
+      name: t('leaderboard'),
       href: '/leaderboard',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -72,7 +75,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'Referral', 
+      name: t('referral'),
       href: '/referral',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -81,7 +84,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'API Keys', 
+      name: t('apiKeys'),
       href: '/developers',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -90,7 +93,7 @@ export function TopBar() {
       )
     },
     { 
-      name: 'Analytics', 
+      name: t('analytics'),
       href: '/analytics',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -99,7 +102,7 @@ export function TopBar() {
       )
     },
     {
-      name: 'Roadmap',
+      name: t('roadmap'),
       href: '/roadmap',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -148,7 +151,7 @@ export function TopBar() {
         {connected && (
           <div className="hidden md:flex items-center gap-1.5">
             <div className="flex items-center gap-1 bg-[var(--color-hover)] px-2 py-1 rounded-md">
-              <span className="text-[11px] text-[var(--color-muted)]">SOL</span>
+              <span className="text-[11px] text-[var(--color-muted)]">{tCommon('sol')}</span>
               {loading ? (
                 <div className="w-8 h-3 skeleton-shimmer rounded" />
               ) : (
@@ -158,7 +161,7 @@ export function TopBar() {
               )}
             </div>
             <div className="flex items-center gap-1 bg-[var(--color-hover)] px-2 py-1 rounded-md">
-              <span className="text-[11px] text-[var(--color-muted)]">USDC</span>
+              <span className="text-[11px] text-[var(--color-muted)]">{tCommon('usdc')}</span>
               {loading ? (
                 <div className="w-8 h-3 skeleton-shimmer rounded" />
               ) : (
@@ -180,7 +183,7 @@ export function TopBar() {
               <svg className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[#FF2828] transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
-              <span className="hidden md:inline text-sm font-medium text-[var(--color-text)] group-hover:text-[#FF2828] transition-colors">Menu</span>
+              <span className="hidden md:inline text-sm font-medium text-[var(--color-text)] group-hover:text-[#FF2828] transition-colors">{t('menu')}</span>
             </div>
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF2828] rounded-full animate-pulse opacity-80" />
           </button>
@@ -221,6 +224,9 @@ export function TopBar() {
             </>
           )}
         </div>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
         {/* Wallet */}
         <WalletPill />

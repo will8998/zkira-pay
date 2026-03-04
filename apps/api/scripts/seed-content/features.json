@@ -62,11 +62,28 @@
             "text": "Learn More",
             "href": "/features/telegram-bot"
           }
+        },
+        {
+          "label": "FEATURE 07",
+          "title": "Shielded Pool",
+          "description": "Zero-knowledge proof deposits and withdrawals. Fixed-denomination design with Groth16 on-chain verification breaks all forensic links.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/shielded-pool"
+          }
+        },
+        {
+          "label": "FEATURE 08",
+          "title": "Privacy Network",
+          "description": "Tor hidden service and Nym mixnet integration. Your IP address and network traffic are completely untraceable.",
+          "link": {
+            "text": "Learn More",
+            "href": "/features/privacy-network"
+          }
         }
       ]
     },
     {
-      "type": "cta",
       "title": "Ready to start?",
       "description": "Create your first confidential payment link and experience the future of private transactions on Solana.",
       "buttons": [

@@ -11,7 +11,7 @@ import healthRoutes from './routes/health.js';
 import announcementRoutes, { setIndexer as setAnnouncementIndexer } from './routes/announcements.js';
 import paymentRoutes, { setIndexer as setPaymentIndexer } from './routes/payments.js';
 import escrowRoutes, { setIndexer as setEscrowIndexer } from './routes/escrows.js';
-import metaRoutes, { setIndexer as setMetaIndexer } from './routes/meta.js';
+import metaRoutes from './routes/meta.js';
 import userRoutes from './routes/users.js';
 import contactRoutes from './routes/contacts.js';
 import invoiceRoutes from './routes/invoices.js';
@@ -80,10 +80,10 @@ app.route('/', analyticsRoutes);
 async function startServer() {
   const config = loadConfig();
   
-  console.log('Starting PRIV API server...');
-  console.log(`Port: ${config.port}`);
-  console.log(`Solana RPC: ${config.solanaRpcUrl}`);
-  console.log(`Index interval: ${config.indexIntervalMs}ms`);
+  // Server startup logging (no sensitive data)
+
+
+
 
   // Initialize Solana connection
   const connection = new Connection(config.solanaRpcUrl, 'confirmed');
@@ -95,26 +95,25 @@ async function startServer() {
   setAnnouncementIndexer(indexer);
   setEscrowIndexer(indexer);
   setPaymentIndexer(indexer);
-  setMetaIndexer(indexer);
 
   // Start indexing
   indexer.start();
 
   // Graceful shutdown
   process.on('SIGINT', () => {
-    console.log('\nShutting down gracefully...');
+    // Graceful shutdown initiated
     indexer.stop();
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
-    console.log('\nShutting down gracefully...');
+    // Graceful shutdown initiated
     indexer.stop();
     process.exit(0);
   });
 
   // Start HTTP server
-  console.log(`Server starting on port ${config.port}`);
+  // HTTP server starting
   serve({
     fetch: app.fetch,
     port: config.port,

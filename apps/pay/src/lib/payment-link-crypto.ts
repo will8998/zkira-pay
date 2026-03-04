@@ -334,3 +334,69 @@ export async function migrateLocalStorageToServer({
     throw error;
   }
 }
+
+/**
+ * Encrypts data for localStorage storage using wallet-derived key
+ */
+export async function encryptForLocalStorage(
+  data: string,
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>,
+  walletAddress: string
+): Promise<{ encryptedData: string; iv: string }> {
+  const key = await getOrDeriveKey(signMessage, walletAddress);
+  return encryptPaymentLink(data, key);
+}
+
+/**
+ * Decrypts data from localStorage using wallet-derived key
+ */
+export async function decryptFromLocalStorage(
+  encryptedData: string,
+  iv: string,
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>,
+  walletAddress: string
+): Promise<string> {
+  const key = await getOrDeriveKey(signMessage, walletAddress);
+  return decryptPaymentLink(encryptedData, iv, key);
+}
+
+/**
+ * Stores encrypted JSON data in localStorage
+ */
+export async function storeEncryptedData(
+  key: string,
+  data: unknown,
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>,
+  walletAddress: string
+): Promise<void> {
+  try {
+    const jsonString = JSON.stringify(data);
+    const { encryptedData, iv } = await encryptForLocalStorage(jsonString, signMessage, walletAddress);
+    const encrypted = JSON.stringify({ encryptedData, iv, version: 1 });
+    localStorage.setItem(key, encrypted);
+  } catch (error) {
+    console.warn(`Failed to store encrypted data for key ${key}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Retrieves and decrypts JSON data from localStorage
+ */
+export async function retrieveEncryptedData<T>(
+  key: string,
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>,
+  walletAddress: string
+): Promise<T | null> {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return null;
+    
+    const { encryptedData, iv } = JSON.parse(stored);
+    const decrypted = await decryptFromLocalStorage(encryptedData, iv, signMessage, walletAddress);
+    return JSON.parse(decrypted) as T;
+  } catch (error) {
+    console.warn(`Failed to retrieve encrypted data for key ${key}:`, error);
+    return null;
+  }
+}

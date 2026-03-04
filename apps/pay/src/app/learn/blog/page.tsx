@@ -15,6 +15,137 @@ interface BlogPost {
 
 const blogPosts: BlogPost[] = [
   {
+    id: "privacy-architecture",
+    title: "ZKIRA Privacy Architecture: From Stealth Addresses to Full Anonymity",
+    date: "Mar 2026",
+    category: "ENGINEERING",
+    excerpt: "A comprehensive look at our 18-wave privacy upgrade — shielded pool, ZK proofs, Tor integration, timing defenses, and how we defeat blockchain forensics while keeping the UX identical.",
+    content: (
+      <div className="prose prose-invert max-w-none">
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">The Problem</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Stealth addresses were just the beginning. While they hide sender-recipient relationships, sophisticated blockchain forensics firms like Arkham Intelligence and Chainalysis can still trace payments through timing analysis, amount correlation, and RPC fingerprinting. A truly private payment system needs defense in depth.
+        </p>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Consider this attack: Alice sends 1.337 SOL to Bob's stealth address at 14:23:45 UTC. Bob withdraws 1.337 SOL from that address 6 minutes later. Even without knowing the stealth address derivation, the timing and exact amount create a probabilistic link. Scale this across thousands of transactions, and patterns emerge.
+        </p>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Our Solution: 5 Layers of Privacy</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          After 18 implementation waves, ZKIRA now provides military-grade privacy through a comprehensive 5-layer architecture. Each layer addresses different attack vectors, creating overlapping defenses that make correlation nearly impossible.
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>Layer 1: Stealth Addresses</strong>: Hide sender-recipient relationships via ECDH key exchange</li>
+          <li className="mb-2">• <strong>Layer 2: Shielded Pool</strong>: Break amount/timing correlation with ZK proofs and fixed denominations</li>
+          <li className="mb-2">• <strong>Layer 3: Privacy Transport</strong>: Eliminate IP correlation via Tor hidden service + Nym mixnet</li>
+          <li className="mb-2">• <strong>Layer 4: Timing Defenses</strong>: Defeat temporal analysis with soak time and Poisson batching</li>
+          <li className="mb-2">• <strong>Layer 5: Data Hygiene</strong>: Zero logs, zero analytics, zero correlation points</li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Layer 1: Stealth Addresses (ECDH)</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Our existing stealth address system remains the foundation. Ed25519 elliptic curve cryptography generates unlinkable one-time addresses through sender-side derivation. Each payment creates a mathematically unique address that only the recipient can claim, breaking the fundamental assumption of address reuse that enables most blockchain surveillance.
+        </p>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Layer 2: Shielded Pool (ZK Proofs)</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          The shielded pool eliminates amount and timing correlation through zero-knowledge cryptography. Users deposit fixed denominations (0.1, 1, 10, 100 SOL) into a shared pool, then withdraw to any address after a randomized delay. Groth16 proofs verify withdrawal legitimacy without revealing which deposit corresponds to which withdrawal.
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>Fixed Denominations</strong>: Standardized amounts prevent correlation via unique values</li>
+          <li className="mb-2">• <strong>Poseidon Merkle Tree</strong>: 20-level tree with 11,354 Circom constraints for efficient proving</li>
+          <li className="mb-2">• <strong>Browser Proving</strong>: ~3 second proof generation via Web Worker, no server dependency</li>
+          <li className="mb-2">• <strong>Batched Withdrawals</strong>: Multiple users withdraw simultaneously, creating larger anonymity sets</li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Layer 3: Privacy Transport (Tor + Nym)</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Network-level privacy prevents IP correlation and traffic analysis. All ZKIRA transactions route through our Tor hidden service, then relay via the Nym mixnet for additional protection. Your ISP, VPN provider, and even Solana RPC nodes cannot correlate your IP address with your transactions.
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>Tor Hidden Service</strong>: zkira7x...onion endpoint eliminates IP exposure</li>
+          <li className="mb-2">• <strong>Nym Mixnet</strong>: Additional mixing layer with cover traffic and timing obfuscation</li>
+          <li className="mb-2">• <strong>Blind Relaying</strong>: Our relayers cannot see transaction contents or correlate users</li>
+          <li className="mb-2">• <strong>No Direct RPC</strong>: Zero direct connections to Solana nodes from user devices</li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Layer 4: Timing Defenses</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Temporal analysis is one of the most powerful correlation techniques. Our timing defenses make it nearly impossible to link deposits and withdrawals based on when they occur.
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>6-Hour Soak Time</strong>: Minimum delay before withdrawals become eligible</li>
+          <li className="mb-2">• <strong>Poisson Distribution</strong>: Batch processing follows natural randomness, ~1 hour mean interval</li>
+          <li className="mb-2">• <strong>Protocol Decoys</strong>: Fake transactions every 30±10 minutes to mask real activity</li>
+          <li className="mb-2">• <strong>Variable Batch Sizes</strong>: 3-50 withdrawals per batch, preventing size-based correlation</li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">Layer 5: Data Hygiene</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Perfect cryptography means nothing if metadata leaks through logs, analytics, or operational security failures. Layer 5 ensures zero correlation points exist in our infrastructure.
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>No Logs</strong>: Zero request logging, zero transaction correlation, zero user tracking</li>
+          <li className="mb-2">• <strong>No Analytics</strong>: No Google Analytics, no user behavior tracking, no fingerprinting</li>
+          <li className="mb-2">• <strong>Ephemeral Sessions</strong>: All user state discarded immediately after transaction completion</li>
+          <li className="mb-2">• <strong>Blind Infrastructure</strong>: Our servers cannot correlate users even if compromised</li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">The Result</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          This 5-layer architecture provides unprecedented privacy resistance. Against commercial blockchain forensics (Arkham, Chainalysis, Solscan), we achieve ~95% correlation resistance. Against nation-state adversaries with global network monitoring, we estimate ~70-80% resistance — the binding constraint being anonymity set size, not cryptographic weakness.
+        </p>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          The cryptography itself is unbreakable. The 5% gap against commercial forensics comes from behavioral analysis and small anonymity sets in early adoption. As usage grows, even this gap disappears.
+        </p>
+        
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mt-6 mb-3">UX Impact</h3>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Despite this comprehensive privacy architecture, the user experience remains nearly identical. Only two changes are visible:
+        </p>
+        
+        <ul className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4 pl-4">
+          <li className="mb-2">• <strong>Proof Generation</strong>: 3-second spinner while generating ZK proof in browser</li>
+          <li className="mb-2">• <strong>Withdrawal Timing</strong>: "~1 hour" message instead of instant settlement</li>
+        </ul>
+        
+        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+          Everything else — wallet connection, transaction signing, balance updates — works exactly as users expect. Privacy that actually works without breaking the user experience.
+        </p>
+        
+        <CodeBlock 
+          code={`// The entire privacy stack in 4 lines
+const transport = await createPrivateTransport();
+const pool = new ShieldedPoolClient(connection, wallet, config, { transport });
+const { note } = await pool.deposit(USDC_MINT);
+await pool.withdraw(note, recipientAddress);`}
+          language="typescript"
+          title="Simple SDK Usage"
+        />
+        
+        <blockquote className="border-l-2 border-[#FF2828] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
+          "Privacy is not about hiding wrongdoing. It's about preserving human dignity in an age of total surveillance."
+        </blockquote>
+      </div>
+    )
+  },
+  {
     id: "intro",
     title: "Introducing ZKIRA Pay: Private Payments on Solana",
     date: "Feb 2026",
@@ -512,10 +643,9 @@ const zkira = new ZkiraClient({
   // Claim each payment
   for (const payment of payments) {
     if (payment.status === 'unclaimed') {
-      const signature = await zkira.claimPayment({
-        paymentId: payment.id,
-        metaAddress: metaAddress,
-        destinationAddress: myWallet.publicKey
+      const signature = await zkira.claimStealth({
+        escrowAddress: payment.escrowAddress,
+      });
       });
       
       console.log(\`Claimed payment: \${signature}\`);

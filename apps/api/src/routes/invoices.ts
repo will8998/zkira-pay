@@ -27,7 +27,7 @@ invoiceRoutes.get('/api/invoices/:walletAddress', async (c) => {
 invoiceRoutes.post('/api/invoices', async (c) => {
   try {
     const body = await c.req.json();
-    const { creatorWallet, invoiceId, amount, tokenMint, claimSecretHash, metaAddress, expiresAt } = body;
+    const { creatorWallet, invoiceId, amount, tokenMint, metaAddress, expiresAt } = body;
 
     if (!creatorWallet || typeof creatorWallet !== 'string') {
       return c.json({ error: 'Valid creator wallet is required' }, 400);
@@ -50,7 +50,6 @@ invoiceRoutes.post('/api/invoices', async (c) => {
       creatorWallet,
       amount: amount.toString(),
       tokenMint,
-      claimSecretHash,
       metaAddress,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
     }).returning();

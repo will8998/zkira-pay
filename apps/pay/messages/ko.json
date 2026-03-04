@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "전송",
+    "request": "요청",
+    "escrow": "에스크로",
+    "learn": "학습",
+    "home": "홈",
+    "pool": "풀",
+    "more": "더보기",
+    "menu": "메뉴",
+    "history": "기록",
+    "contacts": "연락처",
+    "points": "포인트",
+    "leaderboard": "리더보드",
+    "referral": "추천",
+    "apiKeys": "API 키",
+    "analytics": "분석",
+    "roadmap": "로드맵",
+    "batch": "배치",
+    "multiSig": "멀티시그",
+    "docs": "문서",
+    "learnHub": "학습 허브",
+    "documentation": "문서",
+    "apiReference": "API 참조",
+    "useCases": "사용 사례",
+    "blog": "블로그"
+  },
+  "navSections": {
+    "payments": "결제",
+    "finance": "금융",
+    "activity": "활동",
+    "developers": "개발자",
+    "learn": "학습",
+    "rewards": "보상",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "지갑 연결",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "cancel": "취소",
+    "confirm": "확인",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "submit": "제출",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "copy": "복사",
+    "copied": "복사됨!",
+    "share": "공유",
+    "viewAll": "모두 보기",
+    "noActivityYet": "아직 활동이 없습니다",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "스텔스 결제",
+    "titleHighlight": "Solana에서",
+    "subtitle": "스텔스 주소로 기밀 결제를 전송하세요.",
+    "subtitleLine2": "추적 불가능. 즉시 정산.",
+    "featureStealth": "스텔스",
+    "featureInvoices": "인보이스",
+    "featureEscrow": "에스크로",
+    "featureMultiSig": "멀티시그"
+  },
+  "dashboard": {
+    "totalSent": "총 전송",
+    "totalReceived": "총 수신",
+    "activeEscrows": "활성 에스크로",
+    "points": "포인트",
+    "viewRewards": "보상 보기 →",
+    "payment": "{count, plural, one {# 건의 결제} other {# 건의 결제}}",
+    "pendingEscrow": "{count, plural, one {# 건의 대기 중 에스크로} other {# 건의 대기 중 에스크로}}",
+    "sendPayment": "결제 전송",
+    "sendPaymentDesc": "스텔스 주소를 통한 기밀 결제 전송",
+    "requestPayment": "결제 요청",
+    "requestPaymentDesc": "수신 결제용 인보이스 링크 생성",
+    "createEscrow": "에스크로 생성",
+    "createEscrowDesc": "마일스톤 기반 에스크로 결제 설정",
+    "recentActivity": "최근 활동",
+    "noTransactions": "아직 거래가 없습니다",
+    "noTransactionsDesc": "결제를 생성하거나 요청하여 시작하세요",
+    "createPayment": "결제 생성",
+    "paymentSent": "결제 전송됨",
+    "paymentReceived": "결제 수신됨",
+    "invoice": "인보이스"
+  },
+  "status": {
+    "completed": "완료",
+    "pending": "대기 중",
+    "active": "활성",
+    "expired": "만료됨",
+    "failed": "실패",
+    "claimed": "청구됨"
+  },
+  "table": {
+    "type": "유형",
+    "amount": "금액",
+    "status": "상태",
+    "date": "날짜"
+  },
+  "createPage": {
+    "title": "결제 전송",
+    "description": "기밀 결제 링크 생성",
+    "successDescription": "결제가 성공적으로 생성되었습니다",
+    "connectNotice": "기밀 결제를 생성하려면 Solana 지갑을 연결하세요. 귀하의 지갑이 거래에 서명합니다 — 저희는 귀하의 키를 저장하지 않습니다.",
+    "paymentCreated": "결제 링크가 생성되었습니다"
+  },
+  "claimPage": {
+    "title": "결제 청구",
+    "description": "기밀 결제를 지갑으로 청구",
+    "missingInfo": "결제 정보 누락",
+    "missingInfoDesc": "이 페이지는 에스크로 주소가 포함된 유효한 결제 링크가 필요합니다.",
+    "backToDashboard": "대시보드로 돌아가기"
+  },
+  "requestPage": {
+    "title": "결제 요청",
+    "description": "기밀 인보이스 링크 생성",
+    "successDescription": "인보이스가 성공적으로 생성되었습니다",
+    "invoiceGenerated": "인보이스 링크가 생성되었습니다"
+  },
+  "poolPage": {
+    "title": "차폐 풀",
+    "description": "영지식 증명을 통한 비공개 입출금",
+    "deposit": "입금",
+    "withdraw": "출금",
+    "notes": "노트"
+  },
+  "escrowPage": {
+    "title": "에스크로 대시보드",
+    "description": "마일스톤 기반 에스크로 결제 관리",
+    "createNew": "새로 생성",
+    "noEscrows": "아직 에스크로가 없습니다",
+    "noEscrowsDesc": "시작하려면 마일스톤 기반 에스크로를 생성하세요",
+    "totalAmount": "총 금액",
+    "released": "해제됨",
+    "milestones": "마일스톤",
+    "releaseMilestone": "마일스톤 해제",
+    "refund": "환불",
+    "expired": "만료됨"
+  },
+  "escrowCreatePage": {
+    "title": "에스크로 생성",
+    "description": "마일스톤 기반 에스크로 결제 설정"
+  },
+  "batchPage": {
+    "title": "배치 결제",
+    "description": "단일 거래로 여러 결제 전송"
+  },
+  "multisigPage": {
+    "title": "멀티시그네처",
+    "description": "멀티시그 지갑 생성 및 관리"
+  },
+  "multisigCreatePage": {
+    "title": "멀티시그 생성",
+    "description": "새 멀티시그 지갑 설정"
+  },
+  "contactsPage": {
+    "title": "연락처",
+    "description": "저장된 지갑 주소 관리"
+  },
+  "historyPage": {
+    "title": "거래 기록",
+    "description": "모든 과거 거래 보기"
+  },
+  "pointsPage": {
+    "title": "포인트",
+    "description": "ZKIRA Pay 사용으로 보상 획득"
+  },
+  "leaderboardPage": {
+    "title": "리더보드",
+    "description": "포인트별 상위 ZKIRA Pay 사용자"
+  },
+  "referralPage": {
+    "title": "추천 프로그램",
+    "description": "친구를 초대하고 보상을 획득하세요"
+  },
+  "developersPage": {
+    "title": "개발자 대시보드",
+    "description": "API 키 및 통합 관리"
+  },
+  "developerDocsPage": {
+    "title": "개발자 문서",
+    "description": "애플리케이션에 ZKIRA Pay 통합"
+  },
+  "tokenomicsPage": {
+    "title": "토크노믹스",
+    "description": "$ZKR 토큰 배포 및 경제학"
+  },
+  "analyticsPage": {
+    "title": "분석",
+    "description": "결제 활동 및 지표 추적"
+  },
+  "roadmapPage": {
+    "title": "로드맵",
+    "description": "ZKIRA Pay 개발 타임라인"
+  },
+  "learnPage": {
+    "title": "학습",
+    "description": "ZKIRA Pay에 대해 알아야 할 모든 것",
+    "documentation": "문서",
+    "documentationDesc": "완전한 가이드 및 기술 참조",
+    "apiReference": "API 참조",
+    "apiReferenceDesc": "REST API 엔드포인트 및 SDK 메서드",
+    "useCases": "사용 사례",
+    "useCasesDesc": "실제 애플리케이션 및 예제",
+    "blog": "블로그",
+    "blogDesc": "엔지니어링 업데이트 및 공지사항",
+    "quickLinks": "빠른 링크",
+    "stealthAddresses": "스텔스 주소",
+    "stealthAddressesDesc": "ECDH 기반 스텔스 주소가 개인정보를 보호하는 방법",
+    "shieldedPool": "차폐 풀",
+    "shieldedPoolDesc": "영지식 입출금 시스템",
+    "privacyTransport": "프라이버시 전송",
+    "privacyTransportDesc": "네트워크 프라이버시를 위한 Tor 및 Nym 믹스넷 통합"
+  },
+  "languageSwitcher": {
+    "label": "언어 변경"
+  }
+}

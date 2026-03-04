@@ -4,4 +4,9 @@ export type {
   RelayClaimRequest,
   RelayClaimResponse,
   RelayStatusResponse,
+  SessionCreateRequest,
+  SessionCreateResponse,
+  SessionTransactionRequest,
+  SessionTransactionResponse,
+  SessionBalanceResponse,
 } from './types.js';

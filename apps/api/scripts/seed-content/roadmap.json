@@ -47,6 +47,26 @@
               "title": "Basic Telegram Bot",
               "description": "/send and /request commands for creating payment links in chat",
               "status": "✓ DONE"
+            },
+            {
+              "title": "Shielded Pool (ZK Proofs)",
+              "description": "Groth16 zero-knowledge proof deposits and withdrawals with on-chain verification",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Tor Hidden Service",
+              "description": "RPC privacy through Tor .onion routing",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Nym Mixnet Integration",
+              "description": "Browser-level network privacy via Nym mixnet transport",
+              "status": "✓ DONE"
+            },
+            {
+              "title": "Timing Defense System",
+              "description": "6-hour soak time, Poisson-distributed batch processing, and automated protocol decoys",
+              "status": "✓ DONE"
             }
           ]
         },

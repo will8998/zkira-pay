@@ -3,13 +3,15 @@
 import { useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-
+import { useTranslations } from 'next-intl';
 interface MoreSheetProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
+  const t = useTranslations('nav');
+  const tSections = useTranslations('navSections');
   const pathname = usePathname();
   const sheetRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -21,10 +23,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
 
   const navigationSections = [
     {
-      section: 'PAYMENTS',
+      section: tSections('payments'),
       items: [
         {
-          name: 'Batch',
+          name: t('batch'),
           href: '/batch',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -35,10 +37,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
       ],
     },
     {
-      section: 'FINANCE',
+      section: tSections('finance'),
       items: [
         {
-          name: 'Escrow',
+          name: t('escrow'),
           href: '/escrow',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -47,7 +49,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
           ),
         },
         {
-          name: 'Multi-sig',
+          name: t('multiSig'),
           href: '/multisig',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -58,10 +60,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
       ],
     },
     {
-      section: 'ACTIVITY',
+      section: tSections('activity'),
       items: [
         {
-          name: 'Contacts',
+          name: t('contacts'),
           href: '/contacts',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -72,10 +74,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
       ],
     },
     {
-      section: 'DEVELOPERS',
+      section: tSections('developers'),
       items: [
         {
-          name: 'API Keys',
+          name: t('apiKeys'),
           href: '/developers',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -84,7 +86,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
           ),
         },
         {
-          name: 'Docs',
+          name: t('docs'),
           href: '/developers/docs',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -96,10 +98,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
     },
   ];
   const learnSection = {
-    section: 'LEARN',
+    section: tSections('learn'),
     items: [
       {
-        name: 'Learn Hub',
+        name: t('learnHub'),
         href: '/learn',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -108,7 +110,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Documentation',
+        name: t('documentation'),
         href: '/learn/docs',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -117,7 +119,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'API Reference',
+        name: t('apiReference'),
         href: '/learn/api',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -126,7 +128,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Use Cases',
+        name: t('useCases'),
         href: '/learn/use-cases',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -135,7 +137,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Blog',
+        name: t('blog'),
         href: '/learn/blog',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -146,10 +148,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
     ],
   };
   const rewardsSection = {
-    section: 'REWARDS',
+    section: tSections('rewards'),
     items: [
       {
-        name: 'Points',
+        name: t('points'),
         href: '/points',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -158,7 +160,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Leaderboard',
+        name: t('leaderboard'),
         href: '/leaderboard',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -167,7 +169,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Referral',
+        name: t('referral'),
         href: '/referral',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -176,7 +178,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
         ),
       },
       {
-        name: 'Analytics',
+        name: t('analytics'),
         href: '/analytics',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -187,10 +189,10 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
     ],
   };
   const zkrSection = {
-    section: '$ZKR',
+    section: tSections('zkr'),
     items: [
       {
-        name: 'Roadmap',
+        name: t('roadmap'),
         href: '/roadmap',
         icon: (
           <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">

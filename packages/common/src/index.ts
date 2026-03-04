@@ -31,7 +31,7 @@ export interface PaymentEscrow {
   creator: PublicKey;
   tokenMint: PublicKey;
   amount: bigint;
-  claimHash: Uint8Array;
+  stealthAddress: Uint8Array;
   recipientMeta: MetaAddress | null;
   expiry: number;
   claimed: boolean;
@@ -48,7 +48,7 @@ export interface MilestoneEscrow {
   totalAmount: bigint;
   releasedAmount: bigint;
   recipientMeta: MetaAddress | null;
-  claimHash: Uint8Array;
+  stealthAddress: Uint8Array;
   expiry: number;
   milestoneCount: number;
   milestonesReleased: number;

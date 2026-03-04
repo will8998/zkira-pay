@@ -45,15 +45,16 @@ export function tokenPicker(amount: number) {
 
 // ─── Payment Created ───
 
-export function paymentCreated(paymentUrl: string, claimSecretHex: string) {
-  const secretId = storeSecret(claimSecretHex);
-  return new InlineKeyboard()
-    .url('\ud83d\udd17 Share Payment Link', paymentUrl)
-    .row()
-    .text('\ud83d\udd11 Show Claim Secret', `secret:${secretId}`)
-    .row()
-    .text('\ud83d\udcb0 New Request', 'menu:request')
-    .text('\ud83c\udfe0 Home', 'menu:home');
+export function paymentCreated(paymentUrl: string) {
+  const keyboard = new InlineKeyboard()
+    .url('🔗 Share Payment Link', paymentUrl)
+    .row();
+  
+  // Stealth claiming doesn't need secrets - payment link is sufficient
+  
+  return keyboard
+    .text('💰 New Request', 'menu:request')
+    .text('🏠 Home', 'menu:home');
 }
 
 // ─── After Secret Reveal ───

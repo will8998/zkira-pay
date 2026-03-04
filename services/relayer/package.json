@@ -10,12 +10,12 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@zkira/common": "workspace:*",
     "@hono/node-server": "^1.13.8",
     "@noble/hashes": "^1.6.1",
-    "@solana/spl-token": "^0.4.12",
-    "@solana/web3.js": "^1.98.0",
-    "hono": "^4.6.14"
+    "@zkira/crypto": "workspace:*",
+    "ethers": "^6.13.0",
+    "hono": "^4.6.14",
+    "tronweb": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",

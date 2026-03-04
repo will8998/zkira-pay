@@ -6,18 +6,17 @@ import { useBalance } from './useBalance';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { createCreatePaymentIx } from '@zkira/sdk';
-import { decodeMetaAddress, hexToBytes } from '@zkira/crypto';
+import { decodeMetaAddress, deriveStealthAddress } from '@zkira/crypto';
 import { PaymentSuccess } from './PaymentSuccess';
 import { toast } from 'sonner';
 import { useNetwork, getUsdcMint } from '@/lib/network-config';
 interface PayInvoiceProps {
   amount: string;
   recipientMetaAddress: string;
-  claimHashHex: string;
   expiryDays: string;
 }
 
-export function PayInvoice({ amount, recipientMetaAddress, claimHashHex, expiryDays }: PayInvoiceProps) {
+export function PayInvoice({ amount, recipientMetaAddress, expiryDays }: PayInvoiceProps) {
   const { connected, publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
   const { network } = useNetwork();
@@ -37,8 +36,8 @@ export function PayInvoice({ amount, recipientMetaAddress, claimHashHex, expiryD
       // Decode meta address to get recipient keys
       const { spendPubkey, viewPubkey } = decodeMetaAddress(recipientMetaAddress);
       
-      // Convert claim hash from hex to bytes
-      const claimHash = hexToBytes(claimHashHex);
+      // Derive stealth address for this payment
+      const { stealthPubkey, ephemeralPubkey } = deriveStealthAddress(spendPubkey, viewPubkey);
       
       // USDC devnet mint
       const tokenMint = new PublicKey(getUsdcMint(network));
@@ -61,7 +60,7 @@ export function PayInvoice({ amount, recipientMetaAddress, claimHashHex, expiryD
         creatorTokenAccount,
         tokenMint,
         amount: amountLamports,
-        claimHash,
+        stealthAddress: stealthPubkey,
         recipientSpendPubkey: spendPubkey,
         recipientViewPubkey: viewPubkey,
         expiry: expiryTimestamp,

@@ -14,7 +14,7 @@
       "paragraphs": [
         "\"On public blockchains, receiving a payment means revealing your wallet address — and with it, your entire transaction history.\"",
         "Traditional crypto payments force you to choose: either share your wallet address and sacrifice privacy, or create multiple wallets and sacrifice convenience. ZKIRA's stealth payments eliminate this tradeoff.",
-        "With stealth addresses, you can post one meta-address publicly — on social media, your website, or anywhere else — while receiving every payment through a completely unique, unlinkable address generated cryptographically by the sender."
+        "With stealth addresses, you can post one meta-address publicly — on social media, your website, or anywhere else — while receiving every payment through a completely unique, unlinkable address generated cryptographically by the sender. For complete anonymity, stealth addresses are now enhanced with a shielded pool for zero-knowledge proven privacy."
       ]
     },
     {
@@ -75,6 +75,23 @@
     },
     {
       "type": "section_header",
+      "label": "ENHANCED PRIVACY",
+      "title": "Shielded Pool Integration"
+    },
+    {
+      "type": "text",
+      "paragraphs": [
+        "While stealth addresses provide unlinkable payments, the shielded pool adds an additional layer of privacy through zero-knowledge proofs. When you deposit funds into the shielded pool, they become part of a larger anonymity set.",
+        "Fixed-denomination deposits (1 SOL, 10 SOL, 100 SOL, etc.) ensure that deposit amounts cannot be used to correlate transactions. Groth16 zero-knowledge proofs allow you to withdraw funds without revealing which specific deposit you're claiming."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "TYPESCRIPT WITH SHIELDED POOL",
+      "code": "// Enhanced privacy with shielded pool integration\nimport {\n  ZkiraClient,\n  ShieldedPoolClient\n} from '@zkira/sdk'\n\n// Initialize clients\nconst client = new ZkiraClient()\nconst shieldedPool = new ShieldedPoolClient()\n\n// Derive stealth address from recipient's meta-address\nconst { stealthAddress, ephemeralPubkey } =\n  client.deriveStealthAddress(recipientMetaAddress)\n\n// For maximum privacy, deposit to shielded pool first\nconst depositProof = await shieldedPool.deposit({\n  amount: 1000000, // Fixed denomination\n  token: 'USDC'\n})\n\n// Later, withdraw privately to stealth address\nconst withdrawProof = await shieldedPool.withdraw({\n  to: stealthAddress,\n  nullifierHash: depositProof.nullifierHash,\n  proof: depositProof.zkProof\n})"
+    },
+    {
       "label": "BENEFITS",
       "title": "Why Use Stealth Payments"
     },
@@ -96,11 +113,15 @@
           "icon": "account_balance_wallet",
           "title": "Self-Custody",
           "description": "Your keys, your coins. ZKIRA never has access to your funds. All cryptographic operations happen client-side with your own wallet."
+        },
+        {
+          "icon": "shield",
+          "title": "ZK-Proven Privacy",
+          "description": "Shielded pool deposits use Groth16 zero-knowledge proofs to break all on-chain links. Even blockchain forensics firms like Arkham cannot trace the connection between deposits and withdrawals."
         }
       ]
     },
     {
-      "type": "cta",
       "title": "Try Stealth Payments",
       "description": "Experience the future of private payments. Generate your meta-address and start receiving payments through stealth addresses today.",
       "buttons": [

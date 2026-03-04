@@ -2,10 +2,8 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
 import {
   decodeMetaAddress,
-  generateClaimSecret,
-  hashClaimSecret,
+  deriveStealthAddress,
   scanAnnouncements,
-  bytesToHex,
   type MatchedAnnouncement,
   type Announcement as CryptoAnnouncement,
 } from '@zkira/crypto';
@@ -17,23 +15,20 @@ import {
   type PaymentEscrow,
   type ProtocolConfig,
 } from '@zkira/common';
-import { findMetaAddress, findEscrow, findEscrowVault, findConfig } from './pda.js';
+import { findEscrow, findEscrowVault, findConfig } from './pda.js';
 import {
-  createRegisterMetaAddressIx,
   createCreatePaymentIx,
-  createClaimPaymentIx,
+  createClaimStealthIx,
   createRefundPaymentIx,
 } from './instructions.js';
 import type {
   WalletAdapter,
   CreatePaymentLinkParams,
   CreatePaymentLinkResult,
-  ClaimPaymentParams,
-  ClaimPaymentResult,
+  ClaimStealthParams,
+  ClaimStealthResult,
   RefundPaymentParams,
   RefundPaymentResult,
-  RegisterMetaAddressParams,
-  RegisterMetaAddressResult,
   ScanForPaymentsParams,
 } from './types.js';
 
@@ -86,9 +81,8 @@ export class ZkiraClient {
     // Decode recipient meta-address
     const { spendPubkey: recipientSpendPubkey, viewPubkey: recipientViewPubkey } = decodeMetaAddress(recipientMetaAddress);
 
-    // Generate claim secret and hash it
-    const claimSecret = generateClaimSecret();
-    const claimHash = hashClaimSecret(claimSecret);
+    // Derive stealth address
+    const { stealthPubkey, ephemeralPubkey } = deriveStealthAddress(recipientSpendPubkey, recipientViewPubkey);
 
     // Generate random nonce
     const nonce = BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
@@ -105,7 +99,7 @@ export class ZkiraClient {
       creatorTokenAccount,
       tokenMint,
       amount,
-      claimHash,
+      stealthAddress: stealthPubkey,
       recipientSpendPubkey: recipientSpendPubkey,
       recipientViewPubkey: recipientViewPubkey,
       expiry: Math.floor(Date.now() / 1000) + expirySeconds,
@@ -116,24 +110,23 @@ export class ZkiraClient {
     const transaction = new Transaction().add(createPaymentIx);
     const signature = await sendTransaction(this.connection, transaction, this.wallet);
 
-    // Generate payment URL
-    const secretHex = bytesToHex(claimSecret);
-    const paymentUrl = `/claim?escrow=${escrowAddress.toBase58()}#secret=${secretHex}`;
+    // Generate payment URL (no secret in URL)
+    const paymentUrl = `/claim?escrow=${escrowAddress.toBase58()}`;
 
     return {
       paymentUrl,
       escrowAddress,
-      claimSecret,
-      claimSecretHex: secretHex,
+      ephemeralPubkey,
+      stealthPubkey,
       nonce,
     };
   }
 
   /**
-   * Claims a payment from an escrow account.
+   * Claims a payment from a stealth escrow account.
    */
-  async claimPayment(params: ClaimPaymentParams): Promise<ClaimPaymentResult> {
-    const { escrowAddress, claimSecret, claimerTokenAccount } = params;
+  async claimStealth(params: ClaimStealthParams): Promise<ClaimStealthResult> {
+    const { escrowAddress, claimerTokenAccount } = params;
 
     // Fetch escrow account data
     const escrow = await this.getEscrow(escrowAddress);
@@ -184,17 +177,16 @@ export class ZkiraClient {
     const feeRecipientTokenAccount = await getAssociatedTokenAddress(escrow.tokenMint, config.feeRecipient);
 
     // Create claim instruction
-    const claimPaymentIx = createClaimPaymentIx({
+    const claimStealthIx = createClaimStealthIx({
       claimer: this.wallet.publicKey,
       claimerTokenAccount: claimerAta,
       escrowAddress,
-      claimSecret,
       feeRecipientTokenAccount,
       tokenMint: escrow.tokenMint,
       creator: escrow.creator,
     });
 
-    instructions.push(claimPaymentIx);
+    instructions.push(claimStealthIx);
 
     // Build and send transaction
     const transaction = new Transaction().add(...instructions);
@@ -202,7 +194,6 @@ export class ZkiraClient {
 
     return { txSignature: signature };
   }
-
   /**
    * Refunds an expired payment back to the creator.
    */
@@ -252,32 +243,6 @@ export class ZkiraClient {
     return { txSignature: signature };
   }
 
-  /**
-   * Registers a meta-address on-chain.
-   */
-  async registerMetaAddress(params: RegisterMetaAddressParams): Promise<RegisterMetaAddressResult> {
-    const { spendPubkey, viewPubkey, label } = params;
-
-    // Create instruction
-    const registerIx = createRegisterMetaAddressIx({
-      owner: this.wallet.publicKey,
-      spendPubkey,
-      viewPubkey,
-      label,
-    });
-
-    // Build and send transaction
-    const transaction = new Transaction().add(registerIx);
-    const signature = await sendTransaction(this.connection, transaction, this.wallet);
-
-    // Derive meta-address PDA
-    const [metaAddress] = findMetaAddress(this.wallet.publicKey);
-
-    return {
-      txSignature: signature,
-      metaAddress,
-    };
-  }
 
   /**
    * Scans for payments sent to the user's stealth addresses.
@@ -346,8 +311,8 @@ export class ZkiraClient {
       const amount = view.getBigUint64(offset, true);
       offset += 8;
 
-      // Read claim hash (32 bytes)
-      const claimHash = new Uint8Array(data.slice(offset, offset + 32));
+      // Read stealth address (32 bytes)
+      const stealthAddress = new Uint8Array(data.slice(offset, offset + 32));
       offset += 32;
 
       // Read recipient spend pubkey (32 bytes)
@@ -383,7 +348,7 @@ export class ZkiraClient {
         creator,
         tokenMint,
         amount,
-        claimHash,
+        stealthAddress,
         recipientMeta: {
           spendPubkey: recipientSpendPubkey,
           viewPubkey: recipientViewPubkey,

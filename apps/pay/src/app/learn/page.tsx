@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function LearnPage() {
+  const t = useTranslations('learnPage');
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
-        title="Learn" 
-        description="Documentation, guides, API reference, and insights for building with ZKIRA" 
+        title={t('title')} 
+        description={t('description')} 
       />
 
       {/* Hero Section */}
@@ -153,6 +155,24 @@ export default function LearnPage() {
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
             Private Payroll
+          </Link>
+          <Link 
+            href="/learn/docs#shielded-pool"
+            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
+          >
+            Shielded Pool
+          </Link>
+          <Link 
+            href="/learn/docs#privacy-transport"
+            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
+          >
+            Privacy Transport
+          </Link>
+          <Link 
+            href="/learn/docs#timing-defenses"
+            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
+          >
+            Timing Defenses
           </Link>
         </div>
       </section>

@@ -1,6 +1,7 @@
 'use client'
 
 import { PageHeader } from '@/components/PageHeader'
+import { useTranslations } from 'next-intl';
 import Link from 'next/link'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis } from 'recharts'
 
@@ -23,11 +24,12 @@ const supplyScheduleData = [
 ]
 
 export default function TokenomicsPage() {
+  const t = useTranslations('tokenomicsPage');
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
       <PageHeader 
-        title="$ZKR TOKEN"
-        description="Deflationary utility token powering ZKIRA Pay"
+        title={t('title')}
+        description={t('description')}
       />
 
       {/* Hero Section */}

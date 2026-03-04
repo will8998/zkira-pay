@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -13,6 +14,7 @@ interface ApiKey {
 }
 
 export default function DevelopersPage() {
+  const t = useTranslations('developersPage');
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showNewKey, setShowNewKey] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -61,8 +63,8 @@ export default function DevelopersPage() {
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
-        title="Developer API" 
-        description="Manage API keys and integrate ZKIRA Pay payments into your applications"
+        title={t('title')} 
+        description={t('description')}
         actionLabel="Generate New API Key"
         onAction={generateApiKey}
       />

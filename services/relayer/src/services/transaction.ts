@@ -1,250 +1,111 @@
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  TransactionInstruction,
-  AccountMeta,
-  SystemProgram,
-} from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
-import { sha256 } from '@noble/hashes/sha256';
-import { RelayerWallet } from './wallet.js';
-import {
-  PaymentEscrow,
-  ProtocolConfig,
-  BuildClaimTransactionParams,
-  PAYMENT_ESCROW_PROGRAM_ID,
-  CONFIG_SEED,
-  ESCROW_SEED,
-  VAULT_SEED,
-} from '../types.js';
+import { isAddress } from 'ethers';
+import type { RelayerConfig } from '../config.js';
 
-export class TransactionBuilder {
-  constructor(
-    private connection: Connection,
-    private relayerWallet: RelayerWallet,
-  ) {}
+/**
+ * Validates EVM addresses and withdraw request parameters.
+ */
+export class TransactionValidator {
+  private allowedPoolAddresses: Set<string>;
 
-  async buildClaimTransaction(params: BuildClaimTransactionParams): Promise<Transaction> {
-    const { escrowAddress, claimSecret, claimerPubkey } = params;
-
-    // Fetch escrow account data
-    const escrowAccount = await this.connection.getAccountInfo(escrowAddress);
-    if (!escrowAccount) {
-      throw new Error('Escrow account not found');
-    }
-
-    const escrow = this.deserializePaymentEscrow(escrowAccount.data);
-
-    // Validate escrow state
-    if (escrow.claimed) {
-      throw new Error('Escrow already claimed');
-    }
-    if (escrow.refunded) {
-      throw new Error('Escrow already refunded');
-    }
-    if (Date.now() / 1000 > Number(escrow.expiry)) {
-      throw new Error('Escrow expired');
-    }
-
-    // Validate claim secret hash
-    const claimHash = sha256(claimSecret);
-    if (!this.arraysEqual(claimHash, escrow.claimHash)) {
-      throw new Error('Invalid claim secret');
-    }
-
-    // Derive PDAs
-    const configPda = this.deriveConfigPda();
-    const vaultPda = this.deriveVaultPda(escrowAddress);
-
-    // Fetch protocol config
-    const configAccount = await this.connection.getAccountInfo(configPda);
-    if (!configAccount) {
-      throw new Error('Protocol config not found');
-    }
-    const protocolConfig = this.deserializeProtocolConfig(configAccount.data);
-
-    if (protocolConfig.paused) {
-      throw new Error('Protocol is paused');
-    }
-
-    // Get or create ATAs
-    const claimerAta = await getAssociatedTokenAddress(escrow.tokenMint, claimerPubkey);
-    const feeRecipientAta = await getAssociatedTokenAddress(escrow.tokenMint, protocolConfig.feeRecipient);
-
-    // Build claim instruction
-    const claimInstruction = this.buildClaimInstruction({
-      config: configPda,
-      escrow: escrowAddress,
-      vault: vaultPda,
-      tokenMint: escrow.tokenMint,
-      claimerAta,
-      feeRecipientAta,
-      creator: escrow.creator,
-      claimer: claimerPubkey,
-      claimSecret,
-    });
-
-    // Create transaction
-    const transaction = new Transaction();
-    transaction.add(claimInstruction);
-    transaction.feePayer = this.relayerWallet.publicKey;
-
-    // Get recent blockhash
-    const { blockhash } = await this.connection.getLatestBlockhash();
-    transaction.recentBlockhash = blockhash;
-
-    return transaction;
-  }
-
-  private buildClaimInstruction(params: {
-    config: PublicKey;
-    escrow: PublicKey;
-    vault: PublicKey;
-    tokenMint: PublicKey;
-    claimerAta: PublicKey;
-    feeRecipientAta: PublicKey;
-    creator: PublicKey;
-    claimer: PublicKey;
-    claimSecret: Uint8Array;
-  }): TransactionInstruction {
-    // Build instruction data
-    const discriminator = sha256('global:claim_payment').slice(0, 8);
-    const claimSecretLen = new Uint8Array(4);
-    new DataView(claimSecretLen.buffer).setUint32(0, params.claimSecret.length, true); // Little endian
-    
-    const data = new Uint8Array(discriminator.length + claimSecretLen.length + params.claimSecret.length);
-    data.set(discriminator, 0);
-    data.set(claimSecretLen, discriminator.length);
-    data.set(params.claimSecret, discriminator.length + claimSecretLen.length);
-
-    // Build account metas (order must match Anchor struct exactly)
-    const accounts: AccountMeta[] = [
-      { pubkey: params.config, isSigner: false, isWritable: false },
-      { pubkey: params.escrow, isSigner: false, isWritable: true },
-      { pubkey: params.vault, isSigner: false, isWritable: true },
-      { pubkey: params.tokenMint, isSigner: false, isWritable: false },
-      { pubkey: params.claimerAta, isSigner: false, isWritable: true },
-      { pubkey: params.feeRecipientAta, isSigner: false, isWritable: true },
-      { pubkey: params.creator, isSigner: false, isWritable: true },
-      { pubkey: params.claimer, isSigner: true, isWritable: true },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-    ];
-
-    return new TransactionInstruction({
-      keys: accounts,
-      programId: PAYMENT_ESCROW_PROGRAM_ID,
-      data: Buffer.from(data),
-    });
-  }
-
-  private deriveConfigPda(): PublicKey {
-    const [pda] = PublicKey.findProgramAddressSync(
-      [Buffer.from(CONFIG_SEED)],
-      PAYMENT_ESCROW_PROGRAM_ID
+  constructor(private config: RelayerConfig) {
+    this.allowedPoolAddresses = new Set(
+      config.poolAddresses.map((addr) => addr.toLowerCase()),
     );
-    return pda;
   }
 
-  private deriveVaultPda(escrowAddress: PublicKey): PublicKey {
-    const [pda] = PublicKey.findProgramAddressSync(
-      [Buffer.from(VAULT_SEED), escrowAddress.toBuffer()],
-      PAYMENT_ESCROW_PROGRAM_ID
-    );
-    return pda;
+  /**
+   * Validate that a pool address is in our allowed list.
+   */
+  isAllowedPool(poolAddress: string): boolean {
+    return this.allowedPoolAddresses.has(poolAddress.toLowerCase());
   }
 
-  private deserializePaymentEscrow(data: Uint8Array): PaymentEscrow {
-    let offset = 8; // Skip Anchor discriminator
-
-    const creator = new PublicKey(data.slice(offset, offset + 32));
-    offset += 32;
-
-    const tokenMint = new PublicKey(data.slice(offset, offset + 32));
-    offset += 32;
-
-    const amount = new DataView(data.buffer, data.byteOffset + offset).getBigUint64(0, true);
-    offset += 8;
-
-    const claimHash = data.slice(offset, offset + 32);
-    offset += 32;
-
-    const recipientSpendPubkey = data.slice(offset, offset + 32);
-    offset += 32;
-
-    const recipientViewPubkey = data.slice(offset, offset + 32);
-    offset += 32;
-
-    const expiry = new DataView(data.buffer, data.byteOffset + offset).getBigInt64(0, true);
-    offset += 8;
-
-    const claimed = data[offset] !== 0;
-    offset += 1;
-
-    const refunded = data[offset] !== 0;
-    offset += 1;
-
-    const nonce = new DataView(data.buffer, data.byteOffset + offset).getBigUint64(0, true);
-    offset += 8;
-
-    const feeBps = new DataView(data.buffer, data.byteOffset + offset).getUint16(0, true);
-    offset += 2;
-
-    const bump = data[offset];
-    offset += 1;
-
-    const createdAt = new DataView(data.buffer, data.byteOffset + offset).getBigInt64(0, true);
-
-    return {
-      creator,
-      tokenMint,
-      amount,
-      claimHash,
-      recipientSpendPubkey,
-      recipientViewPubkey,
-      expiry,
-      claimed,
-      refunded,
-      nonce,
-      feeBps,
-      bump,
-      createdAt,
-    };
+  /**
+   * Validate an EVM address format.
+   */
+  isValidAddress(address: string): boolean {
+    return isAddress(address);
   }
 
-  private deserializeProtocolConfig(data: Uint8Array): ProtocolConfig {
-    let offset = 8; // Skip Anchor discriminator
-
-    const admin = new PublicKey(data.slice(offset, offset + 32));
-    offset += 32;
-
-    const feeRecipient = new PublicKey(data.slice(offset, offset + 32));
-    offset += 32;
-
-    const feeBps = new DataView(data.buffer, data.byteOffset + offset).getUint16(0, true);
-    offset += 2;
-
-    const paused = data[offset] !== 0;
-    offset += 1;
-
-    const bump = data[offset];
-
-    return {
-      admin,
-      feeRecipient,
-      feeBps,
-      paused,
-      bump,
-    };
+  /**
+   * Validate a hex-encoded bytes32 value (with or without 0x prefix).
+   */
+  isValidBytes32(value: string): boolean {
+    const hex = value.startsWith('0x') ? value.slice(2) : value;
+    return /^[0-9a-fA-F]{64}$/.test(hex);
   }
 
-  private arraysEqual(a: Uint8Array, b: Uint8Array): boolean {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
+  /**
+   * Validate a hex-encoded byte string (proof data).
+   */
+  isValidHexBytes(value: string): boolean {
+    const hex = value.startsWith('0x') ? value.slice(2) : value;
+    return hex.length > 0 && hex.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(hex);
+  }
+
+  /**
+   * Validate a uint256 decimal string.
+   */
+  isValidUint256(value: string): boolean {
+    if (!/^\d+$/.test(value)) return false;
+    try {
+      const n = BigInt(value);
+      return n >= 0n && n < 2n ** 256n;
+    } catch {
+      return false;
     }
-    return true;
+  }
+
+  /**
+   * Validate a withdraw relay request's fields.
+   */
+  validateWithdrawRequest(params: {
+    proof: string;
+    root: string;
+    nullifierHash: string;
+    recipient: string;
+    relayer: string;
+    fee: string;
+    refund: string;
+    referrer: string;
+    poolAddress: string;
+  }): { valid: boolean; error?: string } {
+    if (!this.isValidHexBytes(params.proof)) {
+      return { valid: false, error: 'Invalid proof format (must be hex-encoded bytes)' };
+    }
+
+    if (!this.isValidBytes32(params.root)) {
+      return { valid: false, error: 'Invalid root format (must be bytes32 hex)' };
+    }
+
+    if (!this.isValidBytes32(params.nullifierHash)) {
+      return { valid: false, error: 'Invalid nullifierHash format (must be bytes32 hex)' };
+    }
+
+    if (!this.isValidAddress(params.recipient)) {
+      return { valid: false, error: 'Invalid recipient address' };
+    }
+
+    if (!this.isValidAddress(params.relayer)) {
+      return { valid: false, error: 'Invalid relayer address' };
+    }
+
+    if (!this.isValidUint256(params.fee)) {
+      return { valid: false, error: 'Invalid fee (must be uint256 decimal string)' };
+    }
+
+    if (!this.isValidUint256(params.refund)) {
+      return { valid: false, error: 'Invalid refund (must be uint256 decimal string)' };
+    }
+
+    if (!this.isValidAddress(params.referrer)) {
+      return { valid: false, error: 'Invalid referrer address' };
+    }
+
+    if (!this.isAllowedPool(params.poolAddress)) {
+      return { valid: false, error: 'Pool address not in allowed list' };
+    }
+
+    return { valid: true };
   }
 }

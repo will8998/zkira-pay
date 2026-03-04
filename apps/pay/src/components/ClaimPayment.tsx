@@ -5,12 +5,11 @@ import { useWallet, useConnection } from './WalletProvider';
 import { PublicKey } from '@solana/web3.js';
 import { ZkiraClient } from '@zkira/sdk';
 import { PAYMENT_ESCROW_PROGRAM_ID } from '@zkira/common';
-import { hexToBytes } from '@zkira/crypto';
+
 import { PaymentSuccess } from './PaymentSuccess';
 import { toast } from 'sonner';
 interface ClaimPaymentProps {
   escrowAddress: string;
-  claimSecret: string;
 }
 
 interface EscrowData {
@@ -22,7 +21,7 @@ interface EscrowData {
   refunded: boolean;
 }
 
-export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) {
+export function ClaimPayment({ escrowAddress }: ClaimPaymentProps) {
   const { connected, publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
   const [escrowData, setEscrowData] = useState<EscrowData | null>(null);
@@ -67,7 +66,7 @@ export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) 
         const tokenMint = new PublicKey(data.slice(offset, offset + 32)); offset += 32;
         const view = new DataView(data.buffer, data.byteOffset);
         const amount = view.getBigUint64(offset, true); offset += 8;
-        // skip claim_hash (32), recipient_spend (32), recipient_view (32)
+        // skip stealth_address (32), recipient_spend (32), recipient_view (32)
         offset += 96;
         const expiry = Number(view.getBigInt64(offset, true)); offset += 8;
         const claimed = data[offset] === 1; offset += 1;
@@ -75,7 +74,7 @@ export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) 
         
         setEscrowData({ creator, tokenMint, amount, expiry, claimed, refunded });
       } catch (err) {
-        console.error('Error fetching escrow:', err);
+        // Error fetching escrow data
         if (err instanceof RangeError) {
           setError('Payment not found — invalid account data');
         } else if (err instanceof Error && err.message.includes('Invalid public key')) {
@@ -109,7 +108,7 @@ export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) 
       
       const walletAdapter = { publicKey, signTransaction };
       const zkiraClient = new ZkiraClient(connection, walletAdapter);
-      const claimSecretBytes = hexToBytes(claimSecret);
+
       
       // Pre-flight: verify escrow is still claimable
       const preflightInfo = await connection.getAccountInfo(escrowPubkey);
@@ -118,9 +117,8 @@ export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) 
         setIsLoading(false);
         return;
       }
-      const result = await zkiraClient.claimPayment({
+      const result = await zkiraClient.claimStealth({
         escrowAddress: escrowPubkey,
-        claimSecret: claimSecretBytes,
       });
       
       setTxSignature(result.txSignature);
@@ -140,10 +138,10 @@ export function ClaimPayment({ escrowAddress, claimSecret }: ClaimPaymentProps) 
         });
         localStorage.setItem('zkira_transactions', JSON.stringify(existing));
       } catch (e) {
-        console.error('Failed to save transaction:', e);
+        // Error saving transaction
       }
     } catch (err) {
-      console.error('Error claiming payment:', err);
+      // Error claiming payment
       setError('Failed to claim payment. Please try again.');
       toast.error('Failed to claim payment. Please try again.');
     } finally {

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useWallet } from '@/components/WalletProvider';
 import { PageHeader } from '@/components/PageHeader';
-
 interface ReferralData {
   code: string;
   totalReferrals: number;
@@ -65,6 +65,7 @@ async function copyToClipboard(text: string): Promise<boolean> {
 }
 
 export default function ReferralPage() {
+  const t = useTranslations('referralPage');
   const { connected, publicKey } = useWallet();
   const [referralData, setReferralData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -130,8 +131,8 @@ export default function ReferralPage() {
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
       <PageHeader 
-        title="Refer Friends" 
-        description="Earn 10% of your referrals' points" 
+        title={t('title')} 
+        description={t('description')} 
       />
       
       {!connected ? (

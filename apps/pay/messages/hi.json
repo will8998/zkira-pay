@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "भेजें",
+    "request": "अनुरोध",
+    "escrow": "Escrow",
+    "learn": "सीखें",
+    "home": "होम",
+    "pool": "Pool",
+    "more": "और",
+    "menu": "मेनू",
+    "history": "इतिहास",
+    "contacts": "संपर्क",
+    "points": "पॉइंट्स",
+    "leaderboard": "लीडरबोर्ड",
+    "referral": "रेफरल",
+    "apiKeys": "API Keys",
+    "analytics": "एनालिटिक्स",
+    "roadmap": "रोडमैप",
+    "batch": "बैच",
+    "multiSig": "Multi-sig",
+    "docs": "डॉक्स",
+    "learnHub": "लर्न हब",
+    "documentation": "डॉक्यूमेंटेशन",
+    "apiReference": "API रेफरेंस",
+    "useCases": "उपयोग के मामले",
+    "blog": "ब्लॉग"
+  },
+  "navSections": {
+    "payments": "भुगतान",
+    "finance": "वित्त",
+    "activity": "गतिविधि",
+    "developers": "डेवलपर्स",
+    "learn": "सीखें",
+    "rewards": "पुरस्कार",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "वॉलेट कनेक्ट करें",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "cancel": "रद्द करें",
+    "confirm": "पुष्टि करें",
+    "close": "बंद करें",
+    "back": "वापस",
+    "next": "अगला",
+    "submit": "सबमिट करें",
+    "save": "सेव करें",
+    "delete": "डिलीट करें",
+    "edit": "एडिट करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "share": "शेयर करें",
+    "viewAll": "सभी देखें",
+    "noActivityYet": "अभी तक कोई गतिविधि नहीं",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "Stealth Payments",
+    "titleHighlight": "Solana पर",
+    "subtitle": "Stealth addresses के साथ गोपनीय भुगतान भेजें।",
+    "subtitleLine2": "शून्य ट्रेसेबिलिटी। तत्काल सेटलमेंट।",
+    "featureStealth": "Stealth",
+    "featureInvoices": "इनवॉइस",
+    "featureEscrow": "Escrow",
+    "featureMultiSig": "Multi-sig"
+  },
+  "dashboard": {
+    "totalSent": "कुल भेजा गया",
+    "totalReceived": "कुल प्राप्त",
+    "activeEscrows": "सक्रिय Escrows",
+    "points": "पॉइंट्स",
+    "viewRewards": "पुरस्कार देखें →",
+    "payment": "{count, plural, one {# भुगतान} other {# भुगतान}}",
+    "pendingEscrow": "{count, plural, one {# लंबित escrow} other {# लंबित escrows}}",
+    "sendPayment": "भुगतान भेजें",
+    "sendPaymentDesc": "Stealth address के माध्यम से गोपनीय भुगतान भेजें",
+    "requestPayment": "भुगतान का अनुरोध करें",
+    "requestPaymentDesc": "आने वाले भुगतान के लिए इनवॉइस लिंक जेनरेट करें",
+    "createEscrow": "Escrow बनाएं",
+    "createEscrowDesc": "माइलस्टोन-आधारित escrow भुगतान सेट करें",
+    "recentActivity": "हाल की गतिविधि",
+    "noTransactions": "अभी तक कोई लेनदेन नहीं",
+    "noTransactionsDesc": "भुगतान बनाकर या अनुरोध करके शुरुआत करें",
+    "createPayment": "भुगतान बनाएं",
+    "paymentSent": "भुगतान भेजा गया",
+    "paymentReceived": "भुगतान प्राप्त हुआ",
+    "invoice": "इनवॉइस"
+  },
+  "status": {
+    "completed": "पूर्ण",
+    "pending": "लंबित",
+    "active": "सक्रिय",
+    "expired": "समाप्त",
+    "failed": "असफल",
+    "claimed": "दावा किया गया"
+  },
+  "table": {
+    "type": "प्रकार",
+    "amount": "राशि",
+    "status": "स्थिति",
+    "date": "दिनांक"
+  },
+  "createPage": {
+    "title": "भुगतान भेजें",
+    "description": "गोपनीय भुगतान लिंक जेनरेट करें",
+    "successDescription": "भुगतान सफलतापूर्वक बनाया गया",
+    "connectNotice": "गोपनीय भुगतान बनाने के लिए अपना Solana वॉलेट कनेक्ट करें। आपका वॉलेट लेनदेन पर हस्ताक्षर करता है — हम कभी आपकी keys स्टोर नहीं करते।",
+    "paymentCreated": "भुगतान लिंक बनाया गया"
+  },
+  "claimPage": {
+    "title": "भुगतान का दावा करें",
+    "description": "अपने वॉलेट में गोपनीय भुगतान का दावा करें",
+    "missingInfo": "भुगतान की जानकारी गुम",
+    "missingInfoDesc": "इस पेज को escrow address के साथ वैध भुगतान लिंक की आवश्यकता है।",
+    "backToDashboard": "डैशबोर्ड पर वापस जाएं"
+  },
+  "requestPage": {
+    "title": "भुगतान का अनुरोध करें",
+    "description": "गोपनीय इनवॉइस लिंक जेनरेट करें",
+    "successDescription": "इनवॉइस सफलतापूर्वक बनाया गया",
+    "invoiceGenerated": "इनवॉइस लिंक जेनरेट किया गया"
+  },
+  "poolPage": {
+    "title": "Shielded Pool",
+    "description": "Zero-knowledge proofs के साथ निजी जमा और निकासी",
+    "deposit": "जमा करें",
+    "withdraw": "निकालें",
+    "notes": "नोट्स"
+  },
+  "escrowPage": {
+    "title": "Escrow डैशबोर्ड",
+    "description": "अपने माइलस्टोन-आधारित escrow भुगतानों का प्रबंधन करें",
+    "createNew": "नया बनाएं",
+    "noEscrows": "अभी तक कोई escrows नहीं",
+    "noEscrowsDesc": "शुरुआत करने के लिए माइलस्टोन-आधारित escrow बनाएं",
+    "totalAmount": "कुल राशि",
+    "released": "रिलीज़ किया गया",
+    "milestones": "माइलस्टोन्स",
+    "releaseMilestone": "माइलस्टोन रिलीज़ करें",
+    "refund": "रिफंड",
+    "expired": "समाप्त"
+  },
+  "escrowCreatePage": {
+    "title": "Escrow बनाएं",
+    "description": "माइलस्टोन-आधारित escrow भुगतान सेट करें"
+  },
+  "batchPage": {
+    "title": "बैच भुगतान",
+    "description": "एक ही लेनदेन में कई भुगतान भेजें"
+  },
+  "multisigPage": {
+    "title": "Multi-Signature",
+    "description": "Multi-signature वॉलेट बनाएं और प्रबंधित करें"
+  },
+  "multisigCreatePage": {
+    "title": "Multi-Sig बनाएं",
+    "description": "नया multi-signature वॉलेट सेट करें"
+  },
+  "contactsPage": {
+    "title": "संपर्क",
+    "description": "अपने सेव किए गए वॉलेट addresses का प्रबंधन करें"
+  },
+  "historyPage": {
+    "title": "लेनदेन इतिहास",
+    "description": "अपने सभी पिछले लेनदेन देखें"
+  },
+  "pointsPage": {
+    "title": "पॉइंट्स",
+    "description": "ZKIRA Pay का उपयोग करके पुरस्कार अर्जित करें"
+  },
+  "leaderboardPage": {
+    "title": "लीडरबोर्ड",
+    "description": "पॉइंट्स के आधार पर शीर्ष ZKIRA Pay उपयोगकर्ता"
+  },
+  "referralPage": {
+    "title": "रेफरल प्रोग्राम",
+    "description": "दोस्तों को आमंत्रित करें और पुरस्कार अर्जित करें"
+  },
+  "developersPage": {
+    "title": "डेवलपर डैशबोर्ड",
+    "description": "अपनी API keys और integrations का प्रबंधन करें"
+  },
+  "developerDocsPage": {
+    "title": "डेवलपर डॉक्यूमेंटेशन",
+    "description": "अपने एप्लिकेशन में ZKIRA Pay को integrate करें"
+  },
+  "tokenomicsPage": {
+    "title": "Tokenomics",
+    "description": "$ZKR टोकन वितरण और अर्थशास्त्र"
+  },
+  "analyticsPage": {
+    "title": "एनालिटिक्स",
+    "description": "अपनी भुगतान गतिविधि और मेट्रिक्स को ट्रैक करें"
+  },
+  "roadmapPage": {
+    "title": "रोडमैप",
+    "description": "ZKIRA Pay विकास समयसीमा"
+  },
+  "learnPage": {
+    "title": "सीखें",
+    "description": "ZKIRA Pay के बारे में आपको जो कुछ जानना चाहिए",
+    "documentation": "डॉक्यूमेंटेशन",
+    "documentationDesc": "पूर्ण गाइड और तकनीकी संदर्भ",
+    "apiReference": "API रेफरेंस",
+    "apiReferenceDesc": "REST API endpoints और SDK methods",
+    "useCases": "उपयोग के मामले",
+    "useCasesDesc": "वास्तविक दुनिया के एप्लिकेशन और उदाहरण",
+    "blog": "ब्लॉग",
+    "blogDesc": "इंजीनियरिंग अपडेट और घोषणाएं",
+    "quickLinks": "त्वरित लिंक",
+    "stealthAddresses": "Stealth Addresses",
+    "stealthAddressesDesc": "ECDH-आधारित stealth addresses आपकी गोपनीयता की सुरक्षा कैसे करते हैं",
+    "shieldedPool": "Shielded Pool",
+    "shieldedPoolDesc": "Zero-knowledge जमा और निकासी सिस्टम",
+    "privacyTransport": "Privacy Transport",
+    "privacyTransportDesc": "नेटवर्क गोपनीयता के लिए Tor और Nym mixnet integration"
+  },
+  "languageSwitcher": {
+    "label": "भाषा बदलें"
+  }
+}

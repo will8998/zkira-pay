@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useWallet } from '@/components/WalletProvider';
 import { PageHeader } from '@/components/PageHeader';
-
 interface PointsData {
   totalPoints: number;
   weeklyPoints: number;
@@ -72,6 +72,7 @@ function truncateTxSig(sig: string): string {
 }
 
 export default function PointsPage() {
+  const t = useTranslations('pointsPage');
   const { connected, publicKey } = useWallet();
   const [pointsData, setPointsData] = useState<PointsData | null>(null);
   const [pointsHistory, setPointsHistory] = useState<PointsEvent[]>([]);
@@ -132,8 +133,8 @@ export default function PointsPage() {
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
       <PageHeader 
-        title="Points Dashboard" 
-        description="Your rewards for using ZKIRA Pay" 
+        title={t('title')} 
+        description={t('description')} 
       />
       
       {!connected ? (

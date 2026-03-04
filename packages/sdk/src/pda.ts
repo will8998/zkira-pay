@@ -1,16 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { GHOST_REGISTRY_PROGRAM_ID, PAYMENT_ESCROW_PROGRAM_ID, CONDITIONAL_ESCROW_PROGRAM_ID, MULTISIG_ESCROW_PROGRAM_ID, SEEDS } from '@zkira/common';
 
-/**
- * Derives the meta-address PDA for a given owner.
- * Seeds: ["meta", owner.toBytes()]
- */
-export function findMetaAddress(owner: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [SEEDS.META_ADDRESS, owner.toBytes()],
-    GHOST_REGISTRY_PROGRAM_ID
-  );
-}
 
 /**
  * Derives the announcement PDA for a given stealth address.

@@ -5,9 +5,6 @@ import { escMd2 } from '../utils.js';
 import {
   generateMetaAddress,
   encodeMetaAddress,
-  generateClaimSecret,
-  hashClaimSecret,
-  bytesToHex,
 } from '@zkira/crypto';
 
 // Unified payment command — replaces /send, /request, /create
@@ -57,12 +54,7 @@ export async function createAndReply(
   try {
     const metaAddress = generateMetaAddress();
     const encoded = encodeMetaAddress(metaAddress.spendPubkey, metaAddress.viewPubkey);
-    const claimSecret = generateClaimSecret();
-    const claimHash = hashClaimSecret(claimSecret);
-    const claimHashHex = bytesToHex(claimHash);
-    const claimSecretHex = bytesToHex(claimSecret);
-
-    const paymentUrl = `${config.payAppUrl}/pay?amount=${amount}&token=${token}&to=${encoded}&hash=${claimHashHex}&expiry=7`;
+    const paymentUrl = `${config.payAppUrl}/pay?amount=${amount}&token=${token}&to=${encoded}&expiry=7`;
 
     // Note: API persistence skipped — bot generates crypto locally.
     // The payment URL contains all info the webapp needs.
@@ -71,7 +63,7 @@ export async function createAndReply(
       `\u2705 *Payment link ready*\n\n\ud83d\udcb0 *${escMd2(amount)} ${escMd2(token)}*\n\u23f3 Expires in 7 days`,
       {
         parse_mode: 'MarkdownV2',
-        reply_markup: paymentCreated(paymentUrl, claimSecretHex),
+        reply_markup: paymentCreated(paymentUrl),
       }
     );
   } catch (error) {

@@ -49,7 +49,7 @@
       "type": "code",
       "language": "typescript",
       "title": "4. Claim a Payment",
-      "code": "// Recipient claims payment privately\nconst paymentLink = 'https://app.zkira.xyz/claim/...'\n\nconst txSignature = await client.claimPayment(paymentLink, recipientWallet)\nconsole.log('Claim transaction:', txSignature)"
+      "code": "// Recipient claims payment privately\nconst escrowAddress = 'ABC123...'\n\nconst txSignature = await client.claimStealth({ escrowAddress })\nconsole.log('Claim transaction:', txSignature)"
     },
     {
       "type": "section_header",
@@ -73,9 +73,9 @@
           "description": "Query the current status of an escrow"
         },
         {
-          "method": "claimPayment(link, wallet)",
+          "method": "claimStealth(params)",
           "returns": "TransactionSignature",
-          "description": "Claim a payment from a link to the specified wallet"
+          "description": "Claim a stealth payment from an escrow address"
         },
         {
           "method": "deriveStealthAddress(metaAddress)",
@@ -91,6 +91,69 @@
     },
     {
       "type": "section_header",
+      "label": "Shielded Pool",
+      "title": "ShieldedPoolClient",
+      "subtitle": "Privacy-enhanced deposits and withdrawals with zero-knowledge proofs"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "Initialize ShieldedPoolClient",
+      "code": "import { ShieldedPoolClient } from '@zkira/sdk'\nimport { Connection, PublicKey } from '@solana/web3.js'\n\nconst SHIELDED_POOL_PROGRAM_ID = new PublicKey('6g5RquPcpe81VzB6CtmuS8pzbXs7nZ5CT7gZt4fLKedx')\nconst USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')\n\nconst poolClient = new ShieldedPoolClient(connection, wallet, {\n  programId: SHIELDED_POOL_PROGRAM_ID,\n  tokenMint: USDC_MINT,\n  denomination: 10_000_000 // 10 USDC\n})"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "Shielded Deposit",
+      "code": "// Create a shielded deposit (fixed 10 USDC denomination)\nconst { txSignature, note } = await poolClient.deposit(USDC_MINT)\n\n// IMPORTANT: Save the encrypted note securely\n// You need it to withdraw later"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "Private Withdrawal",
+      "code": "// Generate ZK proof and queue withdrawal (~3s proof generation)\nconst result = await poolClient.withdraw(note, recipientAddress)\n\n// Withdrawal is queued and processed in ~1 hour\n// Funds arrive at recipient address via batched processing"
+    },
+    {
+      "type": "list",
+      "heading": null,
+      "style": "table",
+      "items": [
+        {
+          "method": "deposit(tokenMint)",
+          "returns": "{ txSignature, note }",
+          "description": "Create a shielded deposit with encrypted note for later withdrawal"
+        },
+        {
+          "method": "withdraw(note, recipient)",
+          "returns": "{ txSignature }",
+          "description": "Generate ZK proof and queue a private withdrawal"
+        },
+        {
+          "method": "getPoolState()",
+          "returns": "PoolState",
+          "description": "Get shielded pool statistics (total deposits, pending withdrawals)"
+        },
+        {
+          "method": "rebuildTree()",
+          "returns": "void",
+          "description": "Rebuild local Merkle tree from on-chain data"
+        }
+      ]
+    },
+    {
+      "type": "section_header",
+      "label": "Network Privacy",
+      "title": "Privacy Transport",
+      "subtitle": "Hide your IP address with Tor and Nym mixnet integration"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "title": "Create Privacy Transport",
+      "code": "import { createPrivateTransport } from '@zkira/sdk'\n\n// Creates Nym mixnet transport, falls back to direct connection\nconst transport = await createPrivateTransport()\n\n// Pass to any client for IP-level privacy\nconst poolClient = new ShieldedPoolClient(\n  connection, wallet, poolConfig, { transport }\n)"
+    },
+    {
+      "type": "section_header",
       "label": "Types",
       "title": "TypeScript Interfaces",
       "subtitle": null
@@ -99,7 +162,7 @@
       "type": "code",
       "language": "typescript",
       "title": null,
-      "code": "interface EscrowState {\n  state: 'Active' | 'Claimed' | 'Refunded'\n  amount: bigint\n  tokenMint: PublicKey\n  creator: PublicKey\n  createdAt: Date\n  claimedAt?: Date\n  recipient?: PublicKey\n}\n\ninterface PaymentLink {\n  link: string\n  escrow: PublicKey\n  expiresAt?: Date\n}\n\ninterface CreatePaymentOptions {\n  amount: number | bigint\n  tokenMint?: PublicKey // Defaults to USDC\n  expirySeconds?: number // Optional expiry\n  memo?: string // Optional memo\n}"
+      "code": "interface EscrowState {\n  state: 'Active' | 'Claimed' | 'Refunded'\n  amount: bigint\n  tokenMint: PublicKey\n  creator: PublicKey\n  createdAt: Date\n  claimedAt?: Date\n  recipient?: PublicKey\n}\n\ninterface PaymentLink {\n  link: string\n  escrow: PublicKey\n  expiresAt?: Date\n}\n\ninterface CreatePaymentOptions {\n  amount: number | bigint\n  tokenMint?: PublicKey // Defaults to USDC\n  expirySeconds?: number // Optional expiry\n  memo?: string // Optional memo\n}\n\ninterface PoolConfig {\n  programId: PublicKey\n  tokenMint: PublicKey\n  denomination: number\n}\n\ninterface PoolState {\n  totalDeposits: number\n  pendingWithdrawals: number\n  merkleRoot: string\n}\n\ninterface DepositResult {\n  txSignature: string\n  note: string // Encrypted note — save securely\n}"
     },
     {
       "type": "section_header",

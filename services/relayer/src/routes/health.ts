@@ -1,31 +1,33 @@
 import { Hono } from 'hono';
-import { Connection } from '@solana/web3.js';
 import { RelayerWallet } from '../services/wallet.js';
+import type { HealthResponse } from '../types.js';
 
-export function createHealthRoutes(connection: Connection, wallet: RelayerWallet) {
+export function createHealthRoutes(wallet: RelayerWallet) {
   const health = new Hono();
 
   health.get('/health', async (c) => {
-    let solanaConnection = false;
-    let walletBalance: number | undefined;
+    let arbConnection = false;
+    let walletBalance: string | undefined;
 
     try {
-      const slot = await connection.getSlot();
-      solanaConnection = slot > 0;
-      walletBalance = await wallet.checkBalance(connection);
+      arbConnection = await wallet.isConnected();
+      walletBalance = await wallet.checkBalance();
     } catch {
-      solanaConnection = false;
+      arbConnection = false;
     }
 
-    const status = solanaConnection ? 'healthy' : 'unhealthy';
+    const status = arbConnection ? 'healthy' : 'unhealthy';
 
-    return c.json({
+    const response: HealthResponse = {
       status,
       timestamp: Date.now(),
       version: '0.1.0',
-      solanaConnection,
+      arbConnection,
       walletBalance,
-    }, solanaConnection ? 200 : 503);
+      relayerAddress: wallet.address,
+    };
+
+    return c.json(response, arbConnection ? 200 : 503);
   });
 
   return health;

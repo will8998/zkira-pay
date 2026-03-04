@@ -1,0 +1,18 @@
+# ZKIRA Relayer Tor Hidden Service Config
+
+# SOCKS port for outbound connections
+SocksPort 9050
+
+# Hidden Service for inbound connections to relayer
+HiddenServiceDir /var/lib/tor/hidden_service/
+HiddenServicePort 80 127.0.0.1:3013
+
+# Security settings
+DataDirectory /var/lib/tor
+Log notice stdout
+
+# Disable DNS over Tor (not needed for relayer)
+DNSPort 0
+
+# Hardened security
+SafeSocks 1

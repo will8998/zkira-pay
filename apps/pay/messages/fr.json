@@ -1,0 +1,223 @@
+{
+  "nav": {
+    "send": "Envoyer",
+    "request": "Demander",
+    "escrow": "Séquestre",
+    "learn": "Apprendre",
+    "home": "Accueil",
+    "pool": "Pool",
+    "more": "Plus",
+    "menu": "Menu",
+    "history": "Historique",
+    "contacts": "Contacts",
+    "points": "Points",
+    "leaderboard": "Classement",
+    "referral": "Parrainage",
+    "apiKeys": "Clés API",
+    "analytics": "Analyses",
+    "roadmap": "Feuille de Route",
+    "batch": "Lot",
+    "multiSig": "Multi-signature",
+    "docs": "Docs",
+    "learnHub": "Centre d'Apprentissage",
+    "documentation": "Documentation",
+    "apiReference": "Référence API",
+    "useCases": "Cas d'Usage",
+    "blog": "Blog"
+  },
+  "navSections": {
+    "payments": "PAIEMENTS",
+    "finance": "FINANCE",
+    "activity": "ACTIVITÉ",
+    "developers": "DÉVELOPPEURS",
+    "learn": "APPRENDRE",
+    "rewards": "RÉCOMPENSES",
+    "zkr": "$ZKR"
+  },
+  "common": {
+    "connectWallet": "Connecter le Portefeuille",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "share": "Partager",
+    "viewAll": "Voir tout",
+    "noActivityYet": "Aucune activité pour le moment",
+    "sol": "SOL",
+    "usdc": "USDC"
+  },
+  "hero": {
+    "title": "Paiements Stealth",
+    "titleHighlight": "sur Solana",
+    "subtitle": "Envoyez des paiements confidentiels avec des adresses stealth.",
+    "subtitleLine2": "Zéro traçabilité. Règlement instantané.",
+    "featureStealth": "Stealth",
+    "featureInvoices": "Factures",
+    "featureEscrow": "Séquestre",
+    "featureMultiSig": "Multi-signature"
+  },
+  "dashboard": {
+    "totalSent": "Total Envoyé",
+    "totalReceived": "Total Reçu",
+    "activeEscrows": "Séquestres Actifs",
+    "points": "Points",
+    "viewRewards": "Voir les récompenses →",
+    "payment": "{count, plural, one {# paiement} other {# paiements}}",
+    "pendingEscrow": "{count, plural, one {# séquestre en attente} other {# séquestres en attente}}",
+    "sendPayment": "Envoyer un Paiement",
+    "sendPaymentDesc": "Envoyer un paiement confidentiel via une adresse stealth",
+    "requestPayment": "Demander un Paiement",
+    "requestPaymentDesc": "Générer un lien de facture pour un paiement entrant",
+    "createEscrow": "Créer un Séquestre",
+    "createEscrowDesc": "Configurer un paiement de séquestre basé sur des jalons",
+    "recentActivity": "Activité Récente",
+    "noTransactions": "Aucune transaction pour le moment",
+    "noTransactionsDesc": "Commencez par créer un paiement ou en demander un",
+    "createPayment": "Créer un Paiement",
+    "paymentSent": "Paiement Envoyé",
+    "paymentReceived": "Paiement Reçu",
+    "invoice": "Facture"
+  },
+  "status": {
+    "completed": "Terminé",
+    "pending": "En attente",
+    "active": "Actif",
+    "expired": "Expiré",
+    "failed": "Échoué",
+    "claimed": "Réclamé"
+  },
+  "table": {
+    "type": "Type",
+    "amount": "Montant",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "createPage": {
+    "title": "Envoyer un Paiement",
+    "description": "Générer un lien de paiement confidentiel",
+    "successDescription": "Paiement créé avec succès",
+    "connectNotice": "Connectez votre portefeuille Solana pour créer un paiement confidentiel. Votre portefeuille signe la transaction — nous ne stockons jamais vos clés.",
+    "paymentCreated": "Lien de paiement créé"
+  },
+  "claimPage": {
+    "title": "Réclamer le Paiement",
+    "description": "Réclamer un paiement confidentiel vers votre portefeuille",
+    "missingInfo": "Informations de Paiement Manquantes",
+    "missingInfoDesc": "Cette page nécessite un lien de paiement valide avec une adresse de séquestre.",
+    "backToDashboard": "Retour au Tableau de Bord"
+  },
+  "requestPage": {
+    "title": "Demander un Paiement",
+    "description": "Générer un lien de facture confidentiel",
+    "successDescription": "Facture créée avec succès",
+    "invoiceGenerated": "Lien de facture généré"
+  },
+  "poolPage": {
+    "title": "Pool Blindé",
+    "description": "Dépôts et retraits privés avec des preuves à divulgation nulle",
+    "deposit": "Déposer",
+    "withdraw": "Retirer",
+    "notes": "Notes"
+  },
+  "escrowPage": {
+    "title": "Tableau de Bord Séquestre",
+    "description": "Gérez vos paiements de séquestre basés sur des jalons",
+    "createNew": "Créer Nouveau",
+    "noEscrows": "Aucun séquestre pour le moment",
+    "noEscrowsDesc": "Créez un séquestre basé sur des jalons pour commencer",
+    "totalAmount": "Montant Total",
+    "released": "Libéré",
+    "milestones": "Jalons",
+    "releaseMilestone": "Libérer le Jalon",
+    "refund": "Remboursement",
+    "expired": "Expiré"
+  },
+  "escrowCreatePage": {
+    "title": "Créer un Séquestre",
+    "description": "Configurer un paiement de séquestre basé sur des jalons"
+  },
+  "batchPage": {
+    "title": "Paiements par Lot",
+    "description": "Envoyer plusieurs paiements en une seule transaction"
+  },
+  "multisigPage": {
+    "title": "Multi-Signature",
+    "description": "Créer et gérer des portefeuilles multi-signature"
+  },
+  "multisigCreatePage": {
+    "title": "Créer Multi-Signature",
+    "description": "Configurer un nouveau portefeuille multi-signature"
+  },
+  "contactsPage": {
+    "title": "Contacts",
+    "description": "Gérez vos adresses de portefeuille sauvegardées"
+  },
+  "historyPage": {
+    "title": "Historique des Transactions",
+    "description": "Voir toutes vos transactions passées"
+  },
+  "pointsPage": {
+    "title": "Points",
+    "description": "Gagnez des récompenses en utilisant ZKIRA Pay"
+  },
+  "leaderboardPage": {
+    "title": "Classement",
+    "description": "Meilleurs utilisateurs de ZKIRA Pay par points"
+  },
+  "referralPage": {
+    "title": "Programme de Parrainage",
+    "description": "Invitez des amis et gagnez des récompenses"
+  },
+  "developersPage": {
+    "title": "Tableau de Bord Développeur",
+    "description": "Gérez vos clés API et intégrations"
+  },
+  "developerDocsPage": {
+    "title": "Documentation Développeur",
+    "description": "Intégrez ZKIRA Pay dans votre application"
+  },
+  "tokenomicsPage": {
+    "title": "Tokenomics",
+    "description": "Distribution et économie du token $ZKR"
+  },
+  "analyticsPage": {
+    "title": "Analyses",
+    "description": "Suivez votre activité de paiement et vos métriques"
+  },
+  "roadmapPage": {
+    "title": "Feuille de Route",
+    "description": "Chronologie de développement de ZKIRA Pay"
+  },
+  "learnPage": {
+    "title": "Apprendre",
+    "description": "Tout ce que vous devez savoir sur ZKIRA Pay",
+    "documentation": "Documentation",
+    "documentationDesc": "Guides complets et référence technique",
+    "apiReference": "Référence API",
+    "apiReferenceDesc": "Points de terminaison API REST et méthodes SDK",
+    "useCases": "Cas d'Usage",
+    "useCasesDesc": "Applications et exemples du monde réel",
+    "blog": "Blog",
+    "blogDesc": "Mises à jour d'ingénierie et annonces",
+    "quickLinks": "Liens Rapides",
+    "stealthAddresses": "Adresses Stealth",
+    "stealthAddressesDesc": "Comment les adresses stealth basées sur ECDH protègent votre vie privée",
+    "shieldedPool": "Pool Blindé",
+    "shieldedPoolDesc": "Système de dépôt et retrait à divulgation nulle",
+    "privacyTransport": "Transport de Confidentialité",
+    "privacyTransportDesc": "Intégration Tor et mixnet Nym pour la confidentialité réseau"
+  },
+  "languageSwitcher": {
+    "label": "Changer de langue"
+  }
+}
