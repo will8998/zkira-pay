@@ -462,7 +462,7 @@ export function SendPaymentWizard() {
                     value={amount}
                     onChange={(e) => handleAmountChange(e.target.value)}
                     placeholder="0.00"
-                    className="text-5xl md:text-6xl bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-secondary)] border-none outline-none flex-1"
+                    className="text-5xl md:text-6xl bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-secondary)] border-none outline-none focus:outline-none flex-1 no-focus-ring"
                     style={{ fontFamily: 'var(--font-mono)' }}
                     autoFocus
                   />

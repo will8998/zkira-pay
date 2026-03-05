@@ -252,7 +252,7 @@
   /* Auto focus-visible for all interactive elements */
   button:focus-visible,
   a:focus-visible,
-  input:focus-visible,
+  input:focus-visible:not(.no-focus-ring),
   select:focus-visible,
   textarea:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.5);
