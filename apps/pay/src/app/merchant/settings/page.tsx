@@ -9,7 +9,7 @@ export default function MerchantSettingsPage() {
 
   useEffect(() => {
     setMerchantName(getMerchantName());
-    const storedKey = localStorage.getItem('zkira_merchant_api_key') || '';
+    const storedKey = localStorage.getItem('omnipay_merchant_api_key') || '';
     // Mask API key: show first 8 and last 4 chars
     if (storedKey.length > 12) {
       setApiKey(`${storedKey.slice(0, 8)}${'•'.repeat(storedKey.length - 12)}${storedKey.slice(-4)}`);
@@ -61,7 +61,7 @@ export default function MerchantSettingsPage() {
           <div>
             <label className="text-xs text-[var(--color-muted)] uppercase tracking-wider">SDK</label>
             <p className="text-sm text-[var(--color-muted)] mt-1">
-              Install the TypeScript client: <code className="text-[var(--color-text)] bg-[var(--color-hover)] px-1.5 py-0.5 text-xs font-mono">npm install @zkira/gateway-client</code>
+              Install the TypeScript client: <code className="text-[var(--color-text)] bg-[var(--color-hover)] px-1.5 py-0.5 text-xs font-mono">npm install @omnipay/gateway-client</code>
             </p>
           </div>
         </div>

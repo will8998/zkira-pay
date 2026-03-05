@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
         <div className="bg-[var(--color-surface)] rounded-none border-1.5 border-[var(--border-subtle)] p-6 md:p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <Image src="/logo-new.png" alt="ZKIRA Pay" width={140} height={56} className="h-[32px] w-auto" priority />
+              <Image src="/logo-new.png" alt="OMNIPAY" width={140} height={56} className="h-[32px] w-auto" priority />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)] mb-2">Admin Dashboard</h1>
             <p className="text-[var(--color-muted)] text-sm">Enter your admin password or merchant API key</p>
@@ -73,7 +73,7 @@ export default function AdminLoginPage() {
                 required
               />
               <p className="mt-2 text-xs text-[var(--color-muted)]">
-                Master admin: enter your admin password. Merchant: enter your API key (zkira_sk_...).
+                Master admin: enter your admin password. Merchant: enter your API key (omnipay_sk_...).
               </p>
             </div>
 

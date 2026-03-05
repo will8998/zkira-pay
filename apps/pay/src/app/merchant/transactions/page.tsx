@@ -58,7 +58,7 @@ export default function MerchantTransactionsPage() {
   }, [pagination.page, pagination.limit, typeFilter, playerRefFilter, dateFromFilter, dateToFilter]);
 
   const handleExportCSV = () => {
-    const apiKey = localStorage.getItem('zkira_merchant_api_key');
+    const apiKey = localStorage.getItem('omnipay_merchant_api_key');
     if (!apiKey) return;
 
     const queryParams = new URLSearchParams({

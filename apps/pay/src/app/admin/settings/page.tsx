@@ -48,7 +48,7 @@ export default function SettingsPage() {
           </div>
           <div className="flex justify-between items-center py-2 border-b border-[var(--color-border)]">
             <span className="text-sm font-medium text-[var(--color-text)]">Deployment</span>
-            <span className="text-sm text-[var(--color-muted)]">ZKIRA Pay Multi-tenant</span>
+            <span className="text-sm text-[var(--color-muted)]">OMNIPAY Multi-tenant</span>
           </div>
           <div className="flex justify-between items-center py-2">
             <span className="text-sm font-medium text-[var(--color-text)]">Last Updated</span>

@@ -54,7 +54,7 @@ function MerchantAuthGate({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 z-50 bg-[var(--color-hover)] flex items-center justify-center p-4">
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 md:p-8 w-full max-w-md">
           <div className="text-center mb-6">
-            <Image src="/logo-new.png" alt="ZKIRA Pay" width={101} height={40} className="h-[32px] w-auto mx-auto mb-4" priority />
+            <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[32px] w-auto mx-auto mb-4" priority />
             <h1 className="text-xl font-bold text-[var(--color-text)]">Merchant Dashboard</h1>
             <p className="text-[var(--color-muted)] text-sm mt-2">Enter your API key to continue</p>
           </div>
@@ -156,7 +156,7 @@ function MerchantSidebar({ mobileOpen = false, onClose }: { mobileOpen?: boolean
       {/* Header */}
       <Link href="/merchant" className="p-4 lg:p-6 border-b border-[var(--color-bg)]/10 hover:opacity-80 transition-opacity">
         <div className="flex items-center gap-3">
-          <Image src="/logo-new.png" alt="ZKIRA Pay" width={101} height={40} className="h-[28px] w-auto brightness-0 invert" priority />
+          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[28px] w-auto brightness-0 invert" priority />
           <span className="px-2 py-1 bg-[var(--color-surface)]/10 text-[var(--color-bg)] text-xs rounded font-medium">
             Merchant
           </span>
@@ -253,7 +253,7 @@ function MerchantTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
           </svg>
         </button>
         <Link href="/merchant" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo-new.png" alt="ZKIRA Pay" width={101} height={40} className="h-[24px] w-auto" priority />
+          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[24px] w-auto" priority />
           <span className="text-sm font-semibold text-[var(--color-text)]">Merchant</span>
         </Link>
       </div>
