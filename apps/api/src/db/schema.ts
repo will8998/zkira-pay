@@ -289,6 +289,7 @@ export const merchants = pgTable('merchants', {
   referrerAddress: text('referrer_address'),
   distributorId: uuid('distributor_id').references(() => distributors.id),
   status: text('status').default('active').notNull(),
+  allowedOrigins: text('allowed_origins').array(), // Whitelisted CORS origins for this merchant
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
@@ -489,6 +490,7 @@ export const ephemeralWallets = pgTable('ephemeral_wallets', {
   encryptedKey: text('encrypted_key').notNull(), // AES-256-GCM encrypted private key
   iv: text('iv').notNull(),                      // Initialization vector (hex)
   authTag: text('auth_tag').notNull(),           // GCM auth tag (hex)
+  salt: text('salt'),                            // Per-record random salt (hex); NULL = legacy hardcoded salt
   chain: text('chain'),                          // 'arbitrum' | 'tron' | null
   token: text('token'),                          // 'usdc' | 'usdt' | 'dai' | null
   amount: text('amount'),                        // Intended deposit amount (human readable)

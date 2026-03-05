@@ -25,9 +25,9 @@
 #   - Displays deployment summary
 #
 # Services Deployed:
-#   - zkira-pay (port 3011) — Payment app + admin dashboard
-#   - zkira-api (port 3012) — REST API server
-#   - zkira-relayer (port 3013) — Transaction relayer
+#   - zkira-pay (port 3020) — Payment app + admin dashboard
+#   - zkira-api (port 3021) — REST API server
+#   - zkira-relayer (port 3022) — Transaction relayer
 #   - zkira-bot — Telegram bot
 #   - zkira-swap-api (port 3014) — Swap API
 #   - zkira-swap (port 3015) — Swap app
@@ -298,27 +298,27 @@ log_section "Performing Health Checks"
 
 HEALTH_CHECK_FAILED=false
 
-# Check zkira-pay (port 3011)
-log_info "Checking zkira-pay (port 3011)..."
-if curl -s http://localhost:3011 > /dev/null 2>&1; then
+# Check zkira-pay (port 3020)
+log_info "Checking zkira-pay (port 3020)..."
+if curl -s http://localhost:3020 > /dev/null 2>&1; then
   log_success "zkira-pay is responding"
 else
   log_warning "zkira-pay health check failed (may still be starting)"
   HEALTH_CHECK_FAILED=true
 fi
 
-# Check zkira-api (port 3012)
-log_info "Checking zkira-api (port 3012)..."
-if curl -s http://localhost:3012/health > /dev/null 2>&1 || curl -s http://localhost:3012 > /dev/null 2>&1; then
+# Check zkira-api (port 3021)
+log_info "Checking zkira-api (port 3021)..."
+if curl -s http://localhost:3021/health > /dev/null 2>&1 || curl -s http://localhost:3021 > /dev/null 2>&1; then
   log_success "zkira-api is responding"
 else
   log_warning "zkira-api health check failed (may still be starting)"
   HEALTH_CHECK_FAILED=true
 fi
 
-# Check zkira-relayer (port 3013)
-log_info "Checking zkira-relayer (port 3013)..."
-if curl -s http://localhost:3013 > /dev/null 2>&1; then
+# Check zkira-relayer (port 3022)
+log_info "Checking zkira-relayer (port 3022)..."
+if curl -s http://localhost:3022 > /dev/null 2>&1; then
   log_success "zkira-relayer is responding"
 else
   log_warning "zkira-relayer health check failed (may still be starting)"
@@ -363,9 +363,9 @@ pm2 list
 echo ""
 echo "Service Endpoints:"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  zkira-pay:      http://localhost:3011"
-echo "  zkira-api:      http://localhost:3012"
-echo "  zkira-relayer:  http://localhost:3013"
+echo "  zkira-pay:      http://localhost:3020"
+echo "  zkira-api:      http://localhost:3021"
+echo "  zkira-relayer:  http://localhost:3022"
 echo "  zkira-swap-api: http://localhost:3014"
 echo "  zkira-swap:     http://localhost:3015"
 echo ""
