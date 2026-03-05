@@ -3,7 +3,30 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { deadDropNotes, invoicesV2, invoiceNotes } from '../db/schema-dead-drop.js';
 
-const deadDrop = new Hono();
+// Per-code brute-force rate limiting
+const dropAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 60_000; // 1 minute
+
+function checkDropRateLimit(dropId: string): boolean {
+  const now = Date.now();
+  const entry = dropAttempts.get(dropId);
+  if (!entry || now > entry.resetAt) {
+    dropAttempts.set(dropId, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  entry.count++;
+  if (entry.count > MAX_ATTEMPTS) return false;
+  return true;
+}
+
+// Periodic cleanup to prevent memory leak (every 5 minutes)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of dropAttempts) {
+    if (now > entry.resetAt) dropAttempts.delete(key);
+  }
+}, 5 * 60_000);
 
 // ═══════════════════════════════════════════════════════════
 // DEAD DROP ENDPOINTS (Send flow)
@@ -45,6 +68,12 @@ deadDrop.post('/api/dead-drop', async (c) => {
 deadDrop.get('/api/dead-drop/:dropId', async (c) => {
   try {
     const dropId = c.req.param('dropId');
+
+    // Brute-force protection: rate limit per dropId
+    if (!checkDropRateLimit(dropId)) {
+      return c.json({ error: 'Too many attempts. Try again later.' }, 429);
+    }
+
     const rows = await db
       .select()
       .from(deadDropNotes)
@@ -55,7 +84,6 @@ deadDrop.get('/api/dead-drop/:dropId', async (c) => {
     if (!row) {
       return c.json({ error: 'Dead drop not found' }, 404);
     }
-
 
     return c.json({
       payload: row.payload,
