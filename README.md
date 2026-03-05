@@ -37,8 +37,8 @@ PM2 manages production services. See `ecosystem.config.js`.
 
 | Service | Port |
 |---------|------|
-| zkira-pay | 3011 |
-| zkira-api | 3012 |
-| zkira-relayer | 3013 |
+| zkira-pay | 3020 |
+| zkira-api | 3021 |
+| zkira-relayer | 3022 |
 
 Marketing website is in a [separate repository](https://github.com/zkira-pay/zkira-web).

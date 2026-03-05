@@ -12,7 +12,15 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3012/api/:path*',
+        destination: 'http://localhost:3021/api/:path*',
+      },
+      {
+        source: '/session/:path*',
+        destination: 'http://localhost:3022/session/:path*',
+      },
+      {
+        source: '/tron/:path*',
+        destination: 'http://localhost:3022/tron/:path*',
       },
     ];
   },

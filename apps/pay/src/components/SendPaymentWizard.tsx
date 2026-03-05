@@ -12,8 +12,8 @@ import { useBrowserWallet } from '@/components/BrowserWalletProvider';
 import { QRCodeSVG } from 'qrcode.react';
 import PrivacyCallout from '@/components/PrivacyCallout';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3012';
-const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://localhost:3013';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
 const POLL_INTERVAL_MS = 5000;
 
 type WizardStep = 'select' | 'depositing' | 'complete';

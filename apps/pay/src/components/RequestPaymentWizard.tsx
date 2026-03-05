@@ -15,7 +15,7 @@ import { getChainConfig, getPoolsForChainAndToken, getAvailableChains, getAvaila
 import PrivacyCallout from '@/components/PrivacyCallout';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3012';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const POLL_INTERVAL_MS = 8000;
 
 type WizardStep = 'select' | 'created' | 'waiting' | 'withdrawing' | 'complete';

@@ -8,7 +8,7 @@ import { useBrowserWallet } from '@/components/BrowserWalletProvider';
 import { getChainConfig, type Chain, type TokenId } from '@/config/pool-registry';
 import type { DepositNoteRecord, InvoiceRequest } from '@/types/payment';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3012';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const POLL_INTERVAL_MS = 5000;
 
 type FlowStep = 'loading' | 'review' | 'depositing' | 'complete' | 'error';

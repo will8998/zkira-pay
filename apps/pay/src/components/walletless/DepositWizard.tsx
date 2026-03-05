@@ -14,7 +14,7 @@ interface DepositWizardProps {
 type Step = 'amount' | 'send' | 'waiting' | 'depositing' | 'receipt';
 
 /** Relayer URL */
-const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://localhost:3013';
+const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
 /** Polling interval for USDC balance checks (ms) */
 const POLL_INTERVAL_MS = 5000;
 

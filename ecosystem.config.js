@@ -8,7 +8,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3020,
-      },
+        NEXT_PUBLIC_API_URL: "http://localhost:3021",
+        NEXT_PUBLIC_RELAYER_URL: "http://localhost:3022",
     },
     {
       name: "zkira-api",
@@ -60,7 +61,7 @@ module.exports = {
         NODE_ENV: "production",
         BOT_MODE: "polling",
         PAY_APP_URL: "https://app.zkira.xyz",
-        API_URL: "http://localhost:3012",
+        API_URL: "http://localhost:3021",
       },
     },
     {

@@ -17,7 +17,7 @@ export function loadConfig(): ApiConfig {
   }
   return {
     solanaRpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
-    port: parseInt(process.env.PORT || '3012', 10),
+    port: parseInt(process.env.PORT || '3021', 10),
     indexIntervalMs: parseInt(process.env.INDEX_INTERVAL || '10000', 10),
     databaseUrl,
     adminPassword,

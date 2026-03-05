@@ -7,7 +7,7 @@ import { aesDecrypt } from '@/lib/dead-drop-crypto';
 import type { DepositBundle, DepositNoteRecord } from '@/types/payment';
 import { ReceiptManager, type PoolNote } from '@zkira/sdk';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3012';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 type ClaimStep = 'enter-code' | 'decrypt' | 'download' | 'complete';
 

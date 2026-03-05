@@ -26,7 +26,7 @@ export function loadConfig(): BotConfig {
     botToken,
     solanaRpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
     payAppUrl: process.env.PAY_APP_URL || 'https://app.zkira.xyz',
-    apiUrl: process.env.API_URL || 'http://localhost:3012',
+    apiUrl: process.env.API_URL || 'http://localhost:3021',
     mode,
     webhookDomain,
     webhookPort: parseInt(process.env.WEBHOOK_PORT || '3014', 10),

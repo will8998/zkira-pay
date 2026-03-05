@@ -25,7 +25,7 @@ interface ProcessingStage {
 }
 
 /** Relayer URL */
-const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://localhost:3013';
+const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
 
 // Dynamic based on detected chain
 const getRpcUrl = (chain: Chain) => CHAIN_CONFIGS[chain].rpcUrl;

@@ -25,6 +25,14 @@ import contentRoutes from './routes/content.js';
 import paymentLinkRoutes from './routes/payment-links.js';
 import analyticsRoutes from './routes/analytics.js';
 import deadDropRoutes from './routes/dead-drop.js';
+import { merchantApiKeyAuth } from './middleware/merchant-auth.js';
+import { DepositMonitor } from './services/deposit-monitor.js';
+import { startWebhookProcessor, stopWebhookProcessor } from './services/webhook.js';
+import gatewaySessionRoutes from './routes/gateway-sessions.js';
+import gatewayWithdrawalRoutes from './routes/gateway-withdrawals.js';
+import gatewayReportRoutes from './routes/gateway-reports.js';
+import gatewayDisputeRoutes from './routes/gateway-disputes.js';
+import gatewayPoolRoutes from './routes/gateway-pools.js';
 import { createPathBasedAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { createPathBasedRateLimit } from './middleware/rate-limit.js';
@@ -49,11 +57,18 @@ app.use('/api/*', rateLimit);
 // Apply middleware to payment routes
 app.use('/api/payments/*', createPathBasedAuth('/api/payments'));
 app.use('/api/payments/*', createPathBasedRateLimit('/api/payments'));
-app.use('/api/invoices/*', createPathBasedAuth('/api/invoices'));
+// Invoices v2 (dead-drop flow) are public; legacy /api/invoices/:wallet still requires auth
+app.use('/api/invoices/*', async (c, next) => {
+  if (c.req.path.startsWith('/api/invoices/v2')) return next();
+  return createPathBasedAuth('/api/invoices')(c, next);
+});
 app.use('/api/contacts/*', createPathBasedAuth('/api/contacts'));
 app.use('/api/transactions/*', createPathBasedAuth('/api/transactions'));
 app.use('/api/api-keys/*', createPathBasedAuth('/api/api-keys'));
 // Referral public routes don't need API key auth; admin routes use adminAuth middleware internally
+
+// Gateway routes use merchant API key auth
+app.use('/api/gateway/*', merchantApiKeyAuth);
 
 // Root endpoint
 app.get('/', (c) => c.json({ name: 'zkira-api', version: '0.1.0' }));
@@ -77,6 +92,11 @@ app.route('/', contentRoutes);
 app.route('/', paymentLinkRoutes);
 app.route('/', analyticsRoutes);
 app.route('/', deadDropRoutes);
+app.route('/', gatewaySessionRoutes);
+app.route('/', gatewayWithdrawalRoutes);
+app.route('/', gatewayReportRoutes);
+app.route('/', gatewayDisputeRoutes);
+app.route('/', gatewayPoolRoutes);
 
 // Start server
 async function startServer() {
@@ -101,16 +121,25 @@ async function startServer() {
   // Start indexing
   indexer.start();
 
+  // Start gateway services
+  const depositMonitor = new DepositMonitor(30_000);
+  depositMonitor.start();
+  const webhookProcessorId = startWebhookProcessor();
+
   // Graceful shutdown
   process.on('SIGINT', () => {
     // Graceful shutdown initiated
     indexer.stop();
+    depositMonitor.stop();
+    stopWebhookProcessor(webhookProcessorId);
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
     // Graceful shutdown initiated
     indexer.stop();
+    depositMonitor.stop();
+    stopWebhookProcessor(webhookProcessorId);
     process.exit(0);
   });
 
