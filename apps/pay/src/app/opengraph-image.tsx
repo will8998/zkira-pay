@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'ZKIRA Pay — Private Payments on Arbitrum & Tron';
+export const alt = 'OMNIPAY — Private Payments on Arbitrum & Tron';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -33,7 +33,7 @@ export default async function Image() {
             marginBottom: 32,
           }}
         >
-          <span style={{ color: '#FFFFFF', fontSize: 48, fontWeight: 700 }}>Z</span>
+          <span style={{ color: '#FFFFFF', fontSize: 48, fontWeight: 700 }}>O</span>
         </div>
 
         {/* Title */}
@@ -46,7 +46,7 @@ export default async function Image() {
             marginBottom: 16,
           }}
         >
-          ZKIRA Pay
+          OMNIPAY
         </div>
 
         {/* Subtitle */}

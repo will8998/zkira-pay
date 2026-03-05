@@ -1,5 +1,5 @@
 /**
- * Whitelabel configuration system for ZKIRA Pay partners.
+ * Whitelabel configuration system for OMNIPAY partners.
  * Allows partners to customize branding via environment variables.
  */
 
@@ -27,17 +27,17 @@ export interface WhitelabelConfig {
  * NEXT_PUBLIC_APP_NAME="BetShield Privacy"
  * NEXT_PUBLIC_LOGO_URL="https://betshield.com/logo.svg"
  * NEXT_PUBLIC_PRIMARY_COLOR="#10b981"
- * NEXT_PUBLIC_FOOTER_TEXT="© 2026 BetShield. Powered by ZKIRA."
+ * NEXT_PUBLIC_FOOTER_TEXT="© 2026 BetShield. Powered by OMNIPAY."
  * NEXT_PUBLIC_IS_WHITELABEL=true
  * NEXT_PUBLIC_PARTNER_ID="uuid-of-distributor"
  * ```
  */
 export function getWhitelabelConfig(): WhitelabelConfig {
   return {
-    appName: process.env.NEXT_PUBLIC_APP_NAME || 'ZKIRA Pay',
+    appName: process.env.NEXT_PUBLIC_APP_NAME || 'OMNIPAY',
     logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || '/logo.svg',
     primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#6366f1',
-    footerText: process.env.NEXT_PUBLIC_FOOTER_TEXT || '© 2026 ZKIRA Pay. Private payments on Arbitrum.',
+    footerText: process.env.NEXT_PUBLIC_FOOTER_TEXT || '© 2026 OMNIPAY. Private payments on Arbitrum.',
     isWhitelabel: process.env.NEXT_PUBLIC_IS_WHITELABEL === 'true',
     partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || null,
   };

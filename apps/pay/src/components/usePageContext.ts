@@ -68,8 +68,8 @@ export function usePageContext(): PageContext {
 
   // Fallback
   return {
-    title: 'ZKIRA Pay',
+    title: 'OMNIPAY',
     section: null,
-    breadcrumbs: [{ label: 'ZKIRA Pay', href: '/' }],
+    breadcrumbs: [{ label: 'OMNIPAY', href: '/' }],
   };
 }

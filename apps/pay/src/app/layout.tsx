@@ -29,20 +29,20 @@ const shareTechMono = Share_Tech_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ZKIRA Pay — Private Payments',
+  title: 'OMNIPAY — Private Payments',
   description: 'Anonymous multi-chain privacy mixer. Deposit and withdraw USDC, USDT, and DAI on Arbitrum and Tron with zero-knowledge proofs.',
-  metadataBase: new URL('https://app.zkirapay.xyz'),
+  metadataBase: new URL('https://omnipay.club'),
   openGraph: {
-    title: 'ZKIRA Pay — Private Payments',
+    title: 'OMNIPAY — Private Payments',
     description: 'Anonymous multi-chain privacy mixer powered by zero-knowledge proofs. Break the on-chain link between sender and receiver.',
-    url: 'https://app.zkirapay.xyz',
-    siteName: 'ZKIRA Pay',
+    url: 'https://omnipay.club',
+    siteName: 'OMNIPAY',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZKIRA Pay — Private Payments',
+    title: 'OMNIPAY — Private Payments',
     description: 'Anonymous multi-chain privacy mixer. Zero-knowledge proofs for complete transaction privacy.',
   },
   icons: {
