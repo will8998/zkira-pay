@@ -38,7 +38,7 @@ module.exports = {
         // Arbitrum config — Sepolia testnet
         ARB_RPC_URL: "https://sepolia-rollup.arbitrum.io/rpc",
         CHAIN_ID: "421614",
-        RELAYER_PRIVATE_KEY: "",         // Fill with hex private key
+        RELAYER_PRIVATE_KEY: "b5a46989174d7d63e87039107e0214452e3a73c19ef979a425966b27fe545b21",
         SANCTIONS_ORACLE: "0xAd18BFABA4f6D6c0137559fCa5ff62A21fc3Fd27",
         USDC_ADDRESS: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
         USDT_ADDRESS: "0x93d67359a0f6f117150a70fdde6bb96782497248",
