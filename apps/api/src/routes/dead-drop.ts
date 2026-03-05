@@ -32,6 +32,8 @@ setInterval(() => {
 // DEAD DROP ENDPOINTS (Send flow)
 // ═══════════════════════════════════════════════════════════
 
+const deadDrop = new Hono();
+
 /** Create a dead drop with encrypted deposit bundle. */
 deadDrop.post('/api/dead-drop', async (c) => {
   try {

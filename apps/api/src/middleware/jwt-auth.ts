@@ -29,7 +29,7 @@ export async function verifyAdminToken(
   secret: string,
 ): Promise<AdminJwtPayload | null> {
   try {
-    const payload = await verify(token, secret) as AdminJwtPayload;
+    const payload = await verify(token, secret, 'HS256') as AdminJwtPayload;
     return payload;
   } catch {
     return null;
