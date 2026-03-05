@@ -1,0 +1,1581 @@
+openapi: 3.0.0
+info:
+  title: ZKIRA Pay Gateway API
+  version: 1.0.0
+  description: Casino payment gateway for privacy-preserving deposits and withdrawals via ZK-proof shielded pools
+  contact:
+    name: ZKIRA Pay Support
+    url: https://zkira.xyz
+    email: support@zkira.xyz
+
+servers:
+  - url: https://api.zkira.xyz
+    description: Production server
+  - url: http://localhost:3012
+    description: Development server
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Sessions
+    description: Deposit session management
+  - name: Withdrawals
+    description: Withdrawal flow management
+  - name: Reports
+    description: Transaction reports and analytics
+  - name: Disputes
+    description: Dispute resolution
+  - name: Pools
+    description: Pool assignment management
+
+paths:
+  # Sessions endpoints
+  /api/gateway/sessions:
+    post:
+      tags: [Sessions]
+      operationId: createDepositSession
+      summary: Create a new deposit session
+      description: Creates a new deposit session for a player. Sessions expire after 30 minutes if not confirmed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [playerRef, amount, token, chain]
+              properties:
+                playerRef:
+                  type: string
+                  description: Unique player identifier
+                  example: "player_123"
+                amount:
+                  type: number
+                  description: Deposit amount
+                  minimum: 0
+                  exclusiveMinimum: true
+                  example: 100.50
+                token:
+                  type: string
+                  description: Token symbol (e.g., USDC, SOL)
+                  example: "USDC"
+                chain:
+                  type: string
+                  description: Blockchain network
+                  example: "solana"
+                metadata:
+                  type: object
+                  description: Optional metadata
+                  additionalProperties: true
+                idempotencyKey:
+                  type: string
+                  description: Optional idempotency key to prevent duplicate sessions
+                  example: "idmp_abc123"
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '200':
+          description: Existing session returned (idempotency key match)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags: [Sessions]
+      operationId: listSessions
+      summary: List deposit sessions
+      description: Retrieve a paginated list of deposit sessions with optional filtering
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by player reference
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by session status
+          schema:
+            type: string
+            enum: [pending, confirmed, expired, cancelled]
+        - name: limit
+          in: query
+          description: Maximum number of results (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      sessions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Session'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/sessions/{sessionId}:
+    get:
+      tags: [Sessions]
+      operationId: getSession
+      summary: Get session details
+      description: Retrieve details of a specific deposit session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/sessions/{sessionId}/confirm:
+    post:
+      tags: [Sessions]
+      operationId: confirmDeposit
+      summary: Confirm deposit transaction
+      description: Confirm a deposit session with transaction hash and commitment proof
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [txHash, commitment, amount]
+              properties:
+                txHash:
+                  type: string
+                  description: Transaction hash on blockchain
+                  example: "5KJp7z8..."
+                commitment:
+                  type: string
+                  description: ZK commitment proof
+                  example: "comm_abc123"
+                amount:
+                  type: number
+                  description: Confirmed deposit amount
+                  minimum: 0
+                  exclusiveMinimum: true
+      responses:
+        '200':
+          description: Deposit confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/sessions/{sessionId}/expire:
+    post:
+      tags: [Sessions]
+      operationId: expireSession
+      summary: Expire a pending session
+      description: Manually expire a pending deposit session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session expired successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Withdrawals endpoints
+  /api/gateway/withdrawals:
+    post:
+      tags: [Withdrawals]
+      operationId: initiateWithdrawal
+      summary: Initiate a withdrawal
+      description: Create a new withdrawal request. Places a hold on player balance.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [playerRef, amount, token, chain, recipientAddress]
+              properties:
+                playerRef:
+                  type: string
+                  description: Unique player identifier
+                  example: "player_123"
+                amount:
+                  type: number
+                  description: Withdrawal amount
+                  minimum: 0
+                  exclusiveMinimum: true
+                  example: 50.25
+                token:
+                  type: string
+                  description: Token symbol
+                  example: "USDC"
+                chain:
+                  type: string
+                  description: Blockchain network
+                  example: "solana"
+                recipientAddress:
+                  type: string
+                  description: Recipient wallet address
+                  example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+                metadata:
+                  type: object
+                  description: Optional metadata
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Withdrawal initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Withdrawal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags: [Withdrawals]
+      operationId: listWithdrawals
+      summary: List withdrawals
+      description: Retrieve a paginated list of withdrawals with optional filtering
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by player reference
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by withdrawal status
+          schema:
+            type: string
+            enum: [pending, confirmed, cancelled]
+        - name: limit
+          in: query
+          description: Maximum number of results (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Withdrawals retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      withdrawals:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Withdrawal'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/withdrawals/{sessionId}:
+    get:
+      tags: [Withdrawals]
+      operationId: getWithdrawal
+      summary: Get withdrawal details
+      description: Retrieve details of a specific withdrawal
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Withdrawal session ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Withdrawal details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  withdrawal:
+                    $ref: '#/components/schemas/Withdrawal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/withdrawals/{sessionId}/confirm:
+    post:
+      tags: [Withdrawals]
+      operationId: confirmWithdrawal
+      summary: Confirm withdrawal transaction
+      description: Confirm a withdrawal with transaction hash
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Withdrawal session ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [txHash]
+              properties:
+                txHash:
+                  type: string
+                  description: Transaction hash on blockchain
+                  example: "5KJp7z8..."
+      responses:
+        '200':
+          description: Withdrawal confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Withdrawal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/withdrawals/{sessionId}/cancel:
+    post:
+      tags: [Withdrawals]
+      operationId: cancelWithdrawal
+      summary: Cancel withdrawal
+      description: Cancel a pending withdrawal and release the hold
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Withdrawal session ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Optional cancellation reason
+                  example: "Player request"
+      responses:
+        '200':
+          description: Withdrawal cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/Withdrawal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Reports endpoints
+  /api/gateway/reports/transactions:
+    get:
+      tags: [Reports]
+      operationId: getTransactionHistory
+      summary: Get transaction history
+      description: Retrieve paginated transaction history from the ledger
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by player reference
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Filter by transaction type
+          schema:
+            type: string
+            enum: [deposit, withdrawal_hold, withdrawal_confirmed, withdrawal_cancelled, platform_fee, dispute_hold, dispute_refund, dispute_rejected]
+        - name: from
+          in: query
+          description: Start date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of results (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Transaction history retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LedgerEntry'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/reports/balances:
+    get:
+      tags: [Reports]
+      operationId: getBalanceSummary
+      summary: Get player balance summary
+      description: Retrieve player balance information
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by specific player (returns single player without pagination)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of results (max 100, ignored if playerRef specified)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip (ignored if playerRef specified)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Balance summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balances:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Balance'
+                  total:
+                    type: integer
+                    description: Total number of balance records
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/reports/volume:
+    get:
+      tags: [Reports]
+      operationId: getVolumeAnalytics
+      summary: Get volume analytics
+      description: Retrieve volume analytics with time-based breakdown
+      parameters:
+        - name: from
+          in: query
+          description: Start date (ISO 8601, defaults to 30 days ago)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End date (ISO 8601, defaults to now)
+          schema:
+            type: string
+            format: date-time
+        - name: groupBy
+          in: query
+          description: Time grouping for breakdown
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+      responses:
+        '200':
+          description: Volume analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeReport'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/reports/sessions:
+    get:
+      tags: [Reports]
+      operationId: getSessionSummary
+      summary: Get session summary report
+      description: Retrieve session statistics grouped by status
+      parameters:
+        - name: from
+          in: query
+          description: Start date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: status
+          in: query
+          description: Filter by session status
+          schema:
+            type: string
+            enum: [pending, confirmed, expired, cancelled]
+      responses:
+        '200':
+          description: Session summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of sessions
+                      byStatus:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            count:
+                              type: integer
+                            amount:
+                              type: number
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/reports/export/csv:
+    get:
+      tags: [Reports]
+      operationId: exportTransactionsCsv
+      summary: Export transactions as CSV
+      description: Export transaction history as CSV file (max 10,000 records)
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by player reference
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Filter by transaction type
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Start date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: CSV file generated successfully
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Attachment filename
+              schema:
+                type: string
+                example: 'attachment; filename="transactions_2024-01-15.csv"'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Disputes endpoints
+  /api/gateway/disputes:
+    post:
+      tags: [Disputes]
+      operationId: openDispute
+      summary: Open a new dispute
+      description: Create a new dispute for a session with optional balance hold
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId, playerRef, reason]
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                  description: Session ID to dispute
+                playerRef:
+                  type: string
+                  description: Player reference
+                  example: "player_123"
+                reason:
+                  type: string
+                  description: Dispute reason (minimum 10 characters)
+                  minLength: 10
+                  example: "Transaction not received after confirmation"
+                evidence:
+                  type: array
+                  description: Initial evidence
+                  items:
+                    type: object
+                    additionalProperties: true
+                holdAmount:
+                  type: number
+                  description: Optional amount to hold from player balance
+                  minimum: 0
+                  exclusiveMinimum: true
+                holdCurrency:
+                  type: string
+                  description: Currency for hold amount (defaults to session token)
+      responses:
+        '201':
+          description: Dispute created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dispute:
+                    $ref: '#/components/schemas/Dispute'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags: [Disputes]
+      operationId: listDisputes
+      summary: List disputes
+      description: Retrieve a paginated list of disputes with optional filtering
+      parameters:
+        - name: playerRef
+          in: query
+          description: Filter by player reference
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by dispute status
+          schema:
+            type: string
+            enum: [open, under_review, resolved_refund, resolved_rejected]
+        - name: limit
+          in: query
+          description: Maximum number of results (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Disputes retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      disputes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Dispute'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/disputes/{disputeId}:
+    get:
+      tags: [Disputes]
+      operationId: getDispute
+      summary: Get dispute details
+      description: Retrieve details of a specific dispute
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          description: Dispute ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dispute details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dispute:
+                    $ref: '#/components/schemas/Dispute'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/disputes/{disputeId}/evidence:
+    post:
+      tags: [Disputes]
+      operationId: addEvidence
+      summary: Add evidence to dispute
+      description: Add additional evidence to an open dispute
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          description: Dispute ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description, type]
+              properties:
+                description:
+                  type: string
+                  description: Evidence description
+                  example: "Screenshot of transaction confirmation"
+                type:
+                  type: string
+                  description: Evidence type
+                  example: "screenshot"
+                url:
+                  type: string
+                  description: Optional URL to evidence file
+                  format: uri
+                data:
+                  type: object
+                  description: Optional structured data
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Evidence added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dispute:
+                    $ref: '#/components/schemas/Dispute'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/disputes/{disputeId}/status:
+    patch:
+      tags: [Disputes]
+      operationId: updateDisputeStatus
+      summary: Update dispute status
+      description: Update dispute status with resolution details
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          description: Dispute ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [under_review, resolved_refund, resolved_rejected]
+                  description: New dispute status
+                resolution:
+                  type: string
+                  description: Resolution details (required for resolved statuses)
+                  example: "Refund processed to player account"
+                resolvedBy:
+                  type: string
+                  description: Optional identifier of resolver
+                  example: "admin_user_123"
+      responses:
+        '200':
+          description: Dispute status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dispute:
+                    $ref: '#/components/schemas/Dispute'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Pools endpoints
+  /api/gateway/pools:
+    post:
+      tags: [Pools]
+      operationId: createPoolAssignment
+      summary: Create pool assignment
+      description: Assign pool addresses to merchant for specific chain/token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chain, token, poolAddresses]
+              properties:
+                chain:
+                  type: string
+                  description: Blockchain network
+                  example: "solana"
+                token:
+                  type: string
+                  description: Token symbol
+                  example: "USDC"
+                poolAddresses:
+                  type: array
+                  description: Array of pool addresses
+                  items:
+                    type: string
+                  minItems: 1
+                  example: ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]
+      responses:
+        '201':
+          description: Pool assignment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignment:
+                    $ref: '#/components/schemas/PoolAssignment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Pool assignment already exists for this chain/token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags: [Pools]
+      operationId: listPoolAssignments
+      summary: List pool assignments
+      description: Retrieve pool assignments for merchant
+      parameters:
+        - name: chain
+          in: query
+          description: Filter by blockchain network
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pool assignments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoolAssignment'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/pools/{assignmentId}:
+    get:
+      tags: [Pools]
+      operationId: getPoolAssignment
+      summary: Get pool assignment
+      description: Retrieve details of a specific pool assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: Pool assignment ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pool assignment retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignment:
+                    $ref: '#/components/schemas/PoolAssignment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Pools]
+      operationId: updatePoolAssignment
+      summary: Update pool assignment
+      description: Update pool addresses for an existing assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: Pool assignment ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [poolAddresses]
+              properties:
+                poolAddresses:
+                  type: array
+                  description: Array of pool addresses
+                  items:
+                    type: string
+                  minItems: 1
+                isPrimary:
+                  type: boolean
+                  description: Whether this is the primary pool assignment
+      responses:
+        '200':
+          description: Pool assignment updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignment:
+                    $ref: '#/components/schemas/PoolAssignment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Pools]
+      operationId: deletePoolAssignment
+      summary: Delete pool assignment
+      description: Remove a pool assignment (only if no active sessions)
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: Pool assignment ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pool assignment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Cannot remove pool with active sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gateway/pools/{assignmentId}/reconcile:
+    get:
+      tags: [Pools]
+      operationId: getReconciliationReport
+      summary: Get reconciliation report
+      description: Generate reconciliation report comparing on-chain deposits with gateway balances
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: Pool assignment ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reconciliation report generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reconciliation:
+                    type: object
+                    properties:
+                      poolAssignment:
+                        $ref: '#/components/schemas/PoolAssignment'
+                      onChainDeposits:
+                        type: string
+                        description: Total confirmed deposits on-chain
+                        example: "1000.000000"
+                      currentBalances:
+                        type: object
+                        properties:
+                          totalAvailable:
+                            type: string
+                            example: "750.000000"
+                          totalPending:
+                            type: string
+                            example: "100.000000"
+                          totalDeposited:
+                            type: string
+                            example: "1000.000000"
+                          totalWithdrawn:
+                            type: string
+                            example: "150.000000"
+                      discrepancy:
+                        type: string
+                        description: Difference between on-chain and gateway totals
+                        example: "0.000000"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Merchant API key for authentication
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique session identifier
+        merchantId:
+          type: string
+          format: uuid
+          description: Merchant identifier
+        sessionType:
+          type: string
+          enum: [deposit, withdrawal]
+          description: Type of session
+        playerRef:
+          type: string
+          description: Player reference
+        amount:
+          type: string
+          description: Session amount (6 decimal places)
+          pattern: '^\d+\.\d{6}$'
+        token:
+          type: string
+          description: Token symbol
+        chain:
+          type: string
+          description: Blockchain network
+        status:
+          type: string
+          enum: [pending, confirmed, expired, cancelled]
+          description: Session status
+        recipientAddress:
+          type: string
+          description: Recipient address (withdrawals only)
+          nullable: true
+        referrerAddress:
+          type: string
+          description: Referrer address
+          nullable: true
+        platformFee:
+          type: string
+          description: Platform fee amount
+          nullable: true
+        txHash:
+          type: string
+          description: Transaction hash
+          nullable: true
+        commitment:
+          type: string
+          description: ZK commitment proof
+          nullable: true
+        metadata:
+          type: object
+          description: Additional metadata
+          additionalProperties: true
+          nullable: true
+        idempotencyKey:
+          type: string
+          description: Idempotency key
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          description: Session expiration time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Withdrawal:
+      allOf:
+        - $ref: '#/components/schemas/Session'
+        - type: object
+          properties:
+            sessionType:
+              type: string
+              enum: [withdrawal]
+
+    Balance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Balance record identifier
+        merchantId:
+          type: string
+          format: uuid
+          description: Merchant identifier
+        playerRef:
+          type: string
+          description: Player reference
+        currency:
+          type: string
+          description: Currency symbol
+        availableBalance:
+          type: string
+          description: Available balance (6 decimal places)
+          pattern: '^\d+\.\d{6}$'
+        pendingBalance:
+          type: string
+          description: Pending balance (6 decimal places)
+          pattern: '^\d+\.\d{6}$'
+        totalDeposited:
+          type: string
+          description: Total deposited amount
+          pattern: '^\d+\.\d{6}$'
+        totalWithdrawn:
+          type: string
+          description: Total withdrawn amount
+          pattern: '^\d+\.\d{6}$'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Dispute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Dispute identifier
+        merchantId:
+          type: string
+          format: uuid
+          description: Merchant identifier
+        sessionId:
+          type: string
+          format: uuid
+          description: Related session ID
+        playerRef:
+          type: string
+          description: Player reference
+        reason:
+          type: string
+          description: Dispute reason
+        evidence:
+          type: array
+          description: Evidence array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              type:
+                type: string
+              url:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                type: object
+                additionalProperties: true
+                nullable: true
+              addedAt:
+                type: string
+                format: date-time
+        status:
+          type: string
+          enum: [open, under_review, resolved_refund, resolved_rejected]
+          description: Dispute status
+        holdAmount:
+          type: string
+          description: Amount held from player balance
+          nullable: true
+        holdCurrency:
+          type: string
+          description: Currency of held amount
+          nullable: true
+        resolution:
+          type: string
+          description: Resolution details
+          nullable: true
+        resolvedBy:
+          type: string
+          description: Resolver identifier
+          nullable: true
+        resolvedAt:
+          type: string
+          format: date-time
+          description: Resolution timestamp
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    PoolAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Assignment identifier
+        merchantId:
+          type: string
+          format: uuid
+          description: Merchant identifier
+        chain:
+          type: string
+          description: Blockchain network
+        token:
+          type: string
+          description: Token symbol
+        poolAddresses:
+          type: array
+          description: Array of pool addresses
+          items:
+            type: string
+        isPrimary:
+          type: boolean
+          description: Whether this is the primary assignment
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Ledger entry identifier
+        merchantId:
+          type: string
+          format: uuid
+          description: Merchant identifier
+        playerRef:
+          type: string
+          description: Player reference
+        type:
+          type: string
+          enum: [deposit, withdrawal_hold, withdrawal_confirmed, withdrawal_cancelled, platform_fee, dispute_hold, dispute_refund, dispute_rejected]
+          description: Transaction type
+        amount:
+          type: string
+          description: Transaction amount (6 decimal places)
+          pattern: '^-?\d+\.\d{6}$'
+        currency:
+          type: string
+          description: Currency symbol
+        sessionId:
+          type: string
+          format: uuid
+          description: Related session ID
+          nullable: true
+        disputeId:
+          type: string
+          format: uuid
+          description: Related dispute ID
+          nullable: true
+        balanceBefore:
+          type: string
+          description: Balance before transaction
+          pattern: '^\d+\.\d{6}$'
+        balanceAfter:
+          type: string
+          description: Balance after transaction
+          pattern: '^\d+\.\d{6}$'
+        description:
+          type: string
+          description: Transaction description
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+
+    VolumeReport:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            totalDeposits:
+              type: number
+              description: Total deposit volume
+            totalWithdrawals:
+              type: number
+              description: Total withdrawal volume
+            netVolume:
+              type: number
+              description: Net volume (deposits - withdrawals)
+            transactionCount:
+              type: integer
+              description: Total transaction count
+        breakdown:
+          type: array
+          description: Time-based breakdown
+          items:
+            type: object
+            properties:
+              period:
+                type: string
+                format: date-time
+                description: Time period start
+              deposits:
+                type: number
+                description: Deposit volume for period
+              withdrawals:
+                type: number
+                description: Withdrawal volume for period
+              netVolume:
+                type: number
+                description: Net volume for period
+              transactionCount:
+                type: integer
+                description: Transaction count for period
+
+    PaginatedResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of records
+        limit:
+          type: integer
+          description: Maximum results per page
+        offset:
+          type: integer
+          description: Number of records skipped
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid request parameters"
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
