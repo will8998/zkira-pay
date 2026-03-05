@@ -1,13 +1,16 @@
 pragma circom 2.1.6;
 
-include "node_modules/circomlib/circuits/poseidon.circom";
+include "node_modules/circomlib/circuits/mimcsponge.circom";
 include "node_modules/circomlib/circuits/bitify.circom";
 include "node_modules/circomlib/circuits/switcher.circom";
 
 // Verifies a Merkle proof for a given leaf.
 //
+// Uses MiMCSponge (matching on-chain MerkleTreeWithHistory.sol hashLeftRight).
+// MiMCSponge with nInputs=2, nRounds=220, nOutputs=1 and key=0.
+//
 // Given a leaf, a root, sibling path elements, and path indices (0=left, 1=right),
-// computes the root by hashing up the tree with Poseidon and checks it matches.
+// computes the root by hashing up the tree with MiMCSponge and checks it matches.
 //
 // Uses Switcher to select left/right ordering without conditional logic,
 // which is required for R1CS constraint satisfaction.
@@ -33,12 +36,13 @@ template MerkleTreeChecker(levels) {
         switchers[i].L <== computedPath[i];
         switchers[i].R <== pathElements[i];
 
-        // Hash the pair
-        hashers[i] = Poseidon(2);
-        hashers[i].inputs[0] <== switchers[i].outL;
-        hashers[i].inputs[1] <== switchers[i].outR;
+        // Hash the pair with MiMCSponge (matches on-chain hashLeftRight)
+        hashers[i] = MiMCSponge(2, 220, 1);
+        hashers[i].ins[0] <== switchers[i].outL;
+        hashers[i].ins[1] <== switchers[i].outR;
+        hashers[i].k <== 0;
 
-        computedPath[i + 1] <== hashers[i].out;
+        computedPath[i + 1] <== hashers[i].outs[0];
     }
 
     // Verify computed root matches expected root
