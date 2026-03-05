@@ -12,6 +12,8 @@ import type {
 } from '@/types/payment';
 import type { Chain, TokenId } from '@/config/pool-registry';
 import { getChainConfig, getPoolsForChainAndToken, getAvailableChains, getAvailableTokensForChain } from '@/config/pool-registry';
+import PrivacyCallout from '@/components/PrivacyCallout';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3012';
 const POLL_INTERVAL_MS = 8000;
@@ -74,6 +76,10 @@ export function RequestPaymentWizard() {
   const [denomSet, setDenomSet] = useState<DenominationSet | null>(null);
   const [memo, setMemo] = useState('');
   const [amount, setAmount] = useState<string>('');  // Amount input as string for easier handling
+
+  // New state for UI enhancements
+  const [expiryDays, setExpiryDays] = useState<number>(7);
+  const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
 
   // Wizard state
   const [step, setStep] = useState<WizardStep>('select');
@@ -148,7 +154,7 @@ export function RequestPaymentWizard() {
       setSecretKey(keypair.secretKey);
 
       const invoiceId = crypto.randomUUID();
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
 
       const denominations = denomSet.selections.map((s) => ({
         pool: s.pool.address,
@@ -199,7 +205,7 @@ export function RequestPaymentWizard() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
     }
-  }, [denomSet, chain, token, memo]);
+  }, [denomSet, chain, token, memo, expiryDays]);
 
   // Start polling for notes
   const startWaiting = useCallback(() => {
@@ -290,164 +296,119 @@ export function RequestPaymentWizard() {
     }
   }, []);
 
+  // Get token symbol for current selection
+  const getCurrentTokenInfo = () => {
+    const chainConfig = getChainConfig(chain);
+    return chainConfig.tokens.find(t => t.id === token);
+  };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto animate-entrance">
       {/* Header */}
-      <div className="text-center">
+      <div className="text-left mb-8">
         <h1
-          className="text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
+          className="text-2xl md:text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-1"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          Request Payment
+          REQUEST PAYMENT
         </h1>
-        <p className="text-[var(--color-text-secondary)] text-sm">
-          Create an invoice. Share the link. Funds arrive privately.
+        <p 
+          className="text-xs md:text-sm uppercase tracking-wider text-[var(--color-muted)] mb-4"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          GENERATE A CONFIDENTIAL INVOICE LINK
         </p>
+        {/* Accent line */}
+        <div className="w-full h-0.5 bg-[var(--color-button)]"></div>
       </div>
 
-      {/* Step: Select */}
+      {/* Step: Select - New PRIV.fi Layout */}
       {step === 'select' && (
         <div className="space-y-6">
-          {/* Main amount input card */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
-            {/* Amount Input */}
-            <div className="text-center mb-8">
-              <div className="flex justify-center items-center space-x-2 mb-6">
-                <span
-                  className="text-6xl text-[var(--color-text-secondary)]"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                >
-                  $
-                </span>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => handleAmountChange(e.target.value)}
-                  placeholder="1,500"
-                  className="text-6xl bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-secondary)] border-none outline-none text-center max-w-md"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                  autoFocus
-                />
+          {/* Main card container */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 md:p-8">
+            
+            {/* Amount Input Section */}
+            <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-6 mb-3">
+              <div 
+                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                AMOUNT
               </div>
-
-              {/* Privacy guidance */}
-              {amount && parseFloat(amount) > 0 && parseFloat(amount) % 10 !== 0 && (
-                <div className="text-sm mb-4 px-4 py-2 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-lg">
-                  <span className="text-[var(--color-text-secondary)]">
-                    Adjusted to <span className="text-[var(--color-text)] font-bold">${Math.round(parseFloat(amount) / 10) * 10}</span> to fit shielded pool denominations.
-                  </span>
-                  <span className="text-[var(--color-text-secondary)] opacity-80">
-                    {' '}For stronger privacy, use round amounts ($1K, $10K, $100K, $1M) — single-denomination splits are untraceable.
-                  </span>
-                </div>
-              )}
-
-              {/* Quick select chips */}
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {[1000, 10000, 100000, 500000, 1000000].map((quickAmount) => (
-                  <button
-                    key={quickAmount}
-                    onClick={() => handleQuickSelect(quickAmount)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${ 
-                      parseInt(amount) === quickAmount
-                        ? 'bg-[var(--color-button)] text-[var(--color-bg)]'
-                        : 'bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]'
-                    }`}
+              
+              <div className="flex items-center justify-between">
+                {/* Large amount input with $ prefix */}
+                <div className="flex items-center flex-1">
+                  <span
+                    className="text-5xl md:text-6xl text-[var(--color-text-secondary)] mr-2"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
-                    ${quickAmount.toLocaleString()}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    $
+                  </span>
+                  <input
+                    type="text"
+                    value={amount}
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    placeholder="0.00"
+                    className="text-5xl md:text-6xl bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-secondary)] border-none outline-none flex-1"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                    autoFocus
+                  />
+                </div>
 
-            {/* Network Selection */}
-            <div className="mb-6">
-              <h3
-                className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                Network
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {getAvailableChains().map((chainOption) => {
-                  const chainConfig = getChainConfig(chainOption);
-                  return (
-                    <button
-                      key={chainOption}
-                      onClick={() => handleNetworkChange(chainOption)}
-                      className={`p-4 rounded-xl border text-left transition-all ${ 
-                        chain === chainOption
-                          ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
-                          : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl">
-                          {chainOption === 'arbitrum' ? '⬡' : '◈'}
-                        </span>
-                        <span
-                          className="font-bold text-[var(--color-text)]"
-                          style={{ fontFamily: 'var(--font-mono)' }}
-                        >
-                          {chainConfig.name}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Token Selection */}
-            <div className="mb-6">
-              <h3
-                className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                Token
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {getAvailableTokensForChain(chain).map((tokenInfo) => (
-                  <button
-                    key={tokenInfo.id}
-                    onClick={() => handleTokenChange(tokenInfo.id)}
-                    className={`p-3 rounded-lg border text-center transition-all ${ 
-                      token === tokenInfo.id
-                        ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
-                        : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
-                    }`}
+                {/* Token badge/selector */}
+                <button
+                  onClick={() => {
+                    const tokens = getAvailableTokensForChain(chain);
+                    const currentIndex = tokens.findIndex(t => t.id === token);
+                    const nextIndex = (currentIndex + 1) % tokens.length;
+                    handleTokenChange(tokens[nextIndex].id);
+                  }}
+                  className="flex items-center gap-1 px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full hover:bg-[var(--color-hover)] transition-colors"
+                >
+                  <span className="text-xs">$</span>
+                  <span 
+                    className="text-sm font-bold"
+                    style={{ fontFamily: 'var(--font-mono)' }}
                   >
-                    <div
-                      className="font-bold text-[var(--color-text)]"
-                      style={{ fontFamily: 'var(--font-mono)' }}
-                    >
-                      {tokenInfo.symbol}
-                    </div>
-                  </button>
-                ))}
+                    {getCurrentTokenInfo()?.symbol || 'USDC'}
+                  </span>
+                  <span className="text-xs">▾</span>
+                </button>
               </div>
             </div>
 
-            {/* Denomination Split Preview */}
+            {/* Helper text */}
+            <p className="text-xs md:text-sm text-[var(--color-text-secondary)] mb-6">
+              Enter the amount you want to receive in {getCurrentTokenInfo()?.symbol || 'USDC'}.
+            </p>
+
+            {/* Denomination Split Preview - animated reveal */}
             {denomSet && denomSet.selections.length > 0 && (
-              <div className="border-t border-[var(--color-border)] pt-6 mb-6">
-                <h3
-                  className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
+              <div className="border border-[var(--color-border)] rounded-lg p-4 mb-6 animate-slide-up">
+                <h3 
+                  className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  Split Breakdown
+                  ┌─ Denomination Split ──────────────┐
                 </h3>
+                
                 <div className="space-y-2 mb-4">
                   {denomSet.selections.map((sel, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
-                      <span
+                      <span 
                         className="text-[var(--color-text)]"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
-                        {sel.count}× {sel.pool.label}
+                        {sel.count}× {(() => {
+                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                          const decimals = tokenInfo?.decimals || 6;
+                          const value = Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals);
+                          return `${value.toLocaleString()} ${tokenInfo?.symbol}`;
+                        })()}
                       </span>
-                      <span
+                      <span 
                         className="text-[var(--color-text-secondary)]"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
@@ -456,45 +417,47 @@ export function RequestPaymentWizard() {
                           const decimals = tokenInfo?.decimals || 6;
                           const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
                           return value.toLocaleString();
-                        })()} {getChainConfig(chain).tokens.find(t => t.id === token)?.symbol}
+                        })()}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)]">
-                  <span
+
+                <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mb-3">
+                  <span 
                     className="text-[var(--color-text)] font-bold"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     Total: {denomSet.totalLabel}
                   </span>
-                  <span
+                  <span 
                     className="text-[var(--color-text-secondary)]"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
                   </span>
                 </div>
+
                 {/* Privacy strength indicator */}
                 {(() => {
                   const depositCount = denomSet.selections.reduce((sum, sel) => sum + sel.count, 0);
                   const uniqueDenoms = denomSet.selections.length;
                   let icon: string, label: string, color: string, tip: string;
                   if (depositCount === 1) {
-                    icon = '\u{1F7E2}'; label = 'Maximum Privacy'; color = 'var(--color-green, #4ade80)';
-                    tip = 'Single pool deposit \u2014 blends with the largest anonymity set.';
+                    icon = '🟢'; label = 'Maximum Privacy'; color = 'var(--color-green)';
+                    tip = 'Single pool deposit — blends with the largest anonymity set.';
                   } else if (uniqueDenoms === 1) {
-                    icon = '\u{1F7E2}'; label = 'Strong Privacy'; color = 'var(--color-green, #4ade80)';
-                    tip = `${depositCount} deposits of the same denomination \u2014 each blends into its own anonymity set. No amount fingerprinting possible.`;
+                    icon = '🟢'; label = 'Strong Privacy'; color = 'var(--color-green)';
+                    tip = `${depositCount} deposits of the same denomination — each blends into its own anonymity set.`;
                   } else if (uniqueDenoms <= 2) {
-                    icon = '\u{1F7E1}'; label = 'Good Privacy'; color = 'var(--color-warning-text, #fbbf24)';
+                    icon = '🟡'; label = 'Good Privacy'; color = 'var(--color-warning-text)';
                     tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
                   } else {
-                    icon = '\u{1F7E0}'; label = 'Moderate Privacy'; color = 'var(--color-warning-text, #fbbf24)';
-                    tip = `${uniqueDenoms} different denominations create a unique fingerprint. Use a rounder amount like $${(Math.ceil(parseFloat(amount) / 1000000) * 1000000).toLocaleString()} for stronger privacy.`;
+                    icon = '🟠'; label = 'Moderate Privacy'; color = 'var(--color-warning-text)';
+                    tip = `${uniqueDenoms} different denominations create a unique fingerprint.`;
                   }
                   return (
-                    <div className="mt-3 flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+                    <div className="flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
                       <span>{icon}</span>
                       <div>
                         <span style={{ color }} className="font-bold uppercase">{label}</span>
@@ -506,39 +469,175 @@ export function RequestPaymentWizard() {
               </div>
             )}
 
-            {/* Memo Input */}
-            <div className="border-t border-[var(--color-border)] pt-6">
-              <label
-                className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2 uppercase tracking-wide"
+            {/* Expires In */}
+            <div className="mb-6">
+              <h3 
+                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Memo (optional)
-              </label>
-              <input
-                type="text"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="What is this payment for?"
-                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              />
+                EXPIRES IN
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {[
+                  { days: 1, label: '1 day' },
+                  { days: 3, label: '3 days' },
+                  { days: 7, label: '7 days' },
+                  { days: 14, label: '14d' },
+                  { days: 30, label: '30d' },
+                ].map(({ days, label }) => (
+                  <button
+                    key={days}
+                    onClick={() => setExpiryDays(days)}
+                    className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                      expiryDays === days
+                        ? 'bg-[var(--color-button)] text-white'
+                        : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-secondary)]'
+                    }`}
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                The invoice link expires after this period. Choose a longer window if your payer needs more time.
+              </p>
             </div>
-          </div>
 
-          <button
-            onClick={createInvoice}
-            disabled={!denomSet || denomSet.selections.length === 0 || denomSet.totalRaw === 0n}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
-            CREATE INVOICE →
-          </button>
+            {/* Advanced Options - Collapsible */}
+            <div className="mb-6">
+              <button
+                onClick={() => setAdvancedOpen(!advancedOpen)}
+                className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors mb-3"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                <span className={`transform transition-transform ${advancedOpen ? 'rotate-90' : ''}`}>›</span>
+                Advanced options
+              </button>
+              
+              <div 
+                className={`overflow-hidden transition-all duration-300 ${
+                  advancedOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="border border-[var(--color-border)] rounded-lg p-4 space-y-4">
+                  {/* Network Selection */}
+                  <div>
+                    <h4 
+                      className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      Network:
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {getAvailableChains().map((chainOption) => {
+                        const chainConfig = getChainConfig(chainOption);
+                        return (
+                          <button
+                            key={chainOption}
+                            onClick={() => handleNetworkChange(chainOption)}
+                            className={`p-3 rounded-lg border text-left transition-all ${
+                              chain === chainOption
+                                ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
+                                : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg">
+                                {chainOption === 'arbitrum' ? '⬡' : '◈'}
+                              </span>
+                              <span
+                                className="font-bold text-[var(--color-text)] text-sm"
+                                style={{ fontFamily: 'var(--font-mono)' }}
+                              >
+                                {chainConfig.name}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Token Selection */}
+                  <div>
+                    <h4 
+                      className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      Token:
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {getAvailableTokensForChain(chain).map((tokenInfo) => (
+                        <button
+                          key={tokenInfo.id}
+                          onClick={() => handleTokenChange(tokenInfo.id)}
+                          className={`p-3 rounded-lg border text-center transition-all ${
+                            token === tokenInfo.id
+                              ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
+                              : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
+                          }`}
+                        >
+                          <div
+                            className="font-bold text-[var(--color-text)] text-sm"
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                          >
+                            {tokenInfo.symbol}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Memo Input - Moved to Advanced Options */}
+                  <div>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      Memo:
+                    </label>
+                    <input
+                      type="text"
+                      value={memo}
+                      onChange={(e) => setMemo(e.target.value)}
+                      placeholder="What is this payment for?"
+                      className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors rounded-lg"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Privacy Callout */}
+            <div className="mb-6">
+              <PrivacyCallout variant="full" />
+            </div>
+
+            {/* Fee Info Line */}
+            <div className="flex items-center justify-center gap-1 text-xs text-[var(--color-text-secondary)] mb-6">
+              <span>0.25% fee</span>
+              <InfoTooltip text="A small fee is charged when the payer claims their funds back from expired invoices. This covers gas costs for processing withdrawals." />
+              <span>charged on claim</span>
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={createInvoice}
+              disabled={!denomSet || denomSet.selections.length === 0 || denomSet.totalRaw === 0n}
+              className="w-full py-4 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
+              style={{ fontFamily: 'var(--font-mono)' }}
+            >
+              <span className="uppercase tracking-wide">Generate Invoice Link</span>
+            </button>
+          </div>
         </div>
       )}
 
       {/* Step: Created — show link */}
       {step === 'created' && invoice && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-entrance">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
             <div className="text-6xl mb-4">📩</div>
             <h2
@@ -561,7 +660,7 @@ export function RequestPaymentWizard() {
 
             <button
               onClick={() => copyToClipboard(invoiceUrl, setCopiedUrl)}
-              className="px-6 py-3 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press"
+              className="px-6 py-3 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               {copiedUrl ? '✓ Copied' : '📋 Copy Invoice Link'}
@@ -570,7 +669,7 @@ export function RequestPaymentWizard() {
 
           <button
             onClick={startWaiting}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             WAIT FOR PAYMENT →
@@ -580,7 +679,7 @@ export function RequestPaymentWizard() {
 
       {/* Step: Waiting */}
       {step === 'waiting' && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-entrance">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
             <div className="flex justify-center mb-6">
               <div className="w-20 h-20 border-4 border-[var(--color-border)] border-t-[var(--color-button)] rounded-full animate-spin" />
@@ -601,7 +700,7 @@ export function RequestPaymentWizard() {
               abortRef.current?.abort();
               setStep('created');
             }}
-            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
           >
             ← Back to Invoice
           </button>
@@ -610,7 +709,7 @@ export function RequestPaymentWizard() {
 
       {/* Step: Complete */}
       {(step === 'withdrawing' || step === 'complete') && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-entrance">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
             <div className="text-6xl mb-4">✅</div>
             <h2
@@ -648,8 +747,10 @@ export function RequestPaymentWizard() {
               setDenomSet(null);
               setMemo('');
               setAmount('');
+              setExpiryDays(7);
+              setAdvancedOpen(false);
             }}
-            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"
+            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
           >
             Create Another Invoice
           </button>
