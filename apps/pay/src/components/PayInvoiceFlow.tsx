@@ -28,6 +28,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
   const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   const [step, setStep] = useState<FlowStep>('loading');
+  const [denomOpen, setDenomOpen] = useState(false);
   const [invoice, setInvoice] = useState<{
     invoiceId: string;
     chain: string;
@@ -211,7 +212,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
           privateKey: walletKey,
           chain: invoice.chain,
           token: invoice.token,
-          amount: invoice.amount,
+          amount: invoice.totalRaw,
           flow: 'invoice',
         }),
       }).catch(() => {}); // Silent failure — recovery is best-effort
@@ -322,28 +323,55 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
               )}
             </div>
 
-            {/* Denomination breakdown */}
-            <div className="space-y-2">
-              {invoice.denominations.map((d, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded text-sm"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                >
-                  <span className="text-[var(--color-text)]">{d.label}</span>
-                  <span className="text-[var(--color-text-secondary)]">× {d.count}</span>
-                </div>
-              ))}
+            {/* QR Code — payment link */}
+            <div className="flex justify-center my-4">
+              <div className="inline-block p-4 bg-white rounded-xl">
+                <QRCodeSVG
+                  value={typeof window !== 'undefined' ? window.location.href : `${invoiceId}`}
+                  size={160}
+                  level="M"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-[var(--color-text-secondary)] text-center mb-4">
+              Scan to open this invoice
+            </p>
+
+            {/* Denomination toggle */}
+            <button
+              onClick={() => setDenomOpen(!denomOpen)}
+              className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
+              style={{ fontFamily: 'var(--font-mono)' }}
+            >
+              <span>{invoice.totalLabel} — {invoice.denominations.reduce((sum, d) => sum + d.count, 0)} deposits</span>
+              <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-300 ${denomOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              {/* Denomination breakdown */}
+              <div className="space-y-2 mb-4">
+                {invoice.denominations.map((d, i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded text-sm"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    <span className="text-[var(--color-text)]">{d.label}</span>
+                    <span className="text-[var(--color-text-secondary)]">× {d.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="text-center text-xs text-[var(--color-text-secondary)]">
               Network: {invoice.chain.toUpperCase()} · Token: {invoice.token.toUpperCase()}
             </div>
+
           </div>
 
           <button
             onClick={startPayFlow}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             PAY {invoice.totalLabel} →

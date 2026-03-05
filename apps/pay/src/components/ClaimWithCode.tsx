@@ -172,7 +172,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
           <button
             onClick={handleClaim}
             disabled={!claimCode.trim() || !encryptionKey.trim() || isLoading}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press flex items-center justify-center gap-2"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg flex items-center justify-center gap-2"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             {isLoading ? (
@@ -259,7 +259,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
           <button
             onClick={handleWithdrawAll}
             disabled={!isValidAddress}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             WITHDRAW ALL {bundle.notes.length} NOTE{bundle.notes.length !== 1 ? 'S' : ''} →
@@ -273,7 +273,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               setEncryptionKey('');
               setDestinationAddress('');
             }}
-            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             ← Back
           </button>
@@ -361,7 +361,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               <div className="mt-6 space-y-3">
                 <button
                   onClick={handleWithdrawAll}
-                  className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press"
+                  className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
                   RETRY WITHDRAWAL
@@ -450,7 +450,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               setWithdrawProgress(null);
               setWithdrawError(null);
             }}
-            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"
+            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             Claim Another Payment
           </button>
