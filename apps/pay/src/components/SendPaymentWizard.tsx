@@ -173,8 +173,11 @@ export function SendPaymentWizard() {
   const executeDeposit = useCallback(async (
     pool: PoolEntry,
     signal: AbortSignal,
+    walletOverride?: { address: string; privateKey: string },
   ): Promise<DepositNoteRecord> => {
-    if (!address || !privateKey) throw new Error('Wallet not ready');
+    const walletAddress = walletOverride?.address ?? address;
+    const walletPrivateKey = walletOverride?.privateKey ?? privateKey;
+    if (!walletAddress || !walletPrivateKey) throw new Error('Wallet not ready');
 
     const chainConfig = getChainConfig(chain);
     const rpcUrl = chainConfig.rpcUrl;
@@ -189,7 +192,7 @@ export function SendPaymentWizard() {
     setDepositStatus('approving');
     const { JsonRpcProvider, Contract, Wallet } = await import('ethers');
     const provider = new JsonRpcProvider(rpcUrl);
-    const wallet = new Wallet(privateKey, provider);
+    const wallet = new Wallet(walletPrivateKey, provider);
 
     const { buildMimcSponge } = await import('circomlibjs');
     const mimcSponge = await buildMimcSponge();
@@ -235,8 +238,12 @@ export function SendPaymentWizard() {
       return;
     }
 
-    // Ensure wallet exists
-    if (!isCreated) createWallet();
+    // Ensure wallet exists — await creation and capture return value
+    // to avoid React stale closure issue
+    let walletData: { address: string; privateKey: string } | undefined;
+    if (!isCreated) {
+      walletData = await createWallet();
+    }
 
     const queue = buildQueue(denomSet);
     setTotalDeposits(queue.length);
@@ -255,7 +262,7 @@ export function SendPaymentWizard() {
         setCurrentDepositIndex(i);
         setDepositStatus('waiting');
 
-        const note = await executeDeposit(queue[i].pool, controller.signal);
+        const note = await executeDeposit(queue[i].pool, controller.signal, walletData);
         notes.push(note);
         setCollectedNotes([...notes]);
       }
@@ -411,14 +418,14 @@ export function SendPaymentWizard() {
                     Adjusted to <span className="text-[var(--color-text)] font-bold">${Math.round(parseFloat(amount) / 10) * 10}</span> to fit shielded pool denominations.
                   </span>
                   <span className="text-[var(--color-text-secondary)] opacity-80">
-                    {' '}For stronger privacy, use round amounts ($100, $1K, $5K) — fewer deposits = larger anonymity set.
+                    {' '}For stronger privacy, use round amounts ($1K, $10K, $100K, $1M) — single-denomination splits are untraceable.
                   </span>
                 </div>
               )}
 
               {/* Quick select chips */}
               <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {[100, 500, 1000, 5000, 10000].map((quickAmount) => (
+                {[1000, 10000, 100000, 500000, 1000000].map((quickAmount) => (
                   <button
                     key={quickAmount}
                     onClick={() => handleQuickSelect(quickAmount)}
@@ -556,16 +563,16 @@ export function SendPaymentWizard() {
                   let icon: string, label: string, color: string, tip: string;
                   if (depositCount === 1) {
                     icon = '\u{1F7E2}'; label = 'Maximum Privacy'; color = 'var(--color-green, #4ade80)';
-                    tip = 'Single pool deposit — blends with the largest anonymity set.';
-                  } else if (depositCount <= 3 && uniqueDenoms === 1) {
+                    tip = 'Single pool deposit \u2014 blends with the largest anonymity set.';
+                  } else if (uniqueDenoms === 1) {
                     icon = '\u{1F7E2}'; label = 'Strong Privacy'; color = 'var(--color-green, #4ade80)';
-                    tip = 'Few deposits using one denomination — hard to fingerprint.';
-                  } else if (depositCount <= 5) {
+                    tip = `${depositCount} deposits of the same denomination \u2014 each blends into its own anonymity set. No amount fingerprinting possible.`;
+                  } else if (uniqueDenoms <= 2) {
                     icon = '\u{1F7E1}'; label = 'Good Privacy'; color = 'var(--color-warning-text, #fbbf24)';
-                    tip = 'Consider a rounder amount for fewer deposits and a stronger anonymity set.';
+                    tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
                   } else {
                     icon = '\u{1F7E0}'; label = 'Moderate Privacy'; color = 'var(--color-warning-text, #fbbf24)';
-                    tip = 'Many deposits increase on-chain footprint. Consider splitting into separate transactions or using a rounder amount.';
+                    tip = `${uniqueDenoms} different denominations create a unique fingerprint. Use a rounder amount like $${(Math.ceil(parseFloat(amount) / 1000000) * 1000000).toLocaleString()} for stronger privacy.`;
                   }
                   return (
                     <div className="mt-3 flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>

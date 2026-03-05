@@ -10,7 +10,7 @@ interface WalletContextValue {
   /** Whether the wallet has been created or imported */
   isCreated: boolean;
   /** Generate a fresh ephemeral Ethereum keypair */
-  createWallet: () => Promise<void>;
+  createWallet: () => Promise<{ address: string; privateKey: string }>;
   /** Import a wallet from an existing private key */
   importWallet: (privateKey: string) => Promise<void>;
   /** Clear the current wallet state */
@@ -21,7 +21,7 @@ const WalletContext = createContext<WalletContextValue>({
   address: null,
   privateKey: null,
   isCreated: false,
-  createWallet: async () => {},
+  createWallet: async () => ({ address: '', privateKey: '' }),
   importWallet: async () => {},
   clearWallet: () => {},
 });
@@ -30,7 +30,7 @@ export function BrowserWalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
 
-  const createWallet = useCallback(async () => {
+  const createWallet = useCallback(async (): Promise<{ address: string; privateKey: string }> => {
     // Dynamic import to avoid SSR issues
     const { Wallet } = await import('ethers');
     
@@ -45,6 +45,7 @@ export function BrowserWalletProvider({ children }: { children: ReactNode }) {
     const wallet = new Wallet('0x' + hex);
     setAddress(wallet.address);
     setPrivateKey(wallet.privateKey);
+    return { address: wallet.address, privateKey: wallet.privateKey };
   }, []);
 
   const importWallet = useCallback(async (pk: string) => {
