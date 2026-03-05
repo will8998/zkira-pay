@@ -5,13 +5,26 @@ import { ephemeralWallets } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import { encryptPrivateKey, decryptPrivateKey } from '../services/crypto.js';
 import { loadConfig } from '../config.js';
+import { verifyAdminToken } from '../middleware/jwt-auth.js';
 
 const ephemeralWalletRoutes = new Hono();
 
-// Admin auth middleware (same pattern as admin.ts)
+// Admin auth middleware — supports JWT Bearer + legacy password header
 const adminAuth = async (c: any, next: any) => {
-  const adminPassword = c.req.header('X-Admin-Password');
   const config = loadConfig();
+
+  // Try JWT Bearer first
+  const authHeader = c.req.header('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const payload = await verifyAdminToken(authHeader.slice(7), config.jwtSecret);
+    if (payload) {
+      await next();
+      return;
+    }
+  }
+
+  // Fallback: legacy X-Admin-Password
+  const adminPassword = c.req.header('X-Admin-Password');
   if (!adminPassword) return c.json({ error: 'Unauthorized' }, 401);
   try {
     const provided = Buffer.from(adminPassword);
@@ -36,13 +49,14 @@ ephemeralWalletRoutes.post('/api/ephemeral-wallets', async (c) => {
     }
 
     // Encrypt the private key before storing
-    const { encrypted, iv, authTag } = encryptPrivateKey(privateKey);
+    const { encrypted, iv, authTag, salt } = encryptPrivateKey(privateKey);
 
     const [wallet] = await db.insert(ephemeralWallets).values({
       address: address.toLowerCase(),
       encryptedKey: encrypted,
       iv,
       authTag,
+      salt,
       chain: chain || null,
       token: token || null,
       amount: amount || null,
@@ -98,7 +112,7 @@ ephemeralWalletRoutes.post('/api/admin/ephemeral-wallets/:id/recover', adminAuth
       return c.json({ error: 'Wallet not found' }, 404);
     }
 
-    const privateKey = decryptPrivateKey(wallet.encryptedKey, wallet.iv, wallet.authTag);
+    const privateKey = decryptPrivateKey(wallet.encryptedKey, wallet.iv, wallet.authTag, wallet.salt);
 
     return c.json({
       address: wallet.address,
