@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { gatewaySessions, gatewayBalances, gatewayLedger } from '../db/schema.js';
+import { gatewaySessions, gatewayBalances, gatewayLedger, merchants } from '../db/schema.js';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { deliverWebhook } from '../services/webhook.js';
+import { processCommissions } from '../services/commission.js';
 
 const gatewayWithdrawalRoutes = new Hono<{ Variables: { merchantId: string } }>();
 
@@ -34,6 +35,18 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
       return c.json({ error: 'Valid recipient address is required' }, 400);
     }
 
+    // Fetch merchant data for fee calculation
+    const merchantResult = await db.select().from(merchants).where(
+      eq(merchants.id, merchantId)
+    ).limit(1);
+
+    if (merchantResult.length === 0) {
+      return c.json({ error: 'Merchant not found' }, 404);
+    }
+
+    const merchant = merchantResult[0];
+    const platformFee = amount * parseFloat(merchant.feePercent) / 100;
+
     // Check player balance
     const balance = await db.select().from(gatewayBalances).where(
       and(
@@ -53,7 +66,6 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
     if (availableBalance < amount) {
       return c.json({ error: 'Insufficient balance' }, 400);
     }
-
     // Place a hold: decrease availableBalance, increase pendingBalance
     const newAvailableBalance = (availableBalance - amount).toFixed(6);
     const newPendingBalance = (parseFloat(currentBalance.pendingBalance) + amount).toFixed(6);
@@ -82,6 +94,8 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
       token,
       chain,
       recipientAddress,
+      referrerAddress: merchant.referrerAddress,
+      platformFee: platformFee.toString(),
       metadata,
       status: 'pending',
       expiresAt
@@ -120,7 +134,7 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
       }
     }).catch(err => console.warn('Failed to deliver withdrawal.initiated webhook:', err));
 
-    return c.json({ session }, 201);
+    return c.json({ session: { ...session, referrerAddress: merchant.referrerAddress, platformFee: platformFee.toString() } }, 201);
   } catch (error) {
     console.error('Failed to initiate withdrawal:', error);
     return c.json({ error: 'Failed to initiate withdrawal' }, 500);
@@ -206,6 +220,30 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/confirm', asyn
         balanceAfter: newPendingBalance,
         description: `Withdrawal confirmed with txHash: ${txHash}`
       });
+
+      // Insert platform fee ledger entry if there's a platform fee
+      if (session.platformFee && parseFloat(session.platformFee) > 0) {
+        const platformFeeAmount = parseFloat(session.platformFee);
+        await db.insert(gatewayLedger).values({
+          merchantId,
+          playerRef: session.playerRef,
+          type: 'platform_fee',
+          amount: platformFeeAmount.toString(),
+          currency: session.token,
+          sessionId: session.id,
+          balanceBefore: currentBalance.pendingBalance,
+          balanceAfter: newPendingBalance,
+          description: `Platform fee for withdrawal session ${session.id}`
+        });
+
+        // Process commissions (fire-and-forget)
+        processCommissions({
+          merchantId,
+          sessionId: session.id,
+          platformFee: platformFeeAmount,
+          currency: session.token
+        }).catch(err => console.error('Failed to process commissions:', err));
+      }
     }
 
     // Fire webhook (fire-and-forget)
