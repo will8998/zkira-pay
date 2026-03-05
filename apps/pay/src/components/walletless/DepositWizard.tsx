@@ -119,8 +119,16 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
    * Full deposit flow: poll → approve USDC → deposit commitment → save note.
    */
   const startDepositFlow = useCallback(async () => {
-    if (!address || !privateKey || !selection?.pool) {
-      toast.error('Wallet not ready');
+    // Ensure wallet is ready — await creation if useEffect hasn't finished
+    let walletAddress = address;
+    let walletPrivateKey = privateKey;
+    if (!walletAddress || !walletPrivateKey) {
+      const walletData = await createWallet();
+      walletAddress = walletData.address;
+      walletPrivateKey = walletData.privateKey;
+    }
+    if (!selection?.pool) {
+      toast.error('Select a pool first');
       return;
     }
 
@@ -141,7 +149,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
 
       const { JsonRpcProvider, Contract, Wallet } = await import('ethers');
       const provider = new JsonRpcProvider(rpcUrl);
-      const wallet = new Wallet(privateKey, provider);
+      const wallet = new Wallet(walletPrivateKey, provider);
 
       // Stage 2: Generate commitment
       const { buildMimcSponge } = await import('circomlibjs');
@@ -193,7 +201,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
       toast.error(error instanceof Error ? error.message : 'Deposit failed. Please try again.');
       setCurrentStep('send');
     }
-  }, [address, privateKey, selection, pollForFunds, rpcUrl, tokenAddress, poolAddress, denominationRaw]);
+  }, [address, privateKey, createWallet, selection, pollForFunds, rpcUrl, tokenAddress, poolAddress, denominationRaw]);
 
   // Start deposit flow when entering send step
   useEffect(() => {

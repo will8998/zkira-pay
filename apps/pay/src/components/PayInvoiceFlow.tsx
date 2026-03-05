@@ -113,8 +113,11 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
   const executeDeposit = useCallback(async (
     denom: DenominationEntry,
     signal: AbortSignal,
+    walletOverride?: { address: string; privateKey: string },
   ): Promise<DepositNoteRecord> => {
-    if (!address || !privateKey || !invoice) throw new Error('Not ready');
+    const walletAddress = walletOverride?.address ?? address;
+    const walletPrivateKey = walletOverride?.privateKey ?? privateKey;
+    if (!walletAddress || !walletPrivateKey || !invoice) throw new Error('Not ready');
 
     const chain = invoice.chain as Chain;
     const token = invoice.token as TokenId;
@@ -127,6 +130,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
     setDepositStatus('funding');
     const { JsonRpcProvider, Contract, Wallet } = await import('ethers');
     const provider = new JsonRpcProvider(rpcUrl);
+    const wallet = new Wallet(walletPrivateKey, provider);
     const abi = ['function balanceOf(address) view returns (uint256)'];
 
     while (!signal.aborted) {
@@ -189,6 +193,11 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
   const startPayFlow = useCallback(async () => {
     if (!invoice) return;
 
+    // Ensure wallet is ready — await creation if needed
+    let walletData: { address: string; privateKey: string } | undefined;
+    if (!isCreated) {
+      walletData = await createWallet();
+    }
     const queue = buildQueue();
     setTotalDeposits(queue.length);
     setCurrentDepositIndex(0);
@@ -205,7 +214,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
         setCurrentDepositIndex(i);
         setDepositStatus('waiting');
 
-        const note = await executeDeposit(queue[i], controller.signal);
+        const note = await executeDeposit(queue[i], controller.signal, walletData);
         notes.push(note);
         setCollectedNotes([...notes]);
 
@@ -237,7 +246,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
       toast.error(error instanceof Error ? error.message : 'Payment failed');
       setStep('review');
     }
-  }, [invoice, buildQueue, executeDeposit]);
+  }, [invoice, isCreated, createWallet, buildQueue, executeDeposit]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
