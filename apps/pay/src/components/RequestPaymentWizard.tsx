@@ -330,10 +330,15 @@ export function RequestPaymentWizard() {
                 />
               </div>
 
-              {/* Amount validation feedback */}
+              {/* Privacy guidance */}
               {amount && parseFloat(amount) > 0 && parseFloat(amount) % 10 !== 0 && (
-                <div className="text-[var(--color-text-secondary)] text-sm mb-4">
-                  Amount will be rounded to ${Math.round(parseFloat(amount) / 10) * 10} (nearest multiple of 10)
+                <div className="text-sm mb-4 px-4 py-2 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-lg">
+                  <span className="text-[var(--color-text-secondary)]">
+                    Adjusted to <span className="text-[var(--color-text)] font-bold">${Math.round(parseFloat(amount) / 10) * 10}</span> to fit shielded pool denominations.
+                  </span>
+                  <span className="text-[var(--color-text-secondary)] opacity-80">
+                    {' '}For stronger privacy, use round amounts ($100, $1K, $5K) — fewer deposits = larger anonymity set.
+                  </span>
                 </div>
               )}
 
@@ -470,7 +475,34 @@ export function RequestPaymentWizard() {
                     {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
                   </span>
                 </div>
-              </div>
+                {/* Privacy strength indicator */}
+                {(() => {
+                  const depositCount = denomSet.selections.reduce((sum, sel) => sum + sel.count, 0);
+                  const uniqueDenoms = denomSet.selections.length;
+                  let icon: string, label: string, color: string, tip: string;
+                  if (depositCount === 1) {
+                    icon = '\u{1F7E2}'; label = 'Maximum Privacy'; color = 'var(--color-green, #4ade80)';
+                    tip = 'Single pool deposit — blends with the largest anonymity set.';
+                  } else if (depositCount <= 3 && uniqueDenoms === 1) {
+                    icon = '\u{1F7E2}'; label = 'Strong Privacy'; color = 'var(--color-green, #4ade80)';
+                    tip = 'Few deposits using one denomination — hard to fingerprint.';
+                  } else if (depositCount <= 5) {
+                    icon = '\u{1F7E1}'; label = 'Good Privacy'; color = 'var(--color-warning-text, #fbbf24)';
+                    tip = 'Consider a rounder amount for fewer deposits and a stronger anonymity set.';
+                  } else {
+                    icon = '\u{1F7E0}'; label = 'Moderate Privacy'; color = 'var(--color-warning-text, #fbbf24)';
+                    tip = 'Many deposits increase on-chain footprint. Consider splitting into separate transactions or using a rounder amount.';
+                  }
+                  return (
+                    <div className="mt-3 flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+                      <span>{icon}</span>
+                      <div>
+                        <span style={{ color }} className="font-bold uppercase">{label}</span>
+                        <span className="text-[var(--color-text-secondary)] ml-1">— {tip}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
             )}
 
             {/* Memo Input */}
