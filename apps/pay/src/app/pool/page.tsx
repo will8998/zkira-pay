@@ -2,11 +2,35 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/PageHeader';
-import { BrowserWalletProvider } from '@/components/BrowserWalletProvider';
-import { DepositWizard } from '@/components/walletless/DepositWizard';
-import { WithdrawWizard } from '@/components/walletless/WithdrawWizard';
 import { getAvailableChains, type Chain, CHAIN_CONFIGS } from '@/config/pool-registry';
+
+const DepositWizard = dynamic(
+  () => import('@/components/walletless/DepositWizard').then((m) => ({ default: m.DepositWizard })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-6 w-40 bg-[var(--color-surface)] rounded" />
+        <div className="h-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg" />
+      </div>
+    ),
+  }
+);
+
+const WithdrawWizard = dynamic(
+  () => import('@/components/walletless/WithdrawWizard').then((m) => ({ default: m.WithdrawWizard })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-6 w-40 bg-[var(--color-surface)] rounded" />
+        <div className="h-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg" />
+      </div>
+    ),
+  }
+);
 
 type TabId = 'deposit' | 'withdraw';
 
@@ -74,25 +98,23 @@ export default function PoolPage() {
 
       {/* Tab Content */}
       <div className="animate-fade-in">
-        <BrowserWalletProvider>
-          {activeTab === 'deposit' && (
-            <div>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
-                Deposit to Pool
-              </h3>
-              <DepositWizard />
-            </div>
-          )}
+        {activeTab === 'deposit' && (
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
+              Deposit to Pool
+            </h3>
+            <DepositWizard />
+          </div>
+        )}
 
-          {activeTab === 'withdraw' && (
-            <div>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
-                Withdraw from Pool
-              </h3>
-              <WithdrawWizard />
-            </div>
-          )}
-        </BrowserWalletProvider>
+        {activeTab === 'withdraw' && (
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
+              Withdraw from Pool
+            </h3>
+            <WithdrawWizard />
+          </div>
+        )}
       </div>
     </div>
   );
