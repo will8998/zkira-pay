@@ -78,8 +78,11 @@ const dualAdminAuth = async (c: any, next: any) => {
   return c.json({ error: 'Unauthorized' }, 401);
 };
 
-// Apply dual admin auth to all admin routes
-adminRoutes.use('/api/admin/*', dualAdminAuth);
+// Apply dual admin auth to all admin routes EXCEPT login
+adminRoutes.use('/api/admin/*', async (c, next) => {
+  if (c.req.path === '/api/admin/login') return next();
+  return dualAdminAuth(c, next);
+});
 
 // POST /api/admin/login - Login endpoint for dual authentication
 adminRoutes.post('/api/admin/login', async (c) => {
