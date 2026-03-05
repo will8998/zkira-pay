@@ -1,60 +1,98 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { CodeBlock } from '@/components/learn/CodeBlock';
-import Link from 'next/link';
 
 export default function APIReferencePage() {
-  const t = useTranslations('apiReferencePage');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'omnipay2026') {
+      setAuthenticated(true);
+      setError('');
+    } else {
+      setError('Invalid password');
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto animate-fade-in">
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-8 max-w-md w-full">
+            <h1 className="text-2xl font-medium text-[var(--color-text-primary)] mb-4">API Reference</h1>
+            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
+              This documentation is for authorized integration partners only.
+            </p>
+            
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--border-subtle)] text-[var(--color-text-primary)] text-sm font-mono focus:outline-none focus:border-[var(--color-text-primary)] transition-colors"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-white text-black px-4 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                Access Documentation
+              </button>
+              
+              {error && (
+                <p className="text-red-400 text-sm">{error}</p>
+              )}
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto animate-fade-in">
       <PageHeader
-        title={t('title')}
-        description={t('description')}
+        title="API Reference"
+        description="Gateway integration documentation for OMNIPAY payment processing"
       />
-      
-      <a 
-        href="/developers" 
-        className="text-[11px] text-[var(--color-green)] hover:text-[var(--color-green-hover)] -mt-4 mb-6 inline-block transition-colors"
-      >
-        {t('manageApiKeys')} →
-      </a>
+
+      {/* Getting Started */}
+      <section id="getting-started" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Getting Started</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+            OMNIPAY provides a simple REST API for integrating private payment processing into your platform. We handle all the complexity of zero-knowledge proofs, shielded pools, and multi-chain settlement. You just make API calls.
+          </p>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">
+            API keys are provided by the OMNIPAY team during onboarding. Contact us to get started.
+          </p>
+        </div>
+      </section>
 
       {/* Authentication */}
       <section id="authentication" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('authenticationTitle')}</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Authentication</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('authenticationDesc')}
+            All API requests must include your API key in the request headers. API keys are manually provisioned by the OMNIPAY team during the onboarding process.
           </p>
           
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">{t('merchantAuthTitle')}</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-              {t('merchantAuthDesc')}
-            </p>
-            <CodeBlock 
-              code="X-API-Key: merchant_api_key_here" 
-              language="http"
-              title="Merchant Authentication Header"
-            />
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">{t('adminAuthTitle')}</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-              {t('adminAuthDesc')}
-            </p>
-            <CodeBlock 
-              code="X-Admin-Password: admin_password_here" 
-              language="http"
-              title="Admin Authentication Header"
-            />
-          </div>
-
+          <CodeBlock 
+            code="X-API-Key: your_api_key_here" 
+            language="http"
+            title="Authentication Header"
+          />
+          
           <p className="text-[var(--color-text-secondary)] text-[11px] mt-3">
-            {t('generateApiKeysDesc')} <a href="/developers" className="text-[var(--color-green)] hover:text-[var(--color-green-hover)] transition-colors">/developers</a>
+            API keys are provided manually by OMNIPAY team. No self-service generation available.
           </p>
         </div>
       </section>
@@ -62,30 +100,24 @@ export default function APIReferencePage() {
       {/* Base URL */}
       <section id="base-url" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('baseUrlTitle')}</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Base URL</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('baseUrlDesc')}
+            All API endpoints are relative to the base URL shown below.
           </p>
           <CodeBlock 
-            code="https://api.zkira.xyz" 
+            code="https://omnipay.club/api" 
             language="url"
             title="Production Base URL"
           />
         </div>
       </section>
 
-      {/* Gateway Endpoints */}
-      <section id="gateway-endpoints" className="mb-8">
-        <h2 className="text-2xl font-medium text-[var(--color-text-primary)] mb-6">{t('gatewayEndpointsTitle')}</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-          {t('gatewayEndpointsDesc')}
-        </p>
-
-        {/* Gateway Sessions */}
-        <div id="gateway-sessions" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('gatewaySessionsTitle')}</h3>
+      {/* Create Payment Session */}
+      <section id="create-session" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Create Payment Session</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('gatewaySessionsDesc')}
+            Create a new payment session for a player. Returns a deposit URL that the player can use to complete the payment.
           </p>
           
           <div className="mb-4">
@@ -103,10 +135,34 @@ export default function APIReferencePage() {
                 }
               }, null, 2)} 
               language="json"
-              title="Create Session Request"
+              title="Request Body"
             />
           </div>
 
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Response</h4>
+            <CodeBlock 
+              code={JSON.stringify({
+                "sessionId": "sess_abc123",
+                "depositUrl": "https://omnipay.club/deposit/sess_abc123",
+                "status": "pending",
+                "expiresAt": "2026-03-06T15:30:00Z"
+              }, null, 2)} 
+              language="json"
+              title="Response Body"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Get Session Status */}
+      <section id="get-session" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Get Session Status</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
+            Retrieve the current status and details of a payment session.
+          </p>
+          
           <div className="mb-4">
             <div className="flex items-center gap-3 mb-4">
               <span className="bg-[var(--color-green)] text-white px-2.5 py-0.5 text-[11px] font-medium">GET</span>
@@ -118,21 +174,24 @@ export default function APIReferencePage() {
                 "playerId": "player_123",
                 "amount": "100",
                 "token": "USDC",
-                "status": "pending",
-                "depositUrl": "https://app.zkira.xyz/deposit/sess_abc123",
-                "expiresAt": "2026-03-06T15:30:00Z"
+                "status": "completed",
+                "depositUrl": "https://omnipay.club/deposit/sess_abc123",
+                "expiresAt": "2026-03-06T15:30:00Z",
+                "completedAt": "2026-03-06T14:25:00Z"
               }, null, 2)} 
               language="json"
-              title="Get Session Response"
+              title="Response Body"
             />
           </div>
         </div>
+      </section>
 
-        {/* Gateway Withdrawals */}
-        <div id="gateway-withdrawals" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('gatewayWithdrawalsTitle')}</h3>
+      {/* Create Withdrawal */}
+      <section id="create-withdrawal" className="mb-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Create Withdrawal</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('gatewayWithdrawalsDesc')}
+            Create a withdrawal request for a player. Withdrawals require manual approval from the OMNIPAY team before processing.
           </p>
           
           <div className="mb-4">
@@ -148,288 +207,21 @@ export default function APIReferencePage() {
                 "recipientAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
               }, null, 2)} 
               language="json"
-              title="Create Withdrawal Request"
+              title="Request Body"
             />
           </div>
 
           <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#FFA500] text-white px-2.5 py-0.5 text-[11px] font-medium">PUT</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/withdrawals/:id/approve</code>
-            </div>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-2">
-              {t('approveWithdrawalDesc')}
-            </p>
-          </div>
-        </div>
-
-        {/* Gateway Reports */}
-        <div id="gateway-reports" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('gatewayReportsTitle')}</h3>
-          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('gatewayReportsDesc')}
-          </p>
-          
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[var(--color-green)] text-white px-2.5 py-0.5 text-[11px] font-medium">GET</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/reports/volume</code>
-            </div>
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Response</h4>
             <CodeBlock 
               code={JSON.stringify({
-                "period": "24h",
-                "totalVolume": "15420.50",
-                "totalTransactions": 342,
-                "averageAmount": "45.09",
-                "byToken": {
-                  "USDC": "12340.25",
-                  "USDT": "3080.25"
-                }
+                "withdrawalId": "wd_xyz789",
+                "status": "pending_approval",
+                "createdAt": "2026-03-06T14:30:00Z"
               }, null, 2)} 
               language="json"
-              title="Volume Report Response"
+              title="Response Body"
             />
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[var(--color-green)] text-white px-2.5 py-0.5 text-[11px] font-medium">GET</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/reports/balances</code>
-            </div>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-2">
-              {t('balanceReportDesc')}
-            </p>
-          </div>
-        </div>
-
-        {/* Gateway Disputes */}
-        <div id="gateway-disputes" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('gatewayDisputesTitle')}</h3>
-          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('gatewayDisputesDesc')}
-          </p>
-          
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#FFFFFF] text-black px-2.5 py-0.5 text-[11px] font-medium">POST</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/disputes</code>
-            </div>
-            <CodeBlock 
-              code={JSON.stringify({
-                "transactionId": "tx_abc123",
-                "playerId": "player_123",
-                "reason": "unauthorized_withdrawal",
-                "description": "Player claims they did not initiate this withdrawal"
-              }, null, 2)} 
-              language="json"
-              title="Create Dispute Request"
-            />
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#FFA500] text-white px-2.5 py-0.5 text-[11px] font-medium">PUT</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/disputes/:id/resolve</code>
-            </div>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-2">
-              {t('resolveDisputeDesc')}
-            </p>
-          </div>
-        </div>
-
-        {/* Gateway Pools */}
-        <div id="gateway-pools" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('gatewayPoolsTitle')}</h3>
-          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('gatewayPoolsDesc')}
-          </p>
-          
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#FFFFFF] text-black px-2.5 py-0.5 text-[11px] font-medium">POST</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/pools</code>
-            </div>
-            <CodeBlock 
-              code={JSON.stringify({
-                "token": "USDC",
-                "initialLiquidity": "10000",
-                "minBalance": "1000",
-                "maxBalance": "50000"
-              }, null, 2)} 
-              language="json"
-              title="Create Pool Request"
-            />
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[var(--color-green)] text-white px-2.5 py-0.5 text-[11px] font-medium">GET</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/pools/:id</code>
-            </div>
-            <CodeBlock 
-              code={JSON.stringify({
-                "poolId": "pool_usdc_001",
-                "token": "USDC",
-                "currentBalance": "25430.75",
-                "minBalance": "1000",
-                "maxBalance": "50000",
-                "status": "active"
-              }, null, 2)} 
-              language="json"
-              title="Get Pool Response"
-            />
-          </div>
-        </div>
-
-        {/* Distributor Management */}
-        <div id="distributor-management" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-4">{t('distributorManagementTitle')}</h3>
-          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('distributorManagementDesc')}
-          </p>
-          
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#FFFFFF] text-black px-2.5 py-0.5 text-[11px] font-medium">POST</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/distributors</code>
-            </div>
-            <CodeBlock 
-              code={JSON.stringify({
-                "name": "Asia Pacific Sub-Distributor",
-                "tier": "sub",
-                "parentId": "dist_master_001",
-                "commissionRate": "0.15",
-                "contactEmail": "contact@apac-gaming.com"
-              }, null, 2)} 
-              language="json"
-              title="Create Distributor Request"
-            />
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[var(--color-green)] text-white px-2.5 py-0.5 text-[11px] font-medium">GET</span>
-              <code className="text-[var(--color-text-primary)] font-mono">/api/gateway/distributors/:id/downline</code>
-            </div>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-2">
-              {t('distributorDownlineDesc')}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 mb-6">
-          <p className="text-[var(--color-text-secondary)] text-sm">
-            <strong>{t('fullApiSpecNote')}</strong> {t('fullApiSpecDesc')} 
-            <a href="/api/docs/openapi.yaml" className="text-[var(--color-green)] hover:text-[var(--color-green-hover)] transition-colors">/api/docs/openapi.yaml</a>
-          </p>
-        </div>
-      </section>
-
-      {/* SDK Reference */}
-      <section id="sdk-reference" className="mb-8">
-        <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('sdkReferenceTitle')}</h2>
-          <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-            {t('sdkReferenceDesc')}
-          </p>
-          
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">{t('gatewayClientTitle')}</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-              {t('gatewayClientDesc')}
-            </p>
-            <CodeBlock 
-              code={`import { GatewayClient } from '@zkira/gateway-client';
-
-// Initialize client
-const client = new GatewayClient({
-  baseUrl: 'https://api.zkira.xyz',
-  apiKey: 'your_merchant_api_key'
-});
-
-// Create deposit session
-const session = await client.createSession({
-  playerId: 'player_123',
-  amount: '100',
-  token: 'USDC'
-});
-
-// Process withdrawal
-const withdrawal = await client.createWithdrawal({
-  playerId: 'player_123',
-  amount: '50',
-  token: 'USDC',
-  recipientAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'
-});
-
-// Get volume reports
-const report = await client.getVolumeReport('24h');`} 
-              language="typescript"
-              title="@zkira/gateway-client Usage"
-            />
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">{t('zkiraClientTitle')}</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-              {t('zkiraClientDesc')}
-            </p>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('constructorTitle')}</h4>
-                <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                  new ZkiraClient(connection: Connection, wallet: WalletAdapter)
-                </code>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('methodsTitle')}</h4>
-                <div className="space-y-3">
-                  <div>
-                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                      createPaymentLink(params: CreatePaymentLinkParams): Promise&lt;CreatePaymentLinkResult&gt;
-                    </code>
-                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">{t('createPaymentLinkDesc')}</p>
-                  </div>
-                  
-                  <div>
-                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                      claimStealth(params: ClaimStealthParams): Promise&lt;ClaimStealthResult&gt;
-                    </code>
-                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">{t('claimStealthDesc')}</p>
-                  </div>
-                  
-                  <div>
-                    <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                      scanForPayments(params: ScanForPaymentsParams): Promise&lt;MatchedAnnouncement[]&gt;
-                    </code>
-                    <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">{t('scanForPaymentsDesc')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">{t('shieldedPoolClientTitle')}</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-              {t('shieldedPoolClientDesc')}
-            </p>
-            <div className="space-y-3">
-              <div>
-                <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                  deposit(tokenMint: PublicKey): Promise&lt;DepositResult&gt;
-                </code>
-                <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">{t('depositDesc')}</p>
-              </div>
-              
-              <div>
-                <code className="block text-[var(--color-text-secondary)] text-sm font-mono bg-[var(--color-background)] p-3 border border-[var(--border-subtle)]">
-                  withdraw(note: string, recipient: PublicKey): Promise&lt;{'{'}txSignature: string{'}'}&gt;
-                </code>
-                <p className="text-[var(--color-text-secondary)] text-[11px] mt-1">{t('withdrawDesc')}</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -437,29 +229,26 @@ const report = await client.getVolumeReport('24h');`}
       {/* Webhooks */}
       <section id="webhooks" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('webhooksTitle')}</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Webhooks</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('webhooksDesc')}
+            OMNIPAY sends webhook events to notify your application of important payment events. Configure your webhook endpoint during onboarding.
           </p>
           
           <div className="space-y-4 mb-6">
             <div>
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('eventTypesTitle')}</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Event Types</h4>
               <ul className="text-[var(--color-text-secondary)] text-sm space-y-1">
-                <li>• <code>gateway.session_completed</code> - {t('sessionCompletedEvent')}</li>
-                <li>• <code>gateway.withdrawal_approved</code> - {t('withdrawalApprovedEvent')}</li>
-                <li>• <code>gateway.dispute_created</code> - {t('disputeCreatedEvent')}</li>
-                <li>• <code>pool.deposited</code> - {t('poolDepositedEvent')}</li>
-                <li>• <code>pool.withdrawal_processed</code> - {t('poolWithdrawalEvent')}</li>
+                <li>• <code>session_completed</code> - Payment session successfully completed</li>
+                <li>• <code>withdrawal_processed</code> - Withdrawal has been processed and sent</li>
               </ul>
             </div>
           </div>
 
           <div className="mb-4">
-            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('webhookPayloadTitle')}</h4>
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Webhook Payload</h4>
             <CodeBlock 
               code={JSON.stringify({
-                "event": "gateway.session_completed",
+                "event": "session_completed",
                 "timestamp": 1709740800000,
                 "data": {
                   "sessionId": "sess_abc123",
@@ -467,18 +256,17 @@ const report = await client.getVolumeReport('24h');`}
                   "amount": "100",
                   "token": "USDC",
                   "transactionHash": "5xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
-                },
-                "signature": "webhook_signature_here"
+                }
               }, null, 2)} 
               language="json"
-              title="Webhook Payload"
+              title="Webhook Payload Example"
             />
           </div>
 
           <CodeBlock 
-            code={`// Webhook handler example
+            code={`// Webhook handler example (Node.js/Express)
 app.post('/webhook', (req, res) => {
-  const signature = req.headers['x-zkira-signature'];
+  const signature = req.headers['x-omnipay-signature'];
   const payload = JSON.stringify(req.body);
   
   // Verify webhook signature
@@ -505,13 +293,13 @@ app.post('/webhook', (req, res) => {
       {/* Error Responses */}
       <section id="errors" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('errorResponsesTitle')}</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Error Responses</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('errorResponsesDesc')}
+            The API uses standard HTTP status codes to indicate success or failure. Error responses include a JSON body with additional details.
           </p>
           
           <div className="space-y-4">
-            <div className="border-l-4 border-yellow-500 pl-4">
+            <div className="border-l-4 border-white pl-4">
               <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">400 Bad Request</h4>
               <CodeBlock 
                 code={JSON.stringify({
@@ -522,7 +310,7 @@ app.post('/webhook', (req, res) => {
               />
             </div>
             
-            <div className="border-l-4 border-red-500 pl-4">
+            <div className="border-l-4 border-gray-400 pl-4">
               <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">401 Unauthorized</h4>
               <CodeBlock 
                 code={JSON.stringify({
@@ -533,7 +321,7 @@ app.post('/webhook', (req, res) => {
               />
             </div>
             
-            <div className="border-l-4 border-orange-500 pl-4">
+            <div className="border-l-4 border-gray-600 pl-4">
               <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">404 Not Found</h4>
               <CodeBlock 
                 code={JSON.stringify({
@@ -544,7 +332,7 @@ app.post('/webhook', (req, res) => {
               />
             </div>
             
-            <div className="border-l-4 border-purple-500 pl-4">
+            <div className="border-l-4 border-white pl-4">
               <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">429 Too Many Requests</h4>
               <CodeBlock 
                 code={JSON.stringify({
@@ -555,7 +343,7 @@ app.post('/webhook', (req, res) => {
               />
             </div>
             
-            <div className="border-l-4 border-red-800 pl-4">
+            <div className="border-l-4 border-gray-400 pl-4">
               <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">500 Internal Server Error</h4>
               <CodeBlock 
                 code={JSON.stringify({
@@ -572,18 +360,18 @@ app.post('/webhook', (req, res) => {
       {/* Rate Limiting */}
       <section id="rate-limiting" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('rateLimitingTitle')}</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Rate Limiting</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            {t('rateLimitingDesc')}
+            API requests are limited to 1000 requests per minute per API key. Rate limit information is included in response headers.
           </p>
           
-          <div className="space-y-3">
+          <div className="space-y-3 mb-4">
             <div>
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('rateLimitHeadersTitle')}</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Rate Limit Headers</h4>
               <ul className="text-[var(--color-text-secondary)] text-sm space-y-1 font-mono">
-                <li>• <code>X-RateLimit-Limit</code> - {t('rateLimitLimitHeader')}</li>
-                <li>• <code>X-RateLimit-Remaining</code> - {t('rateLimitRemainingHeader')}</li>
-                <li>• <code>X-RateLimit-Reset</code> - {t('rateLimitResetHeader')}</li>
+                <li>• <code>X-RateLimit-Limit</code> - Maximum requests per minute</li>
+                <li>• <code>X-RateLimit-Remaining</code> - Remaining requests in current window</li>
+                <li>• <code>X-RateLimit-Reset</code> - Unix timestamp when limit resets</li>
               </ul>
             </div>
           </div>

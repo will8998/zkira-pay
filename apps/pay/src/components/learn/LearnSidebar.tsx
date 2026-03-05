@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 interface NavItem {
@@ -17,14 +16,13 @@ interface NavSection {
 
 export function LearnSidebar() {
   const pathname = usePathname();
-  const t = useTranslations('learnSidebar');
 
   const learnNav: NavSection[] = [
     {
-      label: t('overview'),
+      label: 'OVERVIEW',
       items: [
         {
-          name: t('learnHub'),
+          name: 'Learn Hub',
           href: '/learn',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -35,10 +33,10 @@ export function LearnSidebar() {
       ],
     },
     {
-      label: t('resources'),
+      label: 'RESOURCES',
       items: [
         {
-          name: t('documentation'),
+          name: 'How It Works',
           href: '/learn/docs',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -47,7 +45,7 @@ export function LearnSidebar() {
           ),
         },
         {
-          name: t('useCases'),
+          name: 'Use Cases',
           href: '/learn/use-cases',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -56,66 +54,11 @@ export function LearnSidebar() {
           ),
         },
         {
-          name: t('apiReference'),
+          name: 'API Reference',
           href: '/learn/api',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-            </svg>
-          ),
-        },
-        {
-          name: t('blog'),
-          href: '/learn/blog',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.625a2.25 2.25 0 01-2.25-2.25V8.625c0-.621.504-1.125 1.125-1.125H8.25" />
-            </svg>
-          ),
-        },
-      ],
-    },
-    {
-      label: t('gateway'),
-      items: [
-        {
-          name: t('gatewayDocs'),
-          href: '/learn/docs#casino-gateway',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ),
-        },
-        {
-          name: t('merchantGuide'),
-          href: '/learn/docs#merchant-dashboard',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m2.25-18v18m13.5-18v18m2.25-18v18M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.75m-3.75 3.75h.75m-3.75 3.75h.75m-3.75 3.75H21m-3.75-16.5h3.75" />
-            </svg>
-          ),
-        },
-        {
-          name: t('openApiSpec'),
-          href: '/learn/api',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-          ),
-        },
-      ],
-    },
-    {
-      label: t('developers'),
-      items: [
-        {
-          name: t('apiKeys'),
-          href: '/developers',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           ),
         },
