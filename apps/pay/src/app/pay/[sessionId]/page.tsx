@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Session type definition
 interface PaymentSession {
@@ -16,79 +16,6 @@ interface PaymentSession {
   createdAt: string;
 }
 
-// Simple QR code component using canvas
-function QRCode({ value }: { value: string }) {
-  const canvasRef = useState<HTMLCanvasElement | null>(null)[0];
-  
-  useEffect(() => {
-    if (!canvasRef) return;
-    
-    // Simple QR-like pattern for display purposes
-    // In production, you'd use a proper QR library, but per requirements, no new dependencies
-    const canvas = canvasRef;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const size = 200;
-    const modules = 25;
-    const moduleSize = size / modules;
-    
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, size, size);
-    
-    ctx.fillStyle = '#000000';
-    // Create a simple pattern based on the wallet address
-    const hash = value.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    for (let row = 0; row < modules; row++) {
-      for (let col = 0; col < modules; col++) {
-        const seed = (hash + row * modules + col) * 1103515245 + 12345;
-        if ((seed & 0x7fffffff) % 2) {
-          ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
-        }
-      }
-    }
-  }, [value, canvasRef]);
-
-  return (
-    <canvas
-      ref={(canvas) => {
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          if (ctx && value) {
-            const size = 200;
-            const modules = 25;
-            const moduleSize = size / modules;
-            
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, size, size);
-            
-            ctx.fillStyle = '#000000';
-            const hash = value.split('').reduce((a, b) => {
-              a = ((a << 5) - a) + b.charCodeAt(0);
-              return a & a;
-            }, 0);
-            
-            for (let row = 0; row < modules; row++) {
-              for (let col = 0; col < modules; col++) {
-                const seed = (hash + row * modules + col) * 1103515245 + 12345;
-                if ((seed & 0x7fffffff) % 2) {
-                  ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
-                }
-              }
-            }
-          }
-        }
-      }}
-      width={200}
-      height={200}
-      className="border border-[var(--border-subtle)] bg-white"
-    />
-  );
-}
 
 // Countdown timer component
 function CountdownTimer({ expiresAt }: { expiresAt: string }) {
@@ -248,7 +175,7 @@ export default function PaymentSessionPage() {
               setLoading(true);
               fetchSession().finally(() => setLoading(false));
             }}
-            className="bg-[var(--color-button)] text-[var(--color-button-text)] px-4 py-2 text-sm font-semibold hover:bg-[var(--color-button-hover)] transition-colors"
+            className="bg-[var(--color-button)] text-[var(--color-button-text)] px-4 py-2 text-sm font-semibold hover:bg-[var(--color-button-hover)] transition-colors btn-press rounded-lg"
           >
             Retry
           </button>
@@ -359,7 +286,9 @@ export default function PaymentSessionPage() {
           {/* QR Code */}
           {session.ephemeralWallet && (
             <div className="flex justify-center">
-              <QRCode value={session.ephemeralWallet} />
+              <div className="inline-block p-4 bg-white rounded-xl">
+                <QRCodeSVG value={session.ephemeralWallet} size={180} level="M" />
+              </div>
             </div>
           )}
 
