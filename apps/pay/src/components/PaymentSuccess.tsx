@@ -63,7 +63,7 @@ export function PaymentSuccess({
               className="text-lg font-bold text-[var(--color-text)] tracking-wide"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              ZKIRA
+              OMNIPAY
             </div>
             <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium">
               PRIVATE PAYMENT
@@ -170,7 +170,7 @@ export function PaymentSuccess({
               className="text-lg font-bold text-[var(--color-text)] tracking-wide"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              ZKIRA
+              OMNIPAY
             </div>
             <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium">
               INVOICE

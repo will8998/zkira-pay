@@ -108,7 +108,7 @@ export function HelpPopover() {
           <div className="border-b border-[var(--color-border)] my-1" />
 
           <a
-            href="https://x.com/zkira_xyz"
+            href="https://x.com/omnipay_club"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] text-[13px] text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--color-text)] transition-colors w-full"
@@ -131,7 +131,7 @@ export function HelpPopover() {
           </a>
 
           <a
-            href="https://github.com/zkira-pay"
+            href="https://github.com/omnipay-club"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] text-[13px] text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--color-text)] transition-colors w-full"

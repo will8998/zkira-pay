@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-const STORAGE_KEY = 'zkira_ephemeral_wallet';
+const STORAGE_KEY = 'omnipay_ephemeral_wallet';
 
 interface WalletContextValue {
   /** Ethereum address (0x...) */

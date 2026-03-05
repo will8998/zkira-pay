@@ -145,7 +145,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 type="text"
                 value={claimCode}
                 onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
-                placeholder="ZKIRA-XXXX-XXXX"
+                placeholder="OMNIPAY-XXXX-XXXX"
                 className="w-full px-4 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-center text-xl tracking-widest placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors"
                 style={{ fontFamily: 'var(--font-mono)' }}
               />

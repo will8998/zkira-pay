@@ -57,10 +57,10 @@ export function ComparisonEditor({ value, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* ZKIRA Value */}
+        {/* OMNIPAY Value */
         <div>
           <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider mb-1 block">
-            ZKIRA Value
+            OMNIPAY Value
           </label>
           <div className="space-y-2">
             <input
@@ -126,13 +126,13 @@ export function ComparisonEditor({ value, onChange }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider mb-1 block">
-            ZKIRA Column Header
+            OMNIPAY Column Header
           </label>
           <input
             type="text"
             value={value.headers?.priv || ''}
             onChange={(e) => handleHeadersChange('priv', e.target.value)}
-            placeholder="ZKIRA Pay"
+            placeholder="OMNIPAY"
             className="w-full border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-text)] focus:outline-none transition-colors"
           />
         </div>

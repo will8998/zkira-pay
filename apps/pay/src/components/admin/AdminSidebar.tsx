@@ -139,7 +139,7 @@ export function AdminSidebar({ mobileOpen = false, onClose }: AdminSidebarProps)
       {/* Header */}
       <Link href="/admin" className="p-4 lg:p-6 border-b border-[var(--color-bg)]/10 hover:opacity-80 transition-opacity">
         <div className="flex items-center gap-3">
-          <Image src="/logo-new.png" alt="ZKIRA Pay" width={101} height={40} className="h-[28px] w-auto brightness-0 invert" priority />
+          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[28px] w-auto brightness-0 invert" priority />
           <span className="px-2 py-1 bg-[var(--color-surface)]/10 text-[var(--color-bg)] text-xs rounded font-medium">
             Admin
           </span>

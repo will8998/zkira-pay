@@ -31,7 +31,7 @@ export default function PrivacyCallout({ variant = 'full' }: PrivacyCalloutProps
               Confidential by default
             </h3>
             <p className="text-xs text-[var(--color-muted)] mt-0.5">
-              ZKIRA Pay uses stealth addresses to keep your transactions private. Each payment generates a unique one-time address — the sender, recipient, and amount are never exposed on-chain.
+              OMNIPAY uses shielded pools and zero-knowledge proofs to keep your transactions private. Each payment is cryptographically unlinkable — the sender, recipient, and amount are never exposed on-chain.
             </p>
             <a 
               href="/developers/docs" 
