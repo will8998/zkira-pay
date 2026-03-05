@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { gatewaySessions, gatewayBalances, gatewayLedger, merchants } from '../db/schema.js';
+import { gatewaySessions, gatewayBalances, gatewayLedger, merchants, distributors, distributorCommissions } from '../db/schema.js';
 import { eq, and, desc, sql, lte } from 'drizzle-orm';
 import { deliverWebhook } from '../services/webhook.js';
 import { randomUUID } from 'node:crypto';
@@ -282,6 +282,50 @@ gatewaySessionRoutes.post('/api/gateway/sessions/:sessionId/confirm', async (c) 
       event: 'deposit.confirmed',
       payload: { session: updatedSession[0] },
     }).catch(console.warn);
+
+    // === Auto-commission accrual ===
+    // Look up merchant's distributor and accrue commission if applicable
+    try {
+      const merchantResult = await db
+        .select({ distributorId: merchants.distributorId })
+        .from(merchants)
+        .where(eq(merchants.id, merchantId))
+        .limit(1);
+
+      const distId = merchantResult[0]?.distributorId;
+      if (distId) {
+        const distributorResult = await db
+          .select({
+            commissionPercent: distributors.commissionPercent,
+            tier: distributors.tier,
+            status: distributors.status,
+          })
+          .from(distributors)
+          .where(eq(distributors.id, distId))
+          .limit(1);
+
+        const dist = distributorResult[0];
+        if (dist && dist.status === 'active' && parseFloat(dist.commissionPercent) > 0) {
+          const commissionAmount = (confirmedAmount * parseFloat(dist.commissionPercent) / 100).toFixed(6);
+
+          await db.insert(distributorCommissions).values({
+            distributorId: distId,
+            merchantId,
+            sessionId,
+            amount: commissionAmount,
+            currency: session.token,
+            sourceAmount: confirmedAmount.toString(),
+            tier: dist.tier,
+            status: 'pending',
+          });
+
+          console.log(`Commission accrued: ${commissionAmount} ${session.token} for distributor ${distId} (session ${sessionId})`);
+        }
+      }
+    } catch (commErr) {
+      // Commission accrual should never block the deposit confirmation
+      console.warn('Failed to accrue distributor commission:', commErr);
+    }
 
     return c.json({ session: updatedSession[0] });
   } catch (error) {

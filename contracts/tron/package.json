@@ -1,0 +1,16 @@
+{
+  "name": "tron",
+  "version": "1.0.0",
+  "description": "This directory contains the TronBox deployment infrastructure for the compliant Tornado Cash fork on Tron.",
+  "main": "tronbox-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "solc": "^0.7.6",
+    "tronweb": "^6.2.1"
+  }
+}

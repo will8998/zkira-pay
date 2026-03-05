@@ -1,0 +1,31 @@
+{
+  "network": "421614",
+  "deployer": "0x292B6763E4b26708E1d643AC4F1658e3Ba8636cB",
+  "infrastructure": {
+    "verifier": "0xa2aA5F74AD18A5d0EAF89B551d27060Ea08a2EEB",
+    "hasher": "0xB2f940f7facE51076F823EFfb19C6B615cCBDA16",
+    "sanctionsOracle": "0xAd18BFABA4f6D6c0137559fCa5ff62A21fc3Fd27",
+    "treasury": "0x292B6763E4b26708E1d643AC4F1658e3Ba8636cB"
+  },
+  "testTokens": {
+    "tUSDC": {
+      "token": "0x6d408C98c4252020abf861ca35D1ED938112ba7E",
+      "pool": "0xbFDAb1ca862438f8Ab8b48c02d469AF57FB1dD96",
+      "denomination": "1000000",
+      "decimals": 6
+    },
+    "tUSDT": {
+      "token": "0xDC27e984F3cB83E49035829F988F759A8aC9962E",
+      "pool": "0x33A6255713C9aBdAB917D359Ed086eA17a8C6D8D",
+      "denomination": "1000000",
+      "decimals": 6
+    },
+    "tDAI": {
+      "token": "0x4c14E2a93535979E378a36D7D768b3aA69a197e2",
+      "pool": "0xDeD4D6b4A33768ca627252c3583AA9b57BF6bD3e",
+      "denomination": "1000000000000000000",
+      "decimals": 18
+    }
+  },
+  "deployedAt": "2026-03-05T21:40:12.328Z"
+}

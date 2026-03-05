@@ -245,21 +245,24 @@ export async function executeBatchWithdrawal(
         message: `Submitting withdrawal ${processed + 1}/${notes.length} to relayer...`,
       });
 
-      const proofData = {
-        a: [proof.pi_a[0], proof.pi_a[1]],
-        b: [
-          [proof.pi_b[0][1], proof.pi_b[0][0]],
-          [proof.pi_b[1][1], proof.pi_b[1][0]],
-        ],
-        c: [proof.pi_c[0], proof.pi_c[1]],
-      };
+      // Encode proof as ABI-packed hex bytes for the relayer/contract
+      // Format: abi.encodePacked(a[0], a[1], b[0][0], b[0][1], b[1][0], b[1][1], c[0], c[1])
+      const proofElements = [
+        proof.pi_a[0], proof.pi_a[1],
+        proof.pi_b[0][1], proof.pi_b[0][0],
+        proof.pi_b[1][1], proof.pi_b[1][0],
+        proof.pi_c[0], proof.pi_c[1],
+      ];
+      const proofHex = '0x' + proofElements.map((v: string) => {
+        return BigInt(v).toString(16).padStart(64, '0');
+      }).join('');
 
       const response = await fetch(`${RELAYER_URL}/session/withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pool: note.pool,
-          proof: proofData,
+          poolAddress: note.pool,
+          proof: proofHex,
           root: publicSignals[0],
           nullifierHash: publicSignals[1],
           recipient: recipientAddress,
@@ -278,8 +281,7 @@ export async function executeBatchWithdrawal(
       }
 
       const result = await response.json();
-      const txHash =
-        result.txId ?? result.txSignature ?? result.transactionHash ?? '';
+      const txHash = result.txHash ?? result.txId ?? result.transactionHash ?? '';
 
       results.push({ noteIndex: note._batchIndex, txHash });
       processed++;

@@ -147,8 +147,12 @@ export function createSessionRoutes(wallet: RelayerWallet, config: RelayerConfig
         return c.json(error, 400);
       }
 
-      // Verify the relayer address matches ours
-      if (body.relayer.toLowerCase() !== wallet.address.toLowerCase()) {
+      // Allow relayer=0x0 when fee=0 (standard Tornado Cash pattern — no relayer fee)
+      const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+      if (
+        body.relayer.toLowerCase() !== ZERO_ADDRESS &&
+        body.relayer.toLowerCase() !== wallet.address.toLowerCase()
+      ) {
         const error: ErrorResponse = {
           success: false,
           error: 'Relayer address does not match this relayer',

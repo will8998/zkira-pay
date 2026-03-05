@@ -8,8 +8,13 @@ export class TransactionValidator {
   private allowedPoolAddresses: Set<string>;
 
   constructor(private config: RelayerConfig) {
+    // Merge all pool address sources: explicit POOL_ADDRESSES + per-token arrays
+    const allPools = [
+      ...config.poolAddresses,
+      ...Object.values(config.arbitrumPoolsByToken).flat(),
+    ];
     this.allowedPoolAddresses = new Set(
-      config.poolAddresses.map((addr) => addr.toLowerCase()),
+      allPools.map((addr) => addr.toLowerCase()).filter((a) => a.length > 0),
     );
   }
 

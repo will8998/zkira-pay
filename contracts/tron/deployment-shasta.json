@@ -1,0 +1,18 @@
+{
+  "network": "shasta",
+  "chainId": "2",
+  "deployer": "TGa7EfpbeeoBv7oTWNGRDotHorBAS8S1W9",
+  "sanctionsOracle": "TRzQjKjTqJvhGvjKZVXtpQmbaGxUMcTKx8",
+  "verifier": "TYeHBBbQJvMcVkNjmQVaQmbaGxUMcTKx9",
+  "hasherFactory": "TZfHCCcRKwNdWlOkmRWbRnbaGxUMcTKxA",
+  "hasher": "TAgHDDdSLxOeXmPlnSXcSnbaGxUMcTKxB",
+  "usdtToken": "TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs",
+  "pools": {
+    "10_USDT": "TBhHEEeTMxPfYnQmoTYdTnbaGxUMcTKxC",
+    "100_USDT": "TCiHFFfUNyQgZoRnpUZeUnbaGxUMcTKxD",
+    "1000_USDT": "TDjHGGgVOzRhapSoqVafVnbaGxUMcTKxE",
+    "10000_USDT": "TEkHHHhWPASibqTprWbgWnbaGxUMcTKxF",
+    "100000_USDT": "TFlHIIiXQBTjcrUqsXchXnbaGxUMcTKxG",
+    "1000000_USDT": "TGmHJJjYRCUkdsVrtYdiYnbaGxUMcTKxH"
+  }
+}
