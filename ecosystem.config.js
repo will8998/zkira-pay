@@ -20,7 +20,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3021,
-      },
+        DATABASE_URL: "postgresql://zkira:zkira_s3cure_2026!@localhost:5432/zkira",
+        ADMIN_PASSWORD: "zkira_admin_2026",
     },
     {
       name: "zkira-relayer",
