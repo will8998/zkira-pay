@@ -2,13 +2,11 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
-import { DenominationBuilder } from '@/components/DenominationBuilder';
-import { ChainTokenSelector, type ChainTokenSelection } from '@/components/ChainTokenSelector';
 import { generateClaimCode, deriveDeadDropId } from '@/lib/claim-code';
 import { aesEncrypt } from '@/lib/dead-drop-crypto';
-import type { DenominationSet, DepositNoteRecord, DepositBundle, ClaimCodeData } from '@/types/payment';
+import type { DenominationSet, DenominationSelection, DepositNoteRecord, DepositBundle, ClaimCodeData } from '@/types/payment';
 import type { Chain, TokenId, PoolEntry } from '@/config/pool-registry';
-import { getChainConfig } from '@/config/pool-registry';
+import { getChainConfig, getPoolsForChainAndToken, getAvailableChains, getAvailableTokensForChain } from '@/config/pool-registry';
 import { ReceiptManager, type PoolNote } from '@zkira/sdk';
 import { useBrowserWallet } from '@/components/BrowserWalletProvider';
 import { QRCodeSVG } from 'qrcode.react';
@@ -25,6 +23,55 @@ interface DepositQueueItem {
   total: number;
 }
 
+// Calculate optimal denomination split using greedy algorithm
+function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId): DenominationSet | null {
+  // Get available pools for this chain/token
+  const pools = getPoolsForChainAndToken(chain, token);
+  if (pools.length === 0) return null;
+
+  // Round amount to nearest multiple of 10
+  const roundedAmount = Math.round(amount / 10) * 10;
+  if (roundedAmount <= 0) return null;
+
+  // Sort pools by denomination (largest first for greedy algorithm)
+  const sortedPools = [...pools].sort((a, b) => Number(BigInt(b.denomination) - BigInt(a.denomination)));
+
+  // Greedy algorithm: use as many large denominations as possible
+  const selections: DenominationSelection[] = [];
+  let remainingAmount = roundedAmount;
+
+  for (const pool of sortedPools) {
+    // Convert denomination to token units (remove decimals)
+    const chainConfig = getChainConfig(chain);
+    const tokenInfo = chainConfig.tokens.find(t => t.id === token);
+    if (!tokenInfo) continue;
+
+    const denomValue = Number(BigInt(pool.denomination)) / Math.pow(10, tokenInfo.decimals);
+    const count = Math.floor(remainingAmount / denomValue);
+
+    if (count > 0) {
+      selections.push({ pool, count });
+      remainingAmount -= count * denomValue;
+    }
+  }
+
+  // Calculate totals
+  const chainConfig = getChainConfig(chain);
+  const tokenInfo = chainConfig.tokens.find(t => t.id === token);
+  if (!tokenInfo) return null;
+
+  const totalRaw = BigInt(Math.round(roundedAmount * Math.pow(10, tokenInfo.decimals)));
+  const totalLabel = `${roundedAmount.toLocaleString()} ${tokenInfo.symbol}`;
+
+  return {
+    chain,
+    token,
+    selections,
+    totalRaw,
+    totalLabel,
+  };
+}
+
 export function SendPaymentWizard() {
   const { address, privateKey, isCreated, createWallet } = useBrowserWallet();
 
@@ -33,6 +80,7 @@ export function SendPaymentWizard() {
   const [chain, setChain] = useState<Chain>('arbitrum');
   const [token, setToken] = useState<TokenId>('usdc');
   const [denomSet, setDenomSet] = useState<DenominationSet | null>(null);
+  const [amount, setAmount] = useState<string>('');  // Amount input as string for easier handling
 
   // Deposit progress
   const [currentDepositIndex, setCurrentDepositIndex] = useState(0);
@@ -262,16 +310,59 @@ export function SendPaymentWizard() {
     }
   }, []);
 
-  const handleChainTokenChange = useCallback((sel: ChainTokenSelection) => {
-    setChain(sel.chain);
-    setToken(sel.token);
-  }, []);
 
   // Cancel
   const handleCancel = useCallback(() => {
     abortRef.current?.abort();
     setStep('select');
   }, []);
+
+  // Handle amount change and auto-calculate denomination split
+  const handleAmountChange = useCallback((value: string) => {
+    setAmount(value);
+    const numAmount = parseFloat(value);
+    if (!isNaN(numAmount) && numAmount > 0) {
+      const split = calculateDenominationSplit(numAmount, chain, token);
+      setDenomSet(split);
+    } else {
+      setDenomSet(null);
+    }
+  }, [chain, token]);
+
+  // Handle quick select amounts
+  const handleQuickSelect = useCallback((quickAmount: number) => {
+    handleAmountChange(quickAmount.toString());
+  }, [handleAmountChange]);
+
+  // Handle network/token changes
+  const handleNetworkChange = useCallback((newChain: Chain) => {
+    setChain(newChain);
+    // Reset to default token for new chain
+    const availableTokens = getAvailableTokensForChain(newChain);
+    if (availableTokens.length > 0) {
+      setToken(availableTokens[0].id);
+    }
+    // Recalculate split if we have an amount
+    if (amount) {
+      const numAmount = parseFloat(amount);
+      if (!isNaN(numAmount) && numAmount > 0) {
+        const split = calculateDenominationSplit(numAmount, newChain, availableTokens[0]?.id || 'usdc');
+        setDenomSet(split);
+      }
+    }
+  }, [amount]);
+
+  const handleTokenChange = useCallback((newToken: TokenId) => {
+    setToken(newToken);
+    // Recalculate split if we have an amount
+    if (amount) {
+      const numAmount = parseFloat(amount);
+      if (!isNaN(numAmount) && numAmount > 0) {
+        const split = calculateDenominationSplit(numAmount, chain, newToken);
+        setDenomSet(split);
+      }
+    }
+  }, [amount, chain]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -284,32 +375,187 @@ export function SendPaymentWizard() {
           Send Payment
         </h1>
         <p className="text-[var(--color-text-secondary)] text-sm">
-          Send funds privately via shielded pool. Recipient claims with a code.
+          Send funds privately. Recipient claims with a code.
         </p>
       </div>
 
-      {/* Step: Select Amounts */}
+      {/* Step: Amount-First Selection */}
       {step === 'select' && (
         <div className="space-y-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-xl">
-            <ChainTokenSelector onSelectionChange={handleChainTokenChange} />
+          {/* Main amount input card */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
+            {/* Amount Input */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center items-center space-x-2 mb-6">
+                <span
+                  className="text-6xl text-[var(--color-text-secondary)]"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  $
+                </span>
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={(e) => handleAmountChange(e.target.value)}
+                  placeholder="1,500"
+                  className="text-6xl bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-secondary)] border-none outline-none text-center max-w-md"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                  autoFocus
+                />
+              </div>
+
+              {/* Amount validation feedback */}
+              {amount && parseFloat(amount) > 0 && parseFloat(amount) % 10 !== 0 && (
+                <div className="text-[var(--color-text-secondary)] text-sm mb-4">
+                  Amount will be rounded to ${Math.round(parseFloat(amount) / 10) * 10} (nearest multiple of 10)
+                </div>
+              )}
+
+              {/* Quick select chips */}
+              <div className="flex flex-wrap justify-center gap-3 mb-8">
+                {[100, 500, 1000, 5000, 10000].map((quickAmount) => (
+                  <button
+                    key={quickAmount}
+                    onClick={() => handleQuickSelect(quickAmount)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${ 
+                      parseInt(amount) === quickAmount
+                        ? 'bg-[var(--color-button)] text-[var(--color-bg)]'
+                        : 'bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]'
+                    }`}
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    ${quickAmount.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Network Selection */}
+            <div className="mb-6">
+              <h3
+                className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Network
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {getAvailableChains().map((chainOption) => {
+                  const chainConfig = getChainConfig(chainOption);
+                  return (
+                    <button
+                      key={chainOption}
+                      onClick={() => handleNetworkChange(chainOption)}
+                      className={`p-4 rounded-xl border text-left transition-all ${ 
+                        chain === chainOption
+                          ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
+                          : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-2xl">
+                          {chainOption === 'arbitrum' ? '⬡' : '◈'}
+                        </span>
+                        <span
+                          className="font-bold text-[var(--color-text)]"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {chainConfig.name}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Token Selection */}
+            <div className="mb-6">
+              <h3
+                className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Token
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                {getAvailableTokensForChain(chain).map((tokenInfo) => (
+                  <button
+                    key={tokenInfo.id}
+                    onClick={() => handleTokenChange(tokenInfo.id)}
+                    className={`p-3 rounded-lg border text-center transition-all ${ 
+                      token === tokenInfo.id
+                        ? 'border-[var(--color-button)] bg-[var(--color-button)] bg-opacity-10'
+                        : 'border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-text-secondary)]'
+                    }`}
+                  >
+                    <div
+                      className="font-bold text-[var(--color-text)]"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {tokenInfo.symbol}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Denomination Split Preview */}
+            {denomSet && denomSet.selections.length > 0 && (
+              <div className="border-t border-[var(--color-border)] pt-6">
+                <h3
+                  className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  Split Breakdown
+                </h3>
+                <div className="space-y-2 mb-4">
+                  {denomSet.selections.map((sel, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span
+                        className="text-[var(--color-text)]"
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                      >
+                        {sel.count}× {sel.pool.label}
+                      </span>
+                      <span
+                        className="text-[var(--color-text-secondary)]"
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                      >
+                        {(() => {
+                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                          const decimals = tokenInfo?.decimals || 6;
+                          const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
+                          return value.toLocaleString();
+                        })()} {getChainConfig(chain).tokens.find(t => t.id === token)?.symbol}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)]">
+                  <span
+                    className="text-[var(--color-text)] font-bold"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    Total: {denomSet.totalLabel}
+                  </span>
+                  <span
+                    className="text-[var(--color-text-secondary)]"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-xl">
-            <DenominationBuilder
-              chain={chain}
-              token={token}
-              onChange={setDenomSet}
-            />
-          </div>
-
+          {/* Continue Button */}
           <button
             onClick={startSendFlow}
             disabled={!denomSet || denomSet.selections.length === 0 || denomSet.totalRaw === 0n}
             className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            START DEPOSITS →
+            CONTINUE →
           </button>
         </div>
       )}
@@ -505,6 +751,7 @@ export function SendPaymentWizard() {
               setClaimCode(null);
               setCollectedNotes([]);
               setDenomSet(null);
+              setAmount('');
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"
           >
