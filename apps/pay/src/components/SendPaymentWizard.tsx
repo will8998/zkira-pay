@@ -96,6 +96,7 @@ export function SendPaymentWizard() {
 
   // New state for UI enhancements
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
+  const [denomOpen, setDenomOpen] = useState(false);
 
   // Deposit progress
   const [currentDepositIndex, setCurrentDepositIndex] = useState(0);
@@ -504,58 +505,63 @@ export function SendPaymentWizard() {
               Enter the amount in {getCurrentTokenInfo()?.symbol || 'USDC'}. Minimum 10.
             </p>
 
-            {/* Denomination Split Preview - animated reveal */}
+            {/* Denomination Split Preview - collapsible */}
             {denomSet && denomSet.selections.length > 0 && (
               <div className="border border-[var(--color-border)] rounded-lg p-4 mb-6 animate-slide-up">
-                <h3 
-                  className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
+                {/* Denomination toggle */}
+                <button
+                  onClick={() => setDenomOpen(!denomOpen)}
+                  className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  ┌─ Denomination Split ──────────────┐
-                </h3>
-                
-                <div className="space-y-2 mb-4">
-                  {denomSet.selections.map((sel, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span 
-                        className="text-[var(--color-text)]"
-                        style={{ fontFamily: 'var(--font-mono)' }}
-                      >
-                        {sel.count}× {(() => {
-                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                          const decimals = tokenInfo?.decimals || 6;
-                          const value = Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals);
-                          return `${value.toLocaleString()} ${tokenInfo?.symbol}`;
-                        })()}
-                      </span>
-                      <span 
-                        className="text-[var(--color-text-secondary)]"
-                        style={{ fontFamily: 'var(--font-mono)' }}
-                      >
-                        {(() => {
-                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                          const decimals = tokenInfo?.decimals || 6;
-                          const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
-                          return value.toLocaleString();
-                        })()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits</span>
+                  <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
+                </button>
 
-                <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mb-3">
-                  <span 
-                    className="text-[var(--color-text)] font-bold"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    Total: {denomSet.totalLabel}
-                  </span>
-                  <span 
-                    className="text-[var(--color-text-secondary)]"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
-                  </span>
+                <div className={`overflow-hidden transition-all duration-300 ${denomOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="space-y-2 mb-4">
+                    {denomSet.selections.map((sel, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span
+                          className="text-[var(--color-text)]"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {sel.count}× {(() => {
+                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                            const decimals = tokenInfo?.decimals || 6;
+                            const value = Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals);
+                            return `${value.toLocaleString()} ${tokenInfo?.symbol}`;
+                          })()}
+                        </span>
+                        <span
+                          className="text-[var(--color-text-secondary)]"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {(() => {
+                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                            const decimals = tokenInfo?.decimals || 6;
+                            const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
+                            return value.toLocaleString();
+                          })()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mb-3">
+                    <span
+                      className="text-[var(--color-text)] font-bold"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      Total: {denomSet.totalLabel}
+                    </span>
+                    <span
+                      className="text-[var(--color-text-secondary)]"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
+                    </span>
+                  </div>
                 </div>
 
                 {/* Summary Box - You will send + recipient receives */}
@@ -742,7 +748,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(address, () => toast.success('Address copied'))}
-                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
                   📋 Copy Address
                 </button>
@@ -784,7 +790,7 @@ export function SendPaymentWizard() {
 
           <button
             onClick={handleCancel}
-            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             ← Cancel
           </button>
@@ -865,7 +871,7 @@ export function SendPaymentWizard() {
 
           <button
             onClick={handleCancel}
-            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             ← Cancel
           </button>
@@ -904,7 +910,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(claimCode.code, setCopiedCode)}
-                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
                   {copiedCode ? '✓ Copied' : '📋 Copy Code'}
                 </button>
@@ -924,7 +930,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(claimCode.encryptionKey, setCopiedFull)}
-                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
                   {copiedFull ? '✓ Copied' : '📋 Copy Password'}
                 </button>
@@ -960,7 +966,7 @@ export function SendPaymentWizard() {
               setAmount('');
               clearWallet();
             }}
-            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             Send Another Payment
           </button>

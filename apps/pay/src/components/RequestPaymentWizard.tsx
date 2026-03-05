@@ -92,6 +92,7 @@ export function RequestPaymentWizard() {
 
   // New state for UI enhancements
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
+  const [denomOpen, setDenomOpen] = useState(false);
 
   // Wizard state
   const [step, setStep] = useState<WizardStep>('select');
@@ -429,106 +430,111 @@ export function RequestPaymentWizard() {
               Enter the amount you want to receive in {getCurrentTokenInfo()?.symbol || 'USDC'}.
             </p>
 
-            {/* Denomination Split Preview - animated reveal */}
+            {/* Denomination Split Preview - collapsible */}
             {denomSet && denomSet.selections.length > 0 && (
               <div className="border border-[var(--color-border)] rounded-lg p-4 mb-6 animate-slide-up">
-                <h3 
-                  className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
+                {/* Denomination toggle */}
+                <button
+                  onClick={() => setDenomOpen(!denomOpen)}
+                  className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  ┌─ Denomination Split ──────────────┐
-                </h3>
-                
-                <div className="space-y-2 mb-4">
-                  {denomSet.selections.map((sel, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span 
-                        className="text-[var(--color-text)]"
-                        style={{ fontFamily: 'var(--font-mono)' }}
-                      >
-                        {sel.count}× {(() => {
-                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                          const decimals = tokenInfo?.decimals || 6;
-                          const value = Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals);
-                          return `${value.toLocaleString()} ${tokenInfo?.symbol}`;
-                        })()}
-                      </span>
-                      <span 
-                        className="text-[var(--color-text-secondary)]"
-                        style={{ fontFamily: 'var(--font-mono)' }}
-                      >
-                        {(() => {
-                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                          const decimals = tokenInfo?.decimals || 6;
-                          const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
-                          return value.toLocaleString();
-                        })()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits</span>
+                  <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
+                </button>
 
-                <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mb-3">
-                  <span 
-                    className="text-[var(--color-text)] font-bold"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    Total: {denomSet.totalLabel}
-                  </span>
-                  <span 
-                    className="text-[var(--color-text-secondary)]"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
-                  </span>
-                </div>
-
-                {/* Remainder warning */}
-                {denomSet.remainder > 0 && (
-                  <div className="flex items-start gap-2 text-xs mb-3 p-2 rounded bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)]" style={{ fontFamily: 'var(--font-mono)' }}>
-                    <span>⚠️</span>
-                    <div>
-                      <span className="font-bold text-[var(--color-warning-text)]">{denomSet.remainderLabel}</span>
-                      <span className="text-[var(--color-text-secondary)] ml-1">
-                        cannot be covered by pool denominations. Consider rounding to ${(parseFloat(amount) - denomSet.remainder).toLocaleString()} or adding ${((() => {
-                          const nextUp = denomSet.selections[denomSet.selections.length - 1];
-                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                          const denomValue = Number(BigInt(nextUp.pool.denomination)) / Math.pow(10, tokenInfo?.decimals || 6);
-                          return denomValue.toLocaleString();
-                        })())} to reach the next clean amount.
-                      </span>
-                    </div>
+                <div className={`overflow-hidden transition-all duration-300 ${denomOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="space-y-2 mb-4">
+                    {denomSet.selections.map((sel, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span
+                          className="text-[var(--color-text)]"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {sel.count}× {(() => {
+                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                            const decimals = tokenInfo?.decimals || 6;
+                            const value = Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals);
+                            return `${value.toLocaleString()} ${tokenInfo?.symbol}`;
+                          })()}
+                        </span>
+                        <span
+                          className="text-[var(--color-text-secondary)]"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {(() => {
+                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                            const decimals = tokenInfo?.decimals || 6;
+                            const value = sel.count * (Number(BigInt(sel.pool.denomination)) / Math.pow(10, decimals));
+                            return value.toLocaleString();
+                          })()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                )}
 
-                {/* Privacy strength indicator */}
-                {(() => {
-                  const depositCount = denomSet.selections.reduce((sum, sel) => sum + sel.count, 0);
-                  const uniqueDenoms = denomSet.selections.length;
-                  let icon: string, label: string, color: string, tip: string;
-                  if (depositCount === 1) {
-                    icon = '🟢'; label = 'Maximum Privacy'; color = 'var(--color-green)';
-                    tip = 'Single pool deposit — blends with the largest anonymity set.';
-                  } else if (uniqueDenoms === 1) {
-                    icon = '🟢'; label = 'Strong Privacy'; color = 'var(--color-green)';
-                    tip = `${depositCount} deposits of the same denomination — each blends into its own anonymity set.`;
-                  } else if (uniqueDenoms <= 2) {
-                    icon = '🟡'; label = 'Good Privacy'; color = 'var(--color-warning-text)';
-                    tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
-                  } else {
-                    icon = '🟠'; label = 'Moderate Privacy'; color = 'var(--color-warning-text)';
-                    tip = `${uniqueDenoms} different denominations create a unique fingerprint.`;
-                  }
-                  return (
-                    <div className="flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
-                      <span>{icon}</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mb-3">
+                    <span
+                      className="text-[var(--color-text)] font-bold"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      Total: {denomSet.totalLabel}
+                    </span>
+                    <span
+                      className="text-[var(--color-text-secondary)]"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
+                    </span>
+                  </div>
+
+                  {/* Remainder warning */}
+                  {denomSet.remainder > 0 && (
+                    <div className="flex items-start gap-2 text-xs mb-3 p-2 rounded bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      <span>⚠️</span>
                       <div>
-                        <span style={{ color }} className="font-bold uppercase">{label}</span>
-                        <span className="text-[var(--color-text-secondary)] ml-1">— {tip}</span>
+                        <span className="font-bold text-[var(--color-warning-text)]">{denomSet.remainderLabel}</span>
+                        <span className="text-[var(--color-text-secondary)] ml-1">
+                          cannot be covered by pool denominations. Consider rounding to ${(parseFloat(amount) - denomSet.remainder).toLocaleString()} or adding ${((() => {
+                            const nextUp = denomSet.selections[denomSet.selections.length - 1];
+                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                            const denomValue = Number(BigInt(nextUp.pool.denomination)) / Math.pow(10, tokenInfo?.decimals || 6);
+                            return denomValue.toLocaleString();
+                          })())} to reach the next clean amount.
+                        </span>
                       </div>
                     </div>
-                  );
-                })()}
+                  )}
+
+                  {/* Privacy strength indicator */}
+                  {(() => {
+                    const depositCount = denomSet.selections.reduce((sum, sel) => sum + sel.count, 0);
+                    const uniqueDenoms = denomSet.selections.length;
+                    let icon: string, label: string, color: string, tip: string;
+                    if (depositCount === 1) {
+                      icon = '🟢'; label = 'Maximum Privacy'; color = 'var(--color-green)';
+                      tip = 'Single pool deposit — blends with the largest anonymity set.';
+                    } else if (uniqueDenoms === 1) {
+                      icon = '🟢'; label = 'Strong Privacy'; color = 'var(--color-green)';
+                      tip = `${depositCount} deposits of the same denomination — each blends into its own anonymity set.`;
+                    } else if (uniqueDenoms <= 2) {
+                      icon = '🟡'; label = 'Good Privacy'; color = 'var(--color-warning-text)';
+                      tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
+                    } else {
+                      icon = '🟠'; label = 'Moderate Privacy'; color = 'var(--color-warning-text)';
+                      tip = `${uniqueDenoms} different denominations create a unique fingerprint.`;
+                    }
+                    return (
+                      <div className="flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+                        <span>{icon}</span>
+                        <div>
+                          <span style={{ color }} className="font-bold uppercase">{label}</span>
+                          <span className="text-[var(--color-text-secondary)] ml-1">— {tip}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             )}
 
@@ -689,7 +695,7 @@ export function RequestPaymentWizard() {
 
             <button
               onClick={() => copyToClipboard(invoiceUrl, setCopiedUrl)}
-              className="px-6 py-3 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
+              className="px-6 py-3 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               {copiedUrl ? '✓ Copied' : '📋 Copy Invoice Link'}
@@ -698,7 +704,7 @@ export function RequestPaymentWizard() {
 
           <button
             onClick={startWaiting}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             WAIT FOR PAYMENT →
@@ -729,7 +735,7 @@ export function RequestPaymentWizard() {
               abortRef.current?.abort();
               setStep('created');
             }}
-            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             ← Back to Invoice
           </button>
@@ -789,7 +795,7 @@ export function RequestPaymentWizard() {
           <button
             onClick={withdrawAll}
             disabled={!isValidAddress}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             WITHDRAW ALL {receivedNotes.length} NOTE{receivedNotes.length !== 1 ? 'S' : ''} →
@@ -844,7 +850,7 @@ export function RequestPaymentWizard() {
             </div>
 
             {withdrawError && (
-              <button onClick={withdrawAll} className="w-full mt-6 px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded" style={{ fontFamily: 'var(--font-mono)' }}>
+              <button onClick={withdrawAll} className="w-full mt-6 px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg" style={{ fontFamily: 'var(--font-mono)' }}>
                 RETRY WITHDRAWAL
               </button>
             )}
@@ -911,7 +917,7 @@ export function RequestPaymentWizard() {
               setWithdrawError(null);
               setDestinationAddress('');
             }}
-            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+            className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
             Create Another Invoice
           </button>
