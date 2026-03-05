@@ -4,7 +4,8 @@ export type AdminRole = 'master' | 'merchant';
 
 export interface AdminSession {
   role: AdminRole;
-  credential: string; // admin password or API key
+  credential: string; // admin password or API key (legacy)
+  token: string | null; // JWT token (preferred)
   merchantId: string | null;
   merchantName: string | null;
 }
@@ -14,7 +15,12 @@ function getSession(): AdminSession | null {
   const raw = sessionStorage.getItem('omnipay_admin_session');
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as AdminSession;
+    const parsed = JSON.parse(raw) as AdminSession;
+    // Ensure token field exists (backward compat for sessions without it)
+    if (!('token' in parsed)) {
+      (parsed as any).token = null;
+    }
+    return parsed;
   } catch {
     // Legacy format: plain password string
     sessionStorage.removeItem('omnipay_admin_session');
@@ -38,10 +44,14 @@ export async function adminFetch(path: string, options?: RequestInit) {
     'Content-Type': 'application/json',
   };
 
-  // Master uses admin password header, merchant uses API key header
-  if (session.role === 'master') {
+  // Prefer JWT Bearer token when available
+  if (session.token) {
+    headers['Authorization'] = `Bearer ${session.token}`;
+  } else if (session.role === 'master') {
+    // Fallback: legacy password header
     headers['X-Admin-Password'] = session.credential;
   } else {
+    // Fallback: legacy API key header
     headers['X-API-Key'] = session.credential;
     headers['X-Admin-Password'] = session.credential; // Dual header for backward compat
   }
@@ -95,6 +105,7 @@ export async function adminLogin(credential: string): Promise<{
     const session: AdminSession = {
       role: data.role,
       credential,
+      token: data.token || null,
       merchantId: data.merchantId || null,
       merchantName: data.merchantName || null,
     };

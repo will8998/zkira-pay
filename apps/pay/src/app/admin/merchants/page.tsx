@@ -13,17 +13,36 @@ interface Merchant {
   status: 'active' | 'inactive';
   distributorId: string | null;
   webhookUrl: string | null;
+  allowedOrigins: string[];
   createdAt: string;
+}
+
+interface ApiKey {
+  id: string;
+  walletAddress: string;
+  keyPrefix: string;
+  name: string | null;
+  createdAt: string;
+  lastUsed: string | null;
+  isActive: boolean;
 }
 
 export default function MerchantsPage() {
   const { isMaster } = useAdminAuth();
   const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [apiKeys, setApiKeys] = useState<Record<string, ApiKey[]>>({});
+  const [expandedMerchant, setExpandedMerchant] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
+  const [generatingKey, setGeneratingKey] = useState<Record<string, boolean>>({});
+  const [updatingOrigins, setUpdatingOrigins] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [generatedKey, setGeneratedKey] = useState<{ key: string; merchantId: string } | null>(null);
   const [formData, setFormData] = useState({ name: '', walletAddress: '', webhookUrl: '', feePercent: '1.00' });
+  const [newOriginInput, setNewOriginInput] = useState<Record<string, string>>({});
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -75,9 +94,133 @@ export default function MerchantsPage() {
     }
   };
 
+  const fetchApiKeys = async () => {
+    try {
+      const response = await adminFetch('/api/admin/api-keys');
+      const keysByWallet: Record<string, ApiKey[]> = {};
+      response.apiKeys.forEach((key: ApiKey) => {
+        if (!keysByWallet[key.walletAddress]) {
+          keysByWallet[key.walletAddress] = [];
+        }
+        keysByWallet[key.walletAddress].push(key);
+      });
+      setApiKeys(keysByWallet);
+    } catch (error) {
+      console.error('Failed to fetch API keys:', error);
+    }
+  };
+
+  const fetchMerchantKeys = async (walletAddress: string) => {
+    if (loadingKeys[walletAddress]) return;
+    setLoadingKeys(prev => ({ ...prev, [walletAddress]: true }));
+    try {
+      const response = await adminFetch('/api/admin/api-keys');
+      const merchantKeys = response.apiKeys.filter((key: ApiKey) => key.walletAddress === walletAddress);
+      setApiKeys(prev => ({ ...prev, [walletAddress]: merchantKeys }));
+    } catch (error) {
+      console.error('Failed to fetch merchant API keys:', error);
+    } finally {
+      setLoadingKeys(prev => ({ ...prev, [walletAddress]: false }));
+    }
+  };
+
+  const generateApiKey = async (walletAddress: string, merchantName: string) => {
+    if (generatingKey[walletAddress]) return;
+    setGeneratingKey(prev => ({ ...prev, [walletAddress]: true }));
+    try {
+      const response = await adminFetch('/api/admin/api-keys/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          walletAddress,
+          name: `${merchantName} API Key`,
+        }),
+      });
+      setGeneratedKey({ key: response.apiKey, merchantId: walletAddress });
+      setSuccessMessage('API key generated successfully! Copy it now - it will only be shown once.');
+      // Refresh the API keys for this merchant
+      await fetchMerchantKeys(walletAddress);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to generate API key');
+    } finally {
+      setGeneratingKey(prev => ({ ...prev, [walletAddress]: false }));
+    }
+  };
+
+  const revokeApiKey = async (keyId: string, walletAddress: string) => {
+    try {
+      await adminFetch(`/api/admin/api-keys/${keyId}`, { method: 'DELETE' });
+      await fetchMerchantKeys(walletAddress);
+      setSuccessMessage('API key revoked successfully.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to revoke API key');
+    }
+  };
+
+  const updateAllowedOrigins = async (merchantId: string, origins: string[]) => {
+    if (updatingOrigins[merchantId]) return;
+    setUpdatingOrigins(prev => ({ ...prev, [merchantId]: true }));
+    try {
+      const response = await adminFetch(`/api/admin/merchants/${merchantId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ allowedOrigins: origins }),
+      });
+      // Update the merchant in the local state
+      setMerchants(prev => prev.map(merchant => 
+        merchant.id === merchantId 
+          ? { ...merchant, allowedOrigins: response.merchant.allowedOrigins }
+          : merchant
+      ));
+      setSuccessMessage('Allowed origins updated successfully.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to update allowed origins');
+    } finally {
+      setUpdatingOrigins(prev => ({ ...prev, [merchantId]: false }));
+    }
+  };
+
+  const addOrigin = (merchantId: string, origin: string) => {
+    const merchant = merchants.find(m => m.id === merchantId);
+    if (!merchant) return;
+    const newOrigins = [...(merchant.allowedOrigins || []), origin];
+    updateAllowedOrigins(merchantId, newOrigins);
+    setNewOriginInput(prev => ({ ...prev, [merchantId]: '' }));
+  };
+
+  const removeOrigin = (merchantId: string, index: number) => {
+    const merchant = merchants.find(m => m.id === merchantId);
+    if (!merchant) return;
+    const newOrigins = merchant.allowedOrigins.filter((_, i) => i !== index);
+    updateAllowedOrigins(merchantId, newOrigins);
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSuccessMessage('Copied to clipboard!');
+    } catch (error) {
+      setError('Failed to copy to clipboard');
+    }
+  };
+
   useEffect(() => {
     fetchMerchants();
+    fetchApiKeys();
   }, [pagination.page, pagination.limit, filters.search, filters.status]);
+
+  // Auto-dismiss success and error messages
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, page }));
@@ -149,11 +292,45 @@ export default function MerchantsPage() {
       render: (merchant: Merchant) => merchant.webhookUrl ? '✓' : '-',
     },
     {
+      key: 'apiKeys',
+      label: 'API Keys',
+      render: (merchant: Merchant) => {
+        const merchantKeys = apiKeys[merchant.walletAddress] || [];
+        return <span className="text-sm">{merchantKeys.length}</span>;
+      },
+    },
+    {
+      key: 'allowedOrigins',
+      label: 'Origins',
+      render: (merchant: Merchant) => {
+        const origins = merchant.allowedOrigins || [];
+        return <span className="text-sm">{origins.length}</span>;
+      },
+    },
+    {
       key: 'createdAt',
       label: 'Created At',
       render: (merchant: Merchant) => formatDate(merchant.createdAt),
     },
-  ];
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (merchant: Merchant) => (
+        <button
+          onClick={() => {
+            if (expandedMerchant === merchant.id) {
+              setExpandedMerchant(null);
+            } else {
+              setExpandedMerchant(merchant.id);
+              fetchMerchantKeys(merchant.walletAddress);
+            }
+          }}
+          className="px-3 py-1 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] text-xs rounded transition-colors"
+        >
+          {expandedMerchant === merchant.id ? 'Close' : 'Manage'}
+        </button>
+      ),
+    },
 
   if (loading) {
     return (
@@ -206,7 +383,7 @@ export default function MerchantsPage() {
       setFormData({ name: '', walletAddress: '', webhookUrl: '', feePercent: '1.00' });
       setShowCreate(false);
       fetchMerchants();
-    } catch (err) {
+      fetchApiKeys();
       setError(err instanceof Error ? err.message : 'Failed to create merchant');
     } finally {
       setCreating(false);
@@ -227,6 +404,69 @@ export default function MerchantsPage() {
           {showCreate ? 'Cancel' : '+ Add Merchant'}
         </button>
       </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-[var(--color-surface)] border-1.5 border-[var(--color-text)] p-4 md:p-6">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-[var(--color-text)] mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm text-[var(--color-text)]">{successMessage}</p>
+              {generatedKey && generatedKey.merchantId && (
+                <div className="mt-3 p-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded">
+                  <p className="text-xs font-bold text-[var(--color-muted)] mb-2">API KEY (COPY NOW - SHOWN ONCE ONLY):</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono bg-[var(--color-surface)] px-2 py-1 rounded border flex-1">
+                      {generatedKey.key}
+                    </code>
+                    <button
+                      onClick={() => copyToClipboard(generatedKey.key)}
+                      className="px-3 py-1 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] text-xs rounded transition-colors"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setSuccessMessage(null);
+                setGeneratedKey(null);
+              }}
+              className="text-[var(--color-muted)] hover:text-[var(--color-text)]"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-[var(--color-surface)] border-1.5 border-red-500 p-4 md:p-6">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm text-red-500">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-500"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Create Merchant Form */}
       {showCreate && (
@@ -308,6 +548,131 @@ export default function MerchantsPage() {
           </select>
         }
       />
+
+      {/* Expanded Merchant Details */}
+      {expandedMerchant && (() => {
+        const merchant = merchants.find(m => m.id === expandedMerchant);
+        if (!merchant) return null;
+        const merchantKeys = apiKeys[merchant.walletAddress] || [];
+
+        return (
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                MANAGE: {merchant.name.toUpperCase()}
+              </h3>
+              <button
+                onClick={() => setExpandedMerchant(null)}
+                className="text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* API Keys Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-bold text-[var(--color-text)] uppercase tracking-wide">API Keys ({merchantKeys.length})</h4>
+                  <button
+                    onClick={() => generateApiKey(merchant.walletAddress, merchant.name)}
+                    disabled={generatingKey[merchant.walletAddress]}
+                    className="px-3 py-1 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] text-xs rounded transition-colors disabled:opacity-50"
+                  >
+                    {generatingKey[merchant.walletAddress] ? 'Generating...' : 'Generate New'}
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {loadingKeys[merchant.walletAddress] ? (
+                    <div className="animate-pulse h-16 bg-[var(--color-hover)] rounded"></div>
+                  ) : merchantKeys.length > 0 ? (
+                    merchantKeys.map((key) => (
+                      <div key={key.id} className="border border-[var(--color-border)] rounded p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <code className="text-sm font-mono bg-[var(--color-bg)] px-2 py-1 rounded">
+                              {key.keyPrefix}***
+                            </code>
+                            {key.name && (
+                              <span className="ml-2 text-xs text-[var(--color-muted)]">({key.name})</span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => revokeApiKey(key.id, merchant.walletAddress)}
+                            className="text-xs text-red-500 hover:text-red-700 px-2 py-1 border border-red-500 rounded transition-colors"
+                          >
+                            Revoke
+                          </button>
+                        </div>
+                        <div className="text-xs text-[var(--color-muted)]">
+                          Created: {formatDate(key.createdAt)}
+                          {key.lastUsed && ` • Last used: ${formatDate(key.lastUsed)}`}
+                          • Status: {key.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[var(--color-muted)] italic">No API keys generated yet.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Allowed Origins Section */}
+              <div>
+                <h4 className="text-sm font-bold text-[var(--color-text)] uppercase tracking-wide mb-4">
+                  Allowed Origins ({(merchant.allowedOrigins || []).length})
+                </h4>
+
+                <div className="space-y-3">
+                  {/* Add new origin */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="https://casino.com"
+                      value={newOriginInput[merchant.id] || ''}
+                      onChange={(e) => setNewOriginInput(prev => ({ ...prev, [merchant.id]: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        const origin = newOriginInput[merchant.id]?.trim();
+                        if (origin) addOrigin(merchant.id, origin);
+                      }}
+                      disabled={!newOriginInput[merchant.id]?.trim() || updatingOrigins[merchant.id]}
+                      className="px-3 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] text-sm rounded transition-colors disabled:opacity-50"
+                    >
+                      {updatingOrigins[merchant.id] ? 'Adding...' : 'Add'}
+                    </button>
+                  </div>
+
+                  {/* Existing origins */}
+                  {(merchant.allowedOrigins || []).length > 0 ? (
+                    <div className="space-y-2">
+                      {(merchant.allowedOrigins || []).map((origin, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 border border-[var(--color-border)] rounded">
+                          <code className="text-sm font-mono text-[var(--color-text)]">{origin}</code>
+                          <button
+                            onClick={() => removeOrigin(merchant.id, index)}
+                            disabled={updatingOrigins[merchant.id]}
+                            className="text-xs text-red-500 hover:text-red-700 px-2 py-1 border border-red-500 rounded transition-colors disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[var(--color-muted)] italic">No allowed origins configured.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
