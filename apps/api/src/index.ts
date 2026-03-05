@@ -33,6 +33,7 @@ import gatewayWithdrawalRoutes from './routes/gateway-withdrawals.js';
 import gatewayReportRoutes from './routes/gateway-reports.js';
 import gatewayDisputeRoutes from './routes/gateway-disputes.js';
 import gatewayPoolRoutes from './routes/gateway-pools.js';
+import gatewayDistributorRoutes from './routes/gateway-distributors.js';
 import { createPathBasedAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { createPathBasedRateLimit } from './middleware/rate-limit.js';
@@ -67,8 +68,11 @@ app.use('/api/transactions/*', createPathBasedAuth('/api/transactions'));
 app.use('/api/api-keys/*', createPathBasedAuth('/api/api-keys'));
 // Referral public routes don't need API key auth; admin routes use adminAuth middleware internally
 
-// Gateway routes use merchant API key auth
-app.use('/api/gateway/*', merchantApiKeyAuth);
+// Gateway routes use merchant API key auth (except distributor admin routes)
+app.use('/api/gateway/*', async (c, next) => {
+  if (c.req.path.startsWith('/api/gateway/distributors')) return next();
+  return merchantApiKeyAuth(c, next);
+});
 
 // Root endpoint
 app.get('/', (c) => c.json({ name: 'zkira-api', version: '0.1.0' }));
@@ -97,6 +101,7 @@ app.route('/', gatewayWithdrawalRoutes);
 app.route('/', gatewayReportRoutes);
 app.route('/', gatewayDisputeRoutes);
 app.route('/', gatewayPoolRoutes);
+app.route('/', gatewayDistributorRoutes);
 
 // Start server
 async function startServer() {
