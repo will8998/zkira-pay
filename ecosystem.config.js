@@ -4,10 +4,10 @@ module.exports = {
       name: "zkira-pay",
       cwd: "/var/www/zkira-pay/apps/pay",
       script: "node_modules/next/dist/bin/next",
-      args: "start -p 3011",
+      args: "start -p 3020",
       env: {
         NODE_ENV: "production",
-        PORT: 3011,
+        PORT: 3020,
       },
     },
     {
@@ -18,7 +18,7 @@ module.exports = {
       args: "src/index.ts",
       env: {
         NODE_ENV: "production",
-        PORT: 3012,
+        PORT: 3021,
       },
     },
     {
@@ -29,7 +29,7 @@ module.exports = {
       args: "src/index.ts",
       env: {
         NODE_ENV: "production",
-        PORT: 3013,
+        PORT: 3022,
         // Arbitrum config
         ARB_RPC_URL: "https://arb1.arbitrum.io/rpc",
         CHAIN_ID: "42161",
