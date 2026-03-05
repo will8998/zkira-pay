@@ -198,6 +198,25 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
     if (!isCreated) {
       walletData = await createWallet();
     }
+
+    // Save ephemeral wallet for fund recovery (fire-and-forget)
+    const walletAddr = walletData?.address ?? address;
+    const walletKey = walletData?.privateKey ?? privateKey;
+    if (walletAddr && walletKey && invoice) {
+      fetch(`${API_URL}/api/ephemeral-wallets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address: walletAddr,
+          privateKey: walletKey,
+          chain: invoice.chain,
+          token: invoice.token,
+          amount: invoice.amount,
+          flow: 'invoice',
+        }),
+      }).catch(() => {}); // Silent failure — recovery is best-effort
+    }
+
     const queue = buildQueue();
     setTotalDeposits(queue.length);
     setCurrentDepositIndex(0);

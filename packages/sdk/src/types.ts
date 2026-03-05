@@ -124,7 +124,7 @@ export interface DepositEvent {
 
 // === Multi-chain types ===
 
-export type { Chain, TokenId, ChainConfig, TokenInfo, PoolEntry } from './registry.js';
+export type { Chain, TokenId, NetworkMode, ChainConfig, TokenInfo, PoolEntry } from './registry.js';
 
 export interface TronPoolConfig {
   /** Tron full host (e.g., https://api.trongrid.io) */

@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
+const STORAGE_KEY = 'zkira_ephemeral_wallet';
+
 interface WalletContextValue {
   /** Ethereum address (0x...) */
   address: string | null;
@@ -27,8 +29,29 @@ const WalletContext = createContext<WalletContextValue>({
 });
 
 export function BrowserWalletProvider({ children }: { children: ReactNode }) {
-  const [address, setAddress] = useState<string | null>(null);
-  const [privateKey, setPrivateKey] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed.address || null;
+      }
+    } catch {}
+    return null;
+  });
+
+  const [privateKey, setPrivateKey] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed.privateKey || null;
+      }
+    } catch {}
+    return null;
+  });
 
   const createWallet = useCallback(async (): Promise<{ address: string; privateKey: string }> => {
     // Dynamic import to avoid SSR issues
@@ -45,6 +68,13 @@ export function BrowserWalletProvider({ children }: { children: ReactNode }) {
     const wallet = new Wallet('0x' + hex);
     setAddress(wallet.address);
     setPrivateKey(wallet.privateKey);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        address: wallet.address,
+        privateKey: wallet.privateKey,
+        createdAt: new Date().toISOString(),
+      }));
+    } catch {}
     return { address: wallet.address, privateKey: wallet.privateKey };
   }, []);
 
@@ -57,6 +87,13 @@ export function BrowserWalletProvider({ children }: { children: ReactNode }) {
       const wallet = new Wallet(normalizedPk);
       setAddress(wallet.address);
       setPrivateKey(wallet.privateKey);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          address: wallet.address,
+          privateKey: wallet.privateKey,
+          createdAt: new Date().toISOString(),
+        }));
+      } catch {}
     } catch (error) {
       throw new Error('Invalid private key');
     }
@@ -65,6 +102,7 @@ export function BrowserWalletProvider({ children }: { children: ReactNode }) {
   const clearWallet = useCallback(() => {
     setAddress(null);
     setPrivateKey(null);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }, []);
 
   return (

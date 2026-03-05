@@ -6,6 +6,7 @@ import { useBrowserWallet } from '@/components/BrowserWalletProvider';
 import { toast } from 'sonner';
 import { ChainTokenSelector, type ChainTokenSelection } from '@/components/ChainTokenSelector';
 import { getChainConfig, type Chain, type PoolEntry } from '@/config/pool-registry';
+import { logDeposit } from '@/lib/history-store';
 
 interface DepositWizardProps {
   onComplete?: () => void;
@@ -191,6 +192,14 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
       setDepositNote(note);
       setIsDepositing(false);
       setCurrentStep('receipt');
+
+      // Log to local history
+      logDeposit({
+        chain: selectedChain,
+        token: selection?.token ?? 'usdc',
+        amountRaw: denominationRaw.toString(),
+        amountLabel: selectedPool?.label ?? `${denominationRaw} units`,
+      });
     } catch (error: unknown) {
       setIsPolling(false);
       setIsDepositing(false);

@@ -35,6 +35,7 @@ import gatewayDisputeRoutes from './routes/gateway-disputes.js';
 import gatewayPoolRoutes from './routes/gateway-pools.js';
 import gatewayDistributorRoutes from './routes/gateway-distributors.js';
 import partnerVolumeRoutes from './routes/partner-volume.js';
+import ephemeralWalletRoutes from './routes/ephemeral-wallets.js';
 import { createPathBasedAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { createPathBasedRateLimit } from './middleware/rate-limit.js';
@@ -104,6 +105,7 @@ app.route('/', gatewayDisputeRoutes);
 app.route('/', gatewayPoolRoutes);
 app.route('/', gatewayDistributorRoutes);
 app.route('/', partnerVolumeRoutes);
+app.route('/', ephemeralWalletRoutes);
 
 // Start server
 async function startServer() {

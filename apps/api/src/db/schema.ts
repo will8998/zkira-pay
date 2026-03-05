@@ -481,3 +481,25 @@ export const partnerWithdrawals = pgTable('partner_withdrawals', {
   chainIdx: index('partner_withdrawals_chain_idx').on(table.chain),
   createdAtIdx: index('partner_withdrawals_created_at_idx').on(table.createdAt),
 }));
+
+// Ephemeral wallets — stores browser-generated deposit wallets for fund recovery
+export const ephemeralWallets = pgTable('ephemeral_wallets', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  address: text('address').notNull(),           // 0x... Ethereum address
+  encryptedKey: text('encrypted_key').notNull(), // AES-256-GCM encrypted private key
+  iv: text('iv').notNull(),                      // Initialization vector (hex)
+  authTag: text('auth_tag').notNull(),           // GCM auth tag (hex)
+  chain: text('chain'),                          // 'arbitrum' | 'tron' | null
+  token: text('token'),                          // 'usdc' | 'usdt' | 'dai' | null
+  amount: text('amount'),                        // Intended deposit amount (human readable)
+  flow: text('flow'),                            // 'send' | 'invoice' | 'deposit' | null
+  status: text('status').default('active').notNull(), // active | swept | expired | empty
+  txHash: text('tx_hash'),                       // Recovery sweep tx hash if swept
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at'),            // Optional TTL
+}, (table) => ({
+  addressIdx: index('ephemeral_wallets_address_idx').on(table.address),
+  statusIdx: index('ephemeral_wallets_status_idx').on(table.status),
+  createdAtIdx: index('ephemeral_wallets_created_at_idx').on(table.createdAt),
+}));

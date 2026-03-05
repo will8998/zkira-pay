@@ -114,3 +114,41 @@ export function logRequest(params: {
     status: 'pending',
   });
 }
+
+/** Quick helper to log a deposit. */
+export function logDeposit(params: {
+  chain: Chain;
+  token: TokenId;
+  amountRaw: string;
+  amountLabel: string;
+  txHashes?: string[];
+}): HistoryEntry {
+  return addHistoryEntry({
+    type: 'deposit',
+    chain: params.chain,
+    token: params.token,
+    amountRaw: params.amountRaw,
+    amountLabel: params.amountLabel,
+    txHashes: params.txHashes,
+    status: 'complete',
+  });
+}
+
+/** Quick helper to log a withdrawal. */
+export function logWithdraw(params: {
+  chain: Chain;
+  token: TokenId;
+  amountRaw: string;
+  amountLabel: string;
+  txHashes?: string[];
+}): HistoryEntry {
+  return addHistoryEntry({
+    type: 'withdraw',
+    chain: params.chain,
+    token: params.token,
+    amountRaw: params.amountRaw,
+    amountLabel: params.amountLabel,
+    txHashes: params.txHashes,
+    status: 'complete',
+  });
+}

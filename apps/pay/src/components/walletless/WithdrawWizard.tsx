@@ -11,6 +11,7 @@ import {
   type Chain,
   type PoolEntry,
 } from '@/config/pool-registry';
+import { logWithdraw } from '@/lib/history-store';
 
 interface WithdrawWizardProps {
   onComplete?: () => void;
@@ -349,6 +350,15 @@ export function WithdrawWizard({ onComplete }: WithdrawWizardProps) {
       setTransactionHash(txId);
       setCurrentStep('complete');
       toast.success('Withdrawal completed successfully!');
+
+      // Log to local history
+      logWithdraw({
+        chain: detectedChain,
+        token: (receipt ? detectPoolChain(receipt.pool)?.pool.token : undefined) ?? 'usdc',
+        amountRaw: receipt?.denomination ?? '0',
+        amountLabel: receipt ? `${Number(BigInt(receipt.denomination)) / 1e6}` : '0',
+        txHashes: txId ? [txId] : undefined,
+      });
 
     } catch (error) {
       setProcessingStages(prev => prev.map(stage => 

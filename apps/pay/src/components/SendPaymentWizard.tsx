@@ -11,6 +11,7 @@ import { ReceiptManager, type PoolNote } from '@zkira/sdk';
 import { useBrowserWallet } from '@/components/BrowserWalletProvider';
 import { QRCodeSVG } from 'qrcode.react';
 import PrivacyCallout from '@/components/PrivacyCallout';
+import { logSend } from '@/lib/history-store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
@@ -261,6 +262,24 @@ export function SendPaymentWizard() {
       walletData = await createWallet();
     }
 
+    // Save ephemeral wallet for fund recovery (fire-and-forget)
+    const walletAddr = walletData?.address ?? address;
+    const walletKey = walletData?.privateKey ?? privateKey;
+    if (walletAddr && walletKey) {
+      fetch(`${API_URL}/api/ephemeral-wallets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address: walletAddr,
+          privateKey: walletKey,
+          chain,
+          token,
+          amount,
+          flow: 'send',
+        }),
+      }).catch(() => {}); // Silent failure — recovery is best-effort
+    }
+
     const queue = buildQueue(denomSet);
     setTotalDeposits(queue.length);
     setCurrentDepositIndex(0);
@@ -314,6 +333,15 @@ export function SendPaymentWizard() {
       setClaimCode({ code, encryptionKey });
       setStep('complete');
       toast.success('Payment sent! Share the claim code with the recipient.');
+
+      // Log to local history
+      logSend({
+        chain,
+        token,
+        amountRaw: denomSet.totalRaw.toString(),
+        amountLabel: denomSet.totalLabel,
+        claimCode: code,
+      });
 
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
@@ -526,6 +554,23 @@ export function SendPaymentWizard() {
                   >
                     {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
                   </span>
+                </div>
+
+                {/* Summary Box - You will send + recipient receives */}
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4 mt-4 mb-4">
+                  <div className="mb-3">
+                    <div className="text-lg font-bold text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      You will send: {denomSet.totalLabel}
+                    </div>
+                  </div>
+                  <div className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                    Recipient gets {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} private transfer(s)
+                  </div>
+                  {denomSet.remainder > 0 && (
+                    <div className="text-xs text-[var(--color-text-secondary)] mt-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                      {denomSet.remainderLabel} not covered (below minimum pool size)
+                    </div>
+                  )}
                 </div>
 
                 {/* Privacy strength indicator */}

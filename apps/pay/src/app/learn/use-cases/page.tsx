@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
-import { CodeBlock } from '@/components/learn/CodeBlock';
 
 export default function UseCasesPage() {
   const t = useTranslations('useCasesPage');
@@ -46,46 +45,6 @@ export default function UseCasesPage() {
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Casino Gateway Integration"
-          code={`import { GatewayClient } from '@zkira/gateway-client';
-
-// Initialize casino gateway client
-const gateway = new GatewayClient({
-  baseUrl: 'https://api.zkira.xyz',
-  apiKey: 'your_merchant_api_key'
-});
-
-// Create deposit session for player
-const session = await gateway.createSession({
-  playerId: 'player_123',
-  amount: '100',
-  token: 'USDC',
-  metadata: {
-    gameId: 'poker_table_1',
-    tableId: 'high_stakes'
-  }
-});
-
-console.log('Deposit URL:', session.depositUrl);
-// Player uses this URL to complete deposit via ZKIRA widget
-
-// Process withdrawal request
-const withdrawal = await gateway.createWithdrawal({
-  playerId: 'player_123',
-  amount: '75',
-  token: 'USDC',
-  recipientAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'
-});
-
-// Approve withdrawal after verification
-await gateway.approveWithdrawal(withdrawal.id);
-
-// Get volume reports
-const report = await gateway.getVolumeReport('24h');
-console.log('Daily volume:', report.totalVolume);`}
-        />
       </div>
 
       {/* Use Case 2: Private Payroll */}
@@ -121,36 +80,6 @@ console.log('Daily volume:', report.totalVolume);`}
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Multi-Chain Batch Payroll Payment"
-          code={`import { ZkiraClient } from '@zkira/sdk';
-import { Connection, PublicKey } from '@solana/web3.js';
-
-// Initialize client with multi-chain support
-const client = new ZkiraClient(connection, {
-  supportedChains: ['solana', 'arbitrum', 'tron']
-});
-
-// Create batch payroll payment
-const employees = [
-  { metaAddress: 'meta1...', amount: 5000_000000, chain: 'solana' }, // $5,000 USDC on Solana
-  { metaAddress: 'meta2...', amount: 7500_000000, chain: 'arbitrum' }, // $7,500 USDC on Arbitrum
-  { metaAddress: 'meta3...', amount: 4200_000000, chain: 'tron' }, // $4,200 USDT on TRON
-];
-
-const batchPayment = await client.createBatchPayment({
-  payments: employees.map(emp => ({
-    recipient: emp.metaAddress,
-    amount: emp.amount,
-    token: emp.chain === 'tron' ? 'USDT' : 'USDC',
-    chain: emp.chain,
-  })),
-  payer: companyWallet.publicKey,
-});
-
-console.log('Multi-chain payroll distributed:', batchPayment.signature);`}
-        />
       </div>
 
       {/* Use Case 3: E-commerce Integration */}
@@ -186,48 +115,6 @@ console.log('Multi-chain payroll distributed:', batchPayment.signature);`}
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Multi-Chain Widget Integration"
-          code={`import { useZkiraPay } from '@zkira/widget';
-
-function CheckoutButton({ amount, description }: { 
-  amount: number; 
-  description: string; 
-}) {
-  const { createPayment, status, error } = useZkiraPay({
-    apiUrl: 'https://api.zkira.xyz',
-    apiKey: process.env.NEXT_PUBLIC_ZKIRA_KEY,
-    merchantAddress: process.env.NEXT_PUBLIC_MERCHANT_META_ADDRESS,
-    supportedChains: ['solana', 'arbitrum', 'tron'], // Multi-chain support
-    supportedTokens: ['USDC', 'USDT'], // Cross-chain tokens
-  });
-
-  const handlePayment = async () => {
-    const payment = await createPayment({ 
-      amount, 
-      description,
-      successUrl: '/success',
-      cancelUrl: '/checkout',
-      // Widget auto-detects user's preferred chain
-    });
-    
-    if (payment.success) {
-      window.location.href = '/order-confirmation';
-    }
-  };
-
-  return (
-    <button 
-      onClick={handlePayment}
-      disabled={status === 'pending'}
-      className="bg-[#FFFFFF] text-black px-6 py-3 rounded-none font-semibold"
-    >
-      {status === 'pending' ? 'Processing...' : \`Pay $\${amount}\`}
-    </button>
-  );
-}`}
-        />
       </div>
 
       {/* Use Case 4: Anonymous Transfers */}
@@ -263,42 +150,6 @@ function CheckoutButton({ amount, description }: {
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Cross-Chain Anonymous Transfer"
-          code={`import { ShieldedPoolClient, createPrivateTransport } from '@zkira/sdk';
-
-// Use privacy transport to hide IP address
-const transport = await createPrivateTransport();
-
-// Initialize for cross-chain transfer (Solana -> Arbitrum)
-const solanaPool = new ShieldedPoolClient(solanaConnection, wallet, {
-  programId: SHIELDED_POOL_PROGRAM_ID,
-  tokenMint: USDC_MINT,
-  denomination: 10_000_000, // 10 USDC fixed denomination
-  chain: 'solana'
-}, { transport });
-
-const arbitrumPool = new ShieldedPoolClient(arbitrumConnection, wallet, {
-  programId: SHIELDED_POOL_PROGRAM_ID,
-  tokenMint: USDC_MINT,
-  denomination: 10_000_000,
-  chain: 'arbitrum'
-}, { transport });
-
-// Split $1,000 into 100 shielded deposits on Solana
-const notes: string[] = [];
-for (let i = 0; i < 100; i++) {
-  const { note } = await solanaPool.deposit(USDC_MINT);
-  notes.push(note);
-}
-
-// After 6+ hour soak time, withdraw to Arbitrum address
-for (const note of notes) {
-  await arbitrumPool.withdraw(note, freshArbitrumAddress);
-  // Cross-chain privacy bridge handles the transfer
-}`}
-        />
       </div>
 
       {/* Use Case 5: Anonymous Donations */}
@@ -334,31 +185,6 @@ for (const note of notes) {
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Anonymous Donation"
-          code={`import { ZkiraClient } from '@zkira/sdk';
-
-const client = new ZkiraClient(connection);
-
-// Create anonymous donation
-const donation = await client.createPayment({
-  recipient: 'charity_meta_address_here',
-  amount: 100_000000, // $100 USDC
-  token: 'USDC',
-  memo: 'Supporting clean water initiative', // Optional private memo
-});
-
-// Generate proof for donor records
-const proof = await client.generateDonationProof({
-  payment: donation,
-  recipientName: 'Clean Water Foundation',
-  taxId: '12-3456789',
-});
-
-console.log('Anonymous donation sent:', donation.signature);
-console.log('Tax receipt proof:', proof.receiptHash);`}
-        />
       </div>
 
       {/* Use Case 6: Escrow Services */}
@@ -394,36 +220,6 @@ console.log('Tax receipt proof:', proof.receiptHash);`}
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Milestone Escrow Creation"
-          code={`import { ZkiraClient } from '@zkira/sdk';
-
-const client = new ZkiraClient(connection);
-
-// Create milestone-based escrow
-const escrow = await client.createMilestoneEscrow({
-  client: clientWallet.publicKey,
-  contractor: 'contractor_meta_address',
-  milestones: [
-    { description: 'UI/UX Design', amount: 2000_000000 }, // $2,000 USDC
-    { description: 'Frontend Development', amount: 3500_000000 }, // $3,500 USDC
-    { description: 'Backend Integration', amount: 2500_000000 }, // $2,500 USDC
-    { description: 'Testing & Deployment', amount: 2000_000000 }, // $2,000 USDC
-  ],
-  token: 'USDC',
-  deadline: new Date('2026-06-30'),
-});
-
-// Approve milestone completion
-await client.approveMilestone({
-  escrow: escrow.address,
-  milestoneIndex: 0,
-  approver: clientWallet,
-});
-
-console.log('Milestone escrow created:', escrow.address);`}
-        />
       </div>
 
       {/* Use Case 7: Multi-sig Treasury */}
@@ -459,44 +255,6 @@ console.log('Milestone escrow created:', escrow.address);`}
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Multi-sig Treasury Setup"
-          code={`import { ZkiraClient } from '@zkira/sdk';
-
-const client = new ZkiraClient(connection);
-
-// Create multi-sig escrow
-const multisig = await client.createMultisigEscrow({
-  signers: [
-    founderWallet.publicKey,
-    ctoWallet.publicKey, 
-    cfoWallet.publicKey,
-    advisorWallet.publicKey,
-    investorWallet.publicKey,
-  ],
-  threshold: 3, // Require 3 out of 5 signatures
-  spendingLimits: [
-    { amount: 10000_000000, timeframe: '30days' }, // $10k/month limit
-    { amount: 50000_000000, timeframe: 'quarter' }, // $50k/quarter limit
-  ],
-});
-
-// Propose payment
-const proposal = await client.proposePayment({
-  multisig: multisig.address,
-  recipient: 'contractor_meta_address',
-  amount: 15000_000000, // $15,000 USDC
-  justification: 'Q1 development contractor payment',
-  proposer: founderWallet,
-});
-
-// Approve payment
-await client.approvePayment({
-  proposal: proposal.id,
-  signer: ctoWallet,
-});`}
-        />
       </div>
 
       {/* Use Case 8: Payment Links */}
@@ -532,38 +290,6 @@ await client.approvePayment({
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          title="Payment Link Creation"
-          code={`import { ZkiraClient } from '@zkira/sdk';
-
-const client = new ZkiraClient(connection);
-
-// Create payment link
-const paymentLink = await client.createPaymentLink({
-  amount: 2500_000000, // $2,500 USDC
-  token: 'USDC',
-  description: 'Web Development Services - March 2026',
-  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-  recipient: recipientMetaAddress,
-});
-
-console.log('Share this link:', paymentLink.url);
-// Output: https://zkira.xyz/pay/claim?t=abc123...
-
-// Check payment status
-const status = await client.getPaymentStatus({
-  paymentId: paymentLink.id,
-});
-
-if (status === 'completed') {
-  console.log('Payment received! Claiming funds...');
-  
-  const claim = await client.claimStealth({
-    escrowAddress: paymentLink.escrowAddress,
-  });
-}`}
-        />
       </div>
     </div>
   );

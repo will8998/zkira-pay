@@ -6,6 +6,7 @@ import { deriveDeadDropId } from '@/lib/claim-code';
 import { aesDecrypt } from '@/lib/dead-drop-crypto';
 import type { DepositBundle, DepositNoteRecord } from '@/types/payment';
 import { ReceiptManager, type PoolNote } from '@zkira/sdk';
+import { logClaim } from '@/lib/history-store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
@@ -59,6 +60,15 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
       await fetch(`${API_URL}/api/dead-drop/${dropId}/claim`, { method: 'PATCH' });
 
       toast.success(`${decryptedBundle.notes.length} deposit note${decryptedBundle.notes.length !== 1 ? 's' : ''} decrypted!`);
+
+      // Log to local history
+      logClaim({
+        chain: decryptedBundle.notes[0]?.chain ?? 'arbitrum',
+        token: decryptedBundle.notes[0]?.token ?? 'usdc',
+        amountRaw: decryptedBundle.totalRaw,
+        amountLabel: `${decryptedBundle.notes.length} note${decryptedBundle.notes.length !== 1 ? 's' : ''}`,
+        claimCode: claimCode.trim(),
+      });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to claim payment');
     } finally {
