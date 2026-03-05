@@ -136,7 +136,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
     while (!signal.aborted) {
       try {
         const contract = new Contract(tokenAddress, abi, provider);
-        const balance: bigint = await contract.balanceOf(address);
+        const balance: bigint = await contract.balanceOf(walletAddress);
         if (balance >= denominationRaw) break;
       } catch {
         // keep polling
@@ -153,7 +153,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
 
     // Approve + Deposit
     setDepositStatus('approving');
-    const wallet = new Wallet(privateKey, provider);
+    // Reuse the wallet instance from above
 
     const { buildMimcSponge } = await import('circomlibjs');
     const mimcSponge = await buildMimcSponge();
