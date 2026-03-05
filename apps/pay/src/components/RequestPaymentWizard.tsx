@@ -500,6 +500,7 @@ export function RequestPaymentWizard() {
           >
             CREATE INVOICE →
           </button>
+        </div>
       )}
 
       {/* Step: Created — show link */}
