@@ -51,8 +51,6 @@ const adminAuth = async (c: any, next: any) => {
   }
   await next();
 };
-  await next();
-};
 
 // ═══════════════════════════════════════════════════════════
 // POST /api/relayer/withdrawal — Record a partner withdrawal (from relayer)
