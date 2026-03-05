@@ -270,6 +270,7 @@ export const distributors = pgTable('distributors', {
   tier: text('tier').default('agent').notNull(), // master, sub, agent
   commissionPercent: numeric('commission_percent', { precision: 5, scale: 2 }).default('0').notNull(),
   status: text('status').default('active').notNull(),
+  trackingCode: text('tracking_code').unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({

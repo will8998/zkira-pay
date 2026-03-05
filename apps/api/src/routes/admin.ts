@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { sha256 } from '@noble/hashes/sha256';
 import { db } from '../db/index.js';
-import { merchants, gatewaySessions, ephemeralWallets, apiKeys, users, distributors } from '../db/schema.js';
+import { merchants, gatewaySessions, ephemeralWallets, apiKeys, users, distributors, distributorCommissions } from '../db/schema.js';
 import { eq, count, sum, desc, gte, lte, sql, and, like, or } from 'drizzle-orm';
 import { loadConfig } from '../config.js';
 import { signAdminToken, verifyAdminToken } from '../middleware/jwt-auth.js';
@@ -516,10 +516,41 @@ adminRoutes.get('/api/admin/volume', async (c) => {
       }));
     }
 
+    // Per-distributor volume breakdown (master only)
+    let distributorsData: Array<{distributorId: string; distributorName: string; sourceVolume: string; commissions: string; count: number}> = [];
+    if (adminRole === 'master') {
+      const distDateConditions = [];
+      if (from) distDateConditions.push(gte(distributorCommissions.createdAt, new Date(from)));
+      if (to) distDateConditions.push(lte(distributorCommissions.createdAt, new Date(to)));
+
+      const distWhere = distDateConditions.length > 0 ? and(...distDateConditions) : undefined;
+
+      const distResult = await db.select({
+        distributorId: distributorCommissions.distributorId,
+        distributorName: distributors.name,
+        sourceVolume: sum(distributorCommissions.sourceAmount),
+        commissions: sum(distributorCommissions.amount),
+        count: count()
+      })
+      .from(distributorCommissions)
+      .innerJoin(distributors, eq(distributorCommissions.distributorId, distributors.id))
+      .where(distWhere)
+      .groupBy(distributorCommissions.distributorId, distributors.name)
+      .orderBy(desc(sum(distributorCommissions.sourceAmount)));
+
+      distributorsData = distResult.map(row => ({
+        distributorId: row.distributorId,
+        distributorName: row.distributorName,
+        sourceVolume: row.sourceVolume || '0',
+        commissions: row.commissions || '0',
+        count: row.count || 0
+      }));
+    }
+
     return c.json({
       summary,
       timeSeries,
-      ...(adminRole === 'master' ? { merchants: merchantsData } : {})
+      ...(adminRole === 'master' ? { merchants: merchantsData, distributors: distributorsData } : {})
     });
   } catch (error) {
     console.error('Failed to get volume analytics:', error);

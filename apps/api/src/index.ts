@@ -36,7 +36,7 @@ import gatewayWithdrawalRoutes from './routes/gateway-withdrawals.js';
 import gatewayReportRoutes from './routes/gateway-reports.js';
 import gatewayDisputeRoutes from './routes/gateway-disputes.js';
 import gatewayPoolRoutes from './routes/gateway-pools.js';
-import gatewayDistributorRoutes from './routes/gateway-distributors.js';
+import adminDistributorRoutes from './routes/admin-distributors.js';
 import partnerVolumeRoutes from './routes/partner-volume.js';
 import ephemeralWalletRoutes from './routes/ephemeral-wallets.js';
 import { createPathBasedAuth } from './middleware/auth.js';
@@ -104,7 +104,7 @@ app.route('/', gatewayWithdrawalRoutes);
 app.route('/', gatewayReportRoutes);
 app.route('/', gatewayDisputeRoutes);
 app.route('/', gatewayPoolRoutes);
-app.route('/', gatewayDistributorRoutes);
+app.route('/', adminDistributorRoutes);
 app.route('/', partnerVolumeRoutes);
 app.route('/', ephemeralWalletRoutes);
 

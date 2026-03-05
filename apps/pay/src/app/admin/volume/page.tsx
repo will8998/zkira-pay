@@ -31,7 +31,13 @@ interface VolumeData {
     volume: number;
     sessionCount: number;
   }>;
-}
+  distributors?: Array<{
+    distributorId: string;
+    distributorName: string;
+    sourceVolume: string;
+    commissions: string;
+    count: number;
+  }>;
 
 export default function VolumePage() {
   const { isMaster } = useAdminAuth();
@@ -287,6 +293,53 @@ export default function VolumePage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text)]">
                       {merchant.sessionCount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Per-Distributor Volume Breakdown (Master Only) */}
+      {isMaster && data?.distributors && (
+        <div className="bg-[var(--color-surface)] rounded-none border-1.5 border-[var(--border-subtle)] p-4 md:p-6">
+          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+            Per-Distributor Volume Breakdown
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[var(--color-hover)] border-b border-[var(--color-border)]">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider">
+                    Distributor
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider">
+                    Source Volume
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider">
+                    Commissions
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider">
+                    Transactions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]">
+                {data.distributors.map((distributor, index) => (
+                  <tr key={index} className="hover:bg-[var(--color-hover)]">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text)]">
+                      {distributor.distributorName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text)]">
+                      {distributor.sourceVolume}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text)]">
+                      {distributor.commissions}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text)]">
+                      {distributor.count.toLocaleString()}
                     </td>
                   </tr>
                 ))}
