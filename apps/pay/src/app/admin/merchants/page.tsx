@@ -9,9 +9,10 @@ interface Merchant {
   id: string;
   name: string;
   walletAddress: string;
-  feePercentage: number;
+  feePercent: string;
   status: 'active' | 'inactive';
-  distributor: string;
+  distributorId: string | null;
+  webhookUrl: string | null;
   createdAt: string;
 }
 
@@ -20,6 +21,9 @@ export default function MerchantsPage() {
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [formData, setFormData] = useState({ name: '', walletAddress: '', webhookUrl: '', feePercent: '1.00' });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -130,9 +134,9 @@ export default function MerchantsPage() {
       ),
     },
     {
-      key: 'feePercentage',
+      key: 'feePercent',
       label: 'Fee %',
-      render: (merchant: Merchant) => `${merchant.feePercentage}%`,
+      render: (merchant: Merchant) => `${merchant.feePercent}%`,
     },
     {
       key: 'status',
@@ -140,9 +144,9 @@ export default function MerchantsPage() {
       render: (merchant: Merchant) => getStatusBadge(merchant.status),
     },
     {
-      key: 'distributor',
-      label: 'Distributor',
-      render: (merchant: Merchant) => merchant.distributor || '-',
+      key: 'webhookUrl',
+      label: 'Webhook',
+      render: (merchant: Merchant) => merchant.webhookUrl ? '✓' : '-',
     },
     {
       key: 'createdAt',
@@ -186,12 +190,99 @@ export default function MerchantsPage() {
     );
   }
 
+  const handleCreateMerchant = async () => {
+    if (!formData.name || !formData.walletAddress) return;
+    setCreating(true);
+    try {
+      await adminFetch('/api/admin/merchants', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.name,
+          walletAddress: formData.walletAddress,
+          webhookUrl: formData.webhookUrl || undefined,
+          feePercent: parseFloat(formData.feePercent) || 1,
+        }),
+      });
+      setFormData({ name: '', walletAddress: '', webhookUrl: '', feePercent: '1.00' });
+      setShowCreate(false);
+      fetchMerchants();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create merchant');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)]">Merchant Management</h1>
-        <p className="text-[var(--color-muted)]">View and manage all merchants (Master only)</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)]">Merchant Management</h1>
+          <p className="text-[var(--color-muted)]">View and manage all merchants (Master only)</p>
+        </div>
+        <button
+          onClick={() => setShowCreate(!showCreate)}
+          className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors text-sm rounded"
+        >
+          {showCreate ? 'Cancel' : '+ Add Merchant'}
+        </button>
       </div>
+
+      {/* Create Merchant Form */}
+      {showCreate && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6">
+          <h3 className="text-lg font-bold text-[var(--color-text)] mb-4" style={{ fontFamily: 'var(--font-mono)' }}>NEW MERCHANT</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-muted)] mb-1">Name *</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Lucky Casino"
+                className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-muted)] mb-1">Wallet Address *</label>
+              <input
+                type="text"
+                value={formData.walletAddress}
+                onChange={(e) => setFormData(prev => ({ ...prev, walletAddress: e.target.value }))}
+                placeholder="0x..."
+                className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded text-sm font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-muted)] mb-1">Webhook URL</label>
+              <input
+                type="text"
+                value={formData.webhookUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, webhookUrl: e.target.value }))}
+                placeholder="https://casino.com/webhook"
+                className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-muted)] mb-1">Fee %</label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.feePercent}
+                onChange={(e) => setFormData(prev => ({ ...prev, feePercent: e.target.value }))}
+                className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded text-sm"
+              />
+            </div>
+          </div>
+          <button
+            onClick={handleCreateMerchant}
+            disabled={creating || !formData.name || !formData.walletAddress}
+            className="px-6 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors disabled:opacity-40 text-sm rounded"
+          >
+            {creating ? 'Creating...' : 'Create Merchant'}
+          </button>
+        </div>
+      )}
 
       <AdminDataTable
         data={merchants}

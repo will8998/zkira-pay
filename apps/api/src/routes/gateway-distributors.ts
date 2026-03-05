@@ -609,4 +609,112 @@ gatewayDistributorRoutes.get('/api/gateway/distributors/:distributorId/volume', 
   }
 });
 
+// GET /api/gateway/distributors/:distributorId/payouts - List payouts
+gatewayDistributorRoutes.get('/api/gateway/distributors/:distributorId/payouts', async (c) => {
+  const distributorId = c.req.param('distributorId');
+  if (!distributorId) {
+    return c.json({ error: 'Distributor ID parameter is required' }, 400);
+  }
+
+  try {
+    const limit = Math.min(parseInt(c.req.query('limit') || '50'), 100);
+    const offset = parseInt(c.req.query('offset') || '0');
+
+    const payoutsList = await db
+      .select()
+      .from(distributorPayouts)
+      .where(eq(distributorPayouts.distributorId, distributorId))
+      .orderBy(desc(distributorPayouts.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const totalResult = await db
+      .select({ count: count() })
+      .from(distributorPayouts)
+      .where(eq(distributorPayouts.distributorId, distributorId));
+
+    // Get unpaid commission total
+    const unpaidResult = await db
+      .select({
+        total: sql<string>`COALESCE(SUM(${distributorCommissions.amount}), 0)`,
+        currency: distributorCommissions.currency,
+      })
+      .from(distributorCommissions)
+      .where(
+        and(
+          eq(distributorCommissions.distributorId, distributorId),
+          eq(distributorCommissions.status, 'pending')
+        )
+      )
+      .groupBy(distributorCommissions.currency);
+
+    return c.json({
+      payouts: payoutsList,
+      total: totalResult[0].count,
+      limit,
+      offset,
+      unpaidCommissions: unpaidResult.map(r => ({ currency: r.currency, amount: r.total })),
+    });
+  } catch (error) {
+    console.error('Failed to get distributor payouts:', error);
+    return c.json({ error: 'Failed to get distributor payouts' }, 500);
+  }
+});
+
+// POST /api/gateway/distributors/:distributorId/payouts - Record manual settlement
+gatewayDistributorRoutes.post('/api/gateway/distributors/:distributorId/payouts', async (c) => {
+  const distributorId = c.req.param('distributorId');
+  if (!distributorId) {
+    return c.json({ error: 'Distributor ID parameter is required' }, 400);
+  }
+
+  try {
+    const body = await c.req.json();
+    const { amount, currency, txHash } = body;
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return c.json({ error: 'Valid positive amount is required' }, 400);
+    }
+    if (!currency || typeof currency !== 'string') {
+      return c.json({ error: 'Valid currency is required' }, 400);
+    }
+
+    // Verify distributor exists
+    const distExists = await db.select().from(distributors).where(
+      eq(distributors.id, distributorId)
+    ).limit(1);
+    if (distExists.length === 0) {
+      return c.json({ error: 'Distributor not found' }, 404);
+    }
+
+    // Create payout record
+    const result = await db.insert(distributorPayouts).values({
+      distributorId,
+      amount: amount.toString(),
+      currency,
+      txHash: txHash || null,
+      status: txHash ? 'completed' : 'pending',
+      processedAt: txHash ? new Date() : null,
+    }).returning();
+
+    // Mark matching pending commissions as paid
+    if (txHash) {
+      await db.update(distributorCommissions)
+        .set({ status: 'paid' })
+        .where(
+          and(
+            eq(distributorCommissions.distributorId, distributorId),
+            eq(distributorCommissions.currency, currency),
+            eq(distributorCommissions.status, 'pending')
+          )
+        );
+    }
+
+    return c.json({ payout: result[0] }, 201);
+  } catch (error) {
+    console.error('Failed to create payout:', error);
+    return c.json({ error: 'Failed to create payout' }, 500);
+  }
+});
+
 export default gatewayDistributorRoutes;

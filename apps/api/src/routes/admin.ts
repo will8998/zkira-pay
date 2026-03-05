@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { timingSafeEqual } from 'node:crypto';
 import { sha256 } from '@noble/hashes/sha256';
 import { db } from '../db/index.js';
-import { merchants, gatewaySessions, ephemeralWallets, apiKeys } from '../db/schema.js';
+import { merchants, gatewaySessions, ephemeralWallets, apiKeys, users, distributors } from '../db/schema.js';
 import { eq, count, sum, desc, gte, lte, sql, and, like, or } from 'drizzle-orm';
 import { loadConfig } from '../config.js';
 
@@ -571,6 +571,72 @@ adminRoutes.get('/api/admin/merchants', async (c) => {
   } catch (error) {
     console.error('Failed to get merchants:', error);
     return c.json({ error: 'Failed to get merchants' }, 500);
+  }
+});
+
+// POST /api/admin/merchants - Create new merchant (master only)
+adminRoutes.post('/api/admin/merchants', async (c) => {
+  try {
+    const adminRole = c.get('adminRole');
+    if (adminRole !== 'master') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    const body = await c.req.json();
+    const { name, walletAddress, webhookUrl, feePercent, distributorId } = body;
+
+    if (!name || typeof name !== 'string') {
+      return c.json({ error: 'Valid name is required' }, 400);
+    }
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return c.json({ error: 'Valid walletAddress is required' }, 400);
+    }
+
+    // Ensure user record exists (upsert)
+    await db.insert(users).values({
+      walletAddress,
+      firstSeen: new Date(),
+      lastSeen: new Date(),
+      totalPayments: 0,
+      totalVolume: '0',
+    }).onConflictDoNothing();
+
+    // Check for duplicate wallet
+    const existing = await db.select().from(merchants).where(
+      eq(merchants.walletAddress, walletAddress)
+    ).limit(1);
+    if (existing.length > 0) {
+      return c.json({ error: 'Merchant with this wallet address already exists' }, 409);
+    }
+
+    // Validate distributor if provided
+    if (distributorId) {
+      const distExists = await db.select().from(distributors).where(
+        eq(distributors.id, distributorId)
+      ).limit(1);
+      if (distExists.length === 0) {
+        return c.json({ error: 'Distributor not found' }, 404);
+      }
+    }
+
+    // Generate webhook secret
+    const { randomBytes } = await import('node:crypto');
+    const webhookSecret = 'whsec_' + randomBytes(24).toString('hex');
+
+    const result = await db.insert(merchants).values({
+      name,
+      walletAddress,
+      webhookUrl: webhookUrl || null,
+      webhookSecret,
+      feePercent: (feePercent ?? 1).toString(),
+      distributorId: distributorId || null,
+      status: 'active',
+    }).returning();
+
+    return c.json({ merchant: result[0] }, 201);
+  } catch (error) {
+    console.error('Failed to create merchant:', error);
+    return c.json({ error: 'Failed to create merchant' }, 500);
   }
 });
 
