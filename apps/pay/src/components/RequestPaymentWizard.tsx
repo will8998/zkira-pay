@@ -20,45 +20,60 @@ const POLL_INTERVAL_MS = 8000;
 
 type WizardStep = 'select' | 'created' | 'waiting' | 'withdrawing' | 'complete';
 
-// Calculate optimal denomination split using greedy algorithm
+// Calculate optimal denomination split for maximum privacy.
+// Strategy: use the LARGEST denomination that fits, max 2 denomination types.
+// This prevents denomination-fingerprinting attacks.
 function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId): DenominationSet | null {
-  // Get available pools for this chain/token
   const pools = getPoolsForChainAndToken(chain, token);
   if (pools.length === 0) return null;
 
-  // Round amount to nearest multiple of 10
-  const roundedAmount = Math.round(amount / 10) * 10;
-  if (roundedAmount <= 0) return null;
-
-  // Sort pools by denomination (largest first for greedy algorithm)
-  const sortedPools = [...pools].sort((a, b) => Number(BigInt(b.denomination) - BigInt(a.denomination)));
-
-  // Greedy algorithm: use as many large denominations as possible
-  const selections: DenominationSelection[] = [];
-  let remainingAmount = roundedAmount;
-
-  for (const pool of sortedPools) {
-    // Convert denomination to token units (remove decimals)
-    const chainConfig = getChainConfig(chain);
-    const tokenInfo = chainConfig.tokens.find(t => t.id === token);
-    if (!tokenInfo) continue;
-
-    const denomValue = Number(BigInt(pool.denomination)) / Math.pow(10, tokenInfo.decimals);
-    const count = Math.floor(remainingAmount / denomValue);
-
-    if (count > 0) {
-      selections.push({ pool, count });
-      remainingAmount -= count * denomValue;
-    }
-  }
-
-  // Calculate totals
   const chainConfig = getChainConfig(chain);
   const tokenInfo = chainConfig.tokens.find(t => t.id === token);
   if (!tokenInfo) return null;
 
-  const totalRaw = BigInt(Math.round(roundedAmount * Math.pow(10, tokenInfo.decimals)));
-  const totalLabel = `${roundedAmount.toLocaleString()} ${tokenInfo.symbol}`;
+  // Round amount to nearest whole dollar
+  const roundedAmount = Math.round(amount);
+  if (roundedAmount <= 0) return null;
+
+  // Sort pools by denomination (largest first)
+  const sortedPools = [...pools].sort((a, b) => Number(BigInt(b.denomination) - BigInt(a.denomination)));
+
+  // Convert pool denominations to human-readable values
+  const poolValues = sortedPools.map(pool => ({
+    pool,
+    value: Number(BigInt(pool.denomination)) / Math.pow(10, tokenInfo.decimals),
+  }));
+
+  // Find the largest denomination that fits into the amount
+  const primary = poolValues.find(p => p.value <= roundedAmount);
+  if (!primary) return null; // amount too small for any pool
+
+  const selections: DenominationSelection[] = [];
+  const primaryCount = Math.floor(roundedAmount / primary.value);
+  selections.push({ pool: primary.pool, count: primaryCount });
+  let covered = primaryCount * primary.value;
+  let remainder = roundedAmount - covered;
+
+  // If there's a remainder, try ONE smaller denomination (max 2 types total)
+  if (remainder > 0) {
+    // Find the largest denomination that fits the remainder
+    const secondary = poolValues.find(p => p.value <= remainder && p.pool.address !== primary.pool.address);
+    if (secondary) {
+      const secondaryCount = Math.floor(remainder / secondary.value);
+      if (secondaryCount > 0) {
+        selections.push({ pool: secondary.pool, count: secondaryCount });
+        covered += secondaryCount * secondary.value;
+        remainder = roundedAmount - covered;
+      }
+    }
+  }
+
+  // Round remainder to avoid floating point artifacts
+  remainder = Math.round(remainder * 100) / 100;
+
+  const totalRaw = BigInt(Math.round(covered * Math.pow(10, tokenInfo.decimals)));
+  const totalLabel = `${covered.toLocaleString()} ${tokenInfo.symbol}`;
+  const remainderLabel = remainder > 0 ? `${remainder.toLocaleString()} ${tokenInfo.symbol}` : '';
 
   return {
     chain,
@@ -66,6 +81,8 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
     selections,
     totalRaw,
     totalLabel,
+    remainder,
+    remainderLabel,
   };
 }
 
@@ -437,6 +454,24 @@ export function RequestPaymentWizard() {
                     {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
                   </span>
                 </div>
+
+                {/* Remainder warning */}
+                {denomSet.remainder > 0 && (
+                  <div className="flex items-start gap-2 text-xs mb-3 p-2 rounded bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                    <span>⚠️</span>
+                    <div>
+                      <span className="font-bold text-[var(--color-warning-text)]">{denomSet.remainderLabel}</span>
+                      <span className="text-[var(--color-text-secondary)] ml-1">
+                        cannot be covered by pool denominations. Consider rounding to ${(parseFloat(amount) - denomSet.remainder).toLocaleString()} or adding ${((() => {
+                          const nextUp = denomSet.selections[denomSet.selections.length - 1];
+                          const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                          const denomValue = Number(BigInt(nextUp.pool.denomination)) / Math.pow(10, tokenInfo?.decimals || 6);
+                          return denomValue.toLocaleString();
+                        })())} to reach the next clean amount.
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Privacy strength indicator */}
                 {(() => {

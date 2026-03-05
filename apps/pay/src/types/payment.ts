@@ -27,6 +27,10 @@ export interface DenominationSet {
   totalRaw: bigint;
   /** Human-readable total (e.g. "2,500 USDC"). */
   totalLabel: string;
+  /** Amount that cannot be covered by pool denominations (in human-readable units, e.g. 920). */
+  remainder: number;
+  /** Human-readable remainder label (e.g. "920 USDC"). Empty string if no remainder. */
+  remainderLabel: string;
 }
 
 // ──────────────────────────────────────────

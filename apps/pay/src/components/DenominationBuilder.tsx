@@ -57,6 +57,8 @@ export function DenominationBuilder({
       selections,
       totalRaw,
       totalLabel,
+      remainder: 0,
+      remainderLabel: '',
     };
 
     onChange(denominationSet);
