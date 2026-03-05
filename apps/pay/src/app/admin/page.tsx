@@ -37,10 +37,13 @@ export default function AdminOverviewPage() {
   const fetchData = async () => {
     setError(null);
     try {
-      const [statsRes, analyticsRes] = await Promise.all([
-        adminFetch('/api/admin/stats'),
-        adminFetch('/api/admin/analytics')
-      ]);
+      const statsRes = await adminFetch('/api/admin/stats');
+      let analyticsRes: ChartData | null = null;
+      try {
+        analyticsRes = await adminFetch('/api/admin/analytics');
+      } catch {
+        // Analytics endpoint may not exist yet — gracefully degrade
+      }
       
       setStats(statsRes);
       setChartData(analyticsRes);
