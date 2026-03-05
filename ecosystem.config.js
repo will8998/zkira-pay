@@ -10,6 +10,7 @@ module.exports = {
         PORT: 3020,
         NEXT_PUBLIC_API_URL: "http://localhost:3021",
         NEXT_PUBLIC_RELAYER_URL: "http://localhost:3022",
+      },
     },
     {
       name: "zkira-api",
@@ -22,6 +23,7 @@ module.exports = {
         PORT: 3021,
         DATABASE_URL: "postgresql://zkira:zkira_s3cure_2026!@localhost:5432/zkira",
         ADMIN_PASSWORD: "zkira_admin_2026",
+      },
     },
     {
       name: "zkira-relayer",
