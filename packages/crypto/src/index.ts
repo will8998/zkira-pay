@@ -40,8 +40,15 @@ export {
 } from './utils.js';
 
 
-// Poseidon Merkle Tree for ZK circuits
+// Poseidon Merkle Tree for ZK circuits (legacy)
 export {
   PoseidonMerkleTree,
 } from './poseidon.js';
 export type { MerkleProof } from './poseidon.js';
+
+// MiMCSponge Merkle Tree — matches on-chain MerkleTreeWithHistory.sol
+// This is the PRIMARY tree implementation for Tornado Cash-style pools.
+export {
+  MiMCSpongeTree,
+} from './mimcsponge.js';
+export type { MerkleProof as MiMCMerkleProof } from './mimcsponge.js';

@@ -1,19 +1,20 @@
-import { PoseidonMerkleTree } from '@zkira/crypto';
+import { MiMCSpongeTree } from '@zkira/crypto';
 
 /**
- * MerkleTree service that wraps the crypto PoseidonMerkleTree.
+ * MerkleTree service that wraps the MiMCSponge Merkle tree.
  * This service manages the off-chain Merkle tree for the shielded pool.
+ * Uses MiMCSponge hashing to match on-chain MerkleTreeWithHistory.sol.
  */
 export class MerkleTreeService {
-  private tree: PoseidonMerkleTree;
+  private tree: MiMCSpongeTree;
   private initialized: boolean = false;
 
   constructor(levels: number = 20) {
-    this.tree = new PoseidonMerkleTree(levels);
+    this.tree = new MiMCSpongeTree(levels);
   }
 
   /**
-   * Initialize the Merkle tree service.
+   * Initialize the Merkle tree service (loads MiMCSponge WASM).
    */
   async init(): Promise<void> {
     await this.tree.init();
@@ -51,6 +52,16 @@ export class MerkleTreeService {
   }
 
   /**
+   * Check if a root is known (exists in root history).
+   */
+  isKnownRoot(root: bigint): boolean {
+    if (!this.initialized) {
+      throw new Error('MerkleTreeService not initialized');
+    }
+    return this.tree.isKnownRoot(root);
+  }
+
+  /**
    * Generate a Merkle proof for a leaf.
    */
   getProof(leafIndex: number) {
@@ -58,6 +69,26 @@ export class MerkleTreeService {
       throw new Error('MerkleTreeService not initialized');
     }
     return this.tree.getProof(leafIndex);
+  }
+
+  /**
+   * Compute commitment = MiMCSponge(nullifier, secret).
+   */
+  computeCommitment(nullifier: bigint, secret: bigint): bigint {
+    if (!this.initialized) {
+      throw new Error('MerkleTreeService not initialized');
+    }
+    return this.tree.computeCommitment(nullifier, secret);
+  }
+
+  /**
+   * Compute nullifierHash = MiMCSponge(nullifier).
+   */
+  computeNullifierHash(nullifier: bigint): bigint {
+    if (!this.initialized) {
+      throw new Error('MerkleTreeService not initialized');
+    }
+    return this.tree.computeNullifierHash(nullifier);
   }
 
   /**
@@ -71,9 +102,9 @@ export class MerkleTreeService {
   }
 
   /**
-   * Get the underlying PoseidonMerkleTree instance.
+   * Get the underlying MiMCSpongeTree instance.
    */
-  getTree(): PoseidonMerkleTree {
+  getTree(): MiMCSpongeTree {
     return this.tree;
   }
 
