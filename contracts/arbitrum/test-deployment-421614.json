@@ -9,23 +9,23 @@
   },
   "testTokens": {
     "tUSDC": {
-      "token": "0x6d408C98c4252020abf861ca35D1ED938112ba7E",
-      "pool": "0xbFDAb1ca862438f8Ab8b48c02d469AF57FB1dD96",
+      "token": "0x24469622D98ca04AE03fe628Bb0051B76816F897",
+      "pool": "0x00BA184048Bed7988E2191AdBA252Edacd0AD2B6",
       "denomination": "1000000",
       "decimals": 6
     },
     "tUSDT": {
-      "token": "0xDC27e984F3cB83E49035829F988F759A8aC9962E",
-      "pool": "0x33A6255713C9aBdAB917D359Ed086eA17a8C6D8D",
+      "token": "0xa268D3C2D60Db78F6834C92A3c7443EEd0827F48",
+      "pool": "0x31294dC6f8ff9ccA16C83Df0024d9363697e1E77",
       "denomination": "1000000",
       "decimals": 6
     },
     "tDAI": {
-      "token": "0x4c14E2a93535979E378a36D7D768b3aA69a197e2",
-      "pool": "0xDeD4D6b4A33768ca627252c3583AA9b57BF6bD3e",
+      "token": "0xBECcf08803742f4205a0b49bb749F08f6b406574",
+      "pool": "0x3e0cfFf8732aF675f62732C3872E20096BbFaeB4",
       "denomination": "1000000000000000000",
       "decimals": 18
     }
   },
-  "deployedAt": "2026-03-05T21:40:12.328Z"
+  "deployedAt": "2026-03-05T21:52:09.888Z"
 }

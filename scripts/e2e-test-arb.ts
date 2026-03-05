@@ -18,22 +18,22 @@ const PROTOCOL_FEE_BPS = 100; // 1%
 const TEST_TOKENS = [
   {
     name: 'tUSDC',
-    tokenAddress: '0x6d408C98c4252020abf861ca35D1ED938112ba7E',
-    poolAddress: '0xbFDAb1ca862438f8Ab8b48c02d469AF57FB1dD96',
+    tokenAddress: '0x24469622D98ca04AE03fe628Bb0051B76816F897',
+    poolAddress: '0x8E2De22e4cD6be8EbFf95205d40A343A2a852E45',
     denomination: 1000000n, // 1 USDC (6 decimals)
     decimals: 6,
   },
   {
     name: 'tUSDT',
-    tokenAddress: '0xDC27e984F3cB83E49035829F988F759A8aC9962E',
-    poolAddress: '0x33A6255713C9aBdAB917D359Ed086eA17a8C6D8D',
+    tokenAddress: '0xa268D3C2D60Db78F6834C92A3c7443EEd0827F48',
+    poolAddress: '0x451E8fF57fB7e5bCF3c830EEA7EA6a792332f03d',
     denomination: 1000000n, // 1 USDT (6 decimals)
     decimals: 6,
   },
   {
     name: 'tDAI',
-    tokenAddress: '0x4c14E2a93535979E378a36D7D768b3aA69a197e2',
-    poolAddress: '0xDeD4D6b4A33768ca627252c3583AA9b57BF6bD3e',
+    tokenAddress: '0xBECcf08803742f4205a0b49bb749F08f6b406574',
+    poolAddress: '0xcA23279D6027DFd4eC686C7C6Ce87D0dB507B588',
     denomination: 1000000000000000000n, // 1 DAI (18 decimals)
     decimals: 18,
   },
@@ -48,6 +48,8 @@ const POOL_ABI = [
   'function isSpent(bytes32 _nullifierHash) external view returns (bool)',
   'function denomination() external view returns (uint256)',
   'function nextIndex() external view returns (uint32)',
+  'function getLastRoot() external view returns (bytes32)',
+  'function isKnownRoot(bytes32 _root) external view returns (bool)',
 ];
 
 const ERC20_ABI = [
@@ -71,14 +73,39 @@ interface DepositData {
 
 // ── Helper Functions ───────────────────────────────────────────────────────
 
+// Pre-computed zeros from the contract (MerkleTreeWithHistory.zeros(i))
+const CONTRACT_ZEROS: bigint[] = [
+  0x2fe54c60d3acabf3343a35b6eba15db4821b340f76e741e2249685ed4899af6cn,
+  0x256a6135777eee2fd26f54b8b7037a25439d5235caee224154186d2b8a52e31dn,
+  0x1151949895e82ab19924de92c40a3d6f7bcb60d92b00504b8199613683f0c200n,
+  0x20121ee811489ff8d61f09fb89e313f14959a0f28bb428a20dba6b0b068b3bdbn,
+  0x0a89ca6ffa14cc462cfedb842c30ed221a50a3d6bf022a6a57dc82ab24c157c9n,
+  0x24ca05c2b5cd42e890d6be94c68d0689f4f21c9cec9c0f13fe41d566dfb54959n,
+  0x1ccb97c932565a92c60156bdba2d08f3bf1377464e025cee765679e604a7315cn,
+  0x19156fbd7d1a8bf5cba8909367de1b624534ebab4f0f79e003bccdd1b182bdb4n,
+  0x261af8c1f0912e465744641409f622d466c3920ac6e5ff37e36604cb11dfff80n,
+  0x0058459724ff6ca5a1652fcbc3e82b93895cf08e975b19beab3f54c217d1c007n,
+  0x1f04ef20dee48d39984d8eabe768a70eafa6310ad20849d4573c3c40c2ad1e30n,
+  0x1bea3dec5dab51567ce7e200a30f7ba6d4276aeaa53e2686f962a46c66d511e5n,
+  0x0ee0f941e2da4b9e31c3ca97a40d8fa9ce68d97c084177071b3cb46cd3372f0fn,
+  0x1ca9503e8935884501bbaf20be14eb4c46b89772c97b96e3b2ebf3a36a948bbdn,
+  0x133a80e30697cd55d8f7d4b0965b7be24057ba5dc3da898ee2187232446cb108n,
+  0x13e6d8fc88839ed76e182c2a779af5b2c0da9dd18c90427a644f7e148a6253b6n,
+  0x1eb16b057a477f4bc8f572ea6bee39561098f78f15bfb3699dcbb7bd8db61854n,
+  0x0da2cb16a1ceaabf1c16b838f7a9e3f2a3a3088d9e0a6debaa748114620696ean,
+  0x24a3b3d822420b14b5d8cb6c28a574f01e98ea9e940551d2ebd75cee12649f9dn,
+  0x198622acbd783d1b0d9064105b1fc8e4d8889de95c4c519b3f635809fe6afc05n,
+];
+
 /**
- * Build MiMC Merkle tree from on-chain deposit events
+ * Build sparse MiMC Merkle tree mirroring the on-chain _insert() logic.
+ * Uses CONTRACT_ZEROS (pre-computed zeros matching the contract) for empty siblings.
  */
 async function buildMerkleTree(
   poolAddress: string,
   provider: JsonRpcProvider,
   mimcSponge: any
-): Promise<{ root: bigint; layers: bigint[][]; zeros: bigint[] }> {
+): Promise<{ root: bigint; pathElements: Map<string, bigint>; deposits: Array<{ commitment: bigint; leafIndex: number }> }> {
   const poolContract = new Contract(poolAddress, POOL_ABI, provider);
   const events = await poolContract.queryFilter(poolContract.filters.Deposit(), 0, 'latest');
 
@@ -93,62 +120,84 @@ async function buildMerkleTree(
   }
   deposits.sort((a, b) => a.leafIndex - b.leafIndex);
 
-  // Pre-compute zero values
-  const zeros: bigint[] = [0n];
-  for (let i = 1; i <= TREE_DEPTH; i++) {
-    zeros[i] = mimcSponge.F.toObject(
-      mimcSponge.multiHash([zeros[i - 1], zeros[i - 1]], 0n, 1)
-    );
-  }
+  // Sparse tree: only store nodes that differ from zeros
+  // Key format: `${level}:${index}`
+  const nodes = new Map<string, bigint>();
 
-  // Build layer 0 (leaves)
-  const layers: bigint[][] = [[]];
+  // Insert each deposit leaf
   for (const dep of deposits) {
-    layers[0].push(dep.commitment);
+    nodes.set(`0:${dep.leafIndex}`, dep.commitment);
   }
 
-  // Pad to full tree size
-  const treeSize = 1 << TREE_DEPTH;
-  while (layers[0].length < treeSize) {
-    layers[0].push(0n);
+  // Compute only the nodes on paths from leaves to root
+  // Mirroring the contract's _insert logic: process each insertion in order
+  // The contract's filledSubtrees tracks the last non-zero subtree at each level
+  const filledSubtrees: bigint[] = new Array(TREE_DEPTH).fill(0n);
+  for (let i = 0; i < TREE_DEPTH; i++) {
+    filledSubtrees[i] = CONTRACT_ZEROS[i];
   }
 
-  // Build upper layers
-  for (let level = 1; level <= TREE_DEPTH; level++) {
-    layers[level] = [];
-    const prev = layers[level - 1];
-    for (let i = 0; i < prev.length; i += 2) {
-      const left = prev[i];
-      const right = prev[i + 1] ?? zeros[level - 1];
-      layers[level].push(
-        mimcSponge.F.toObject(mimcSponge.multiHash([left, right], 0n, 1))
+  let currentRoot = 0n;
+
+  for (const dep of deposits) {
+    let currentIndex = dep.leafIndex;
+    let currentLevelHash = dep.commitment;
+
+    for (let i = 0; i < TREE_DEPTH; i++) {
+      let left: bigint;
+      let right: bigint;
+
+      if (currentIndex % 2 === 0) {
+        left = currentLevelHash;
+        right = CONTRACT_ZEROS[i];
+        filledSubtrees[i] = currentLevelHash;
+      } else {
+        left = filledSubtrees[i];
+        right = currentLevelHash;
+      }
+
+      // Store siblings for path extraction
+      const parentIndex = Math.floor(currentIndex / 2);
+      if (currentIndex % 2 === 0) {
+        nodes.set(`${i}:${currentIndex + 1}`, right);
+      } else {
+        nodes.set(`${i}:${currentIndex - 1}`, left);
+      }
+
+      // Hash left and right to get parent
+      currentLevelHash = mimcSponge.F.toObject(
+        mimcSponge.multiHash([left, right], 0n, 1)
       );
+      nodes.set(`${i + 1}:${parentIndex}`, currentLevelHash);
+      currentIndex = parentIndex;
     }
+
+    currentRoot = currentLevelHash;
   }
 
-  return { root: layers[TREE_DEPTH][0], layers, zeros };
+  return { root: currentRoot, pathElements: nodes, deposits };
 }
 
 /**
- * Extract Merkle path for a given leaf index
+ * Extract Merkle path for a given leaf index from sparse tree
  */
 function extractPath(
   leafIndex: number,
-  layers: bigint[][],
-  zeros: bigint[]
+  pathElements: Map<string, bigint>
 ): { pathElements: bigint[]; pathIndices: number[] } {
-  const pathElements: bigint[] = [];
-  const pathIndices: number[] = [];
+  const elements: bigint[] = [];
+  const indices: number[] = [];
   let idx = leafIndex;
 
   for (let level = 0; level < TREE_DEPTH; level++) {
     const siblingIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
-    pathElements.push(layers[level][siblingIdx] ?? zeros[level]);
-    pathIndices.push(idx % 2);
+    const sibling = pathElements.get(`${level}:${siblingIdx}`) ?? CONTRACT_ZEROS[level];
+    elements.push(sibling);
+    indices.push(idx % 2);
     idx = Math.floor(idx / 2);
   }
 
-  return { pathElements, pathIndices };
+  return { pathElements: elements, pathIndices: indices };
 }
 
 /**
@@ -256,8 +305,18 @@ async function testTokenFlow(
     console.log('   Building Merkle tree...');
     const tree = await buildMerkleTree(poolAddr, provider, mimcSponge);
     
+    // DEBUG: Compare computed root with on-chain root
+    const onChainRoot = await poolContract.getLastRoot();
+    const computedRootHex = '0x' + BigInt(tree.root).toString(16).padStart(64, '0');
+    console.log(`   On-chain root:  ${onChainRoot}`);
+    console.log(`   Computed root:  ${computedRootHex}`);
+    console.log(`   Roots match:    ${onChainRoot.toLowerCase() === computedRootHex.toLowerCase()}`);
+    const isKnown = await poolContract.isKnownRoot(computedRootHex);
+    console.log(`   isKnownRoot:    ${isKnown}`);
+    console.log(`   Deposits found: ${tree.deposits.length}`);
+    
     // 2. Extract Merkle path
-    const { pathElements, pathIndices } = extractPath(leafIndex, tree.layers, tree.zeros);
+    const { pathElements, pathIndices } = extractPath(leafIndex, tree.pathElements);
     
     // 3. Compute nullifierHash
     const nullifierHash = mimcSponge.F.toObject(
@@ -293,7 +352,17 @@ async function testTokenFlow(
       zkeyPath
     );
     
-    // 7. Encode proof for Solidity
+    // DEBUG: Verify proof locally first
+    const vkeyPath = path.join(__dirname, '..', 'apps', 'pay', 'public', 'circuits', 'verification_key.json');
+    const vkey = JSON.parse(require('fs').readFileSync(vkeyPath, 'utf8'));
+    const isValid = await snarkjs.groth16.verify(vkey, publicSignals, proof);
+    console.log(`   Local proof verification: ${isValid ? '✅ VALID' : '❌ INVALID'}`);
+    console.log(`   Public signals: ${JSON.stringify(publicSignals)}`);
+    if (!isValid) {
+      throw new Error('ZK proof failed local verification');
+    }
+    
+    // 7. Encode proof for Solidity (abi.encode(uint256[8]))
     const proofElements = [
       proof.pi_a[0], proof.pi_a[1],
       proof.pi_b[0][1], proof.pi_b[0][0],
@@ -333,12 +402,23 @@ async function testTokenFlow(
     console.log(`   ✅ Recipient received ${Number(recipientBalance) / (10 ** decimals)} ${name} (correct)`);
     
     // 2. Check treasury received protocol fee
+    // Note: deployer IS the treasury, so net change = -denomination + protocolFee
+    // Instead, check the pool's balance decreased by denomination (tokens were transferred out)
     const finalTreasuryBalance = await tokenContract.balanceOf(TREASURY_ADDRESS);
-    const treasuryIncrease = finalTreasuryBalance - initialTreasuryBalance;
-    if (treasuryIncrease !== protocolFee) {
-      throw new Error(`Treasury fee mismatch. Expected: ${protocolFee}, Got: ${treasuryIncrease}`);
+    if (TREASURY_ADDRESS.toLowerCase() === wallet.address.toLowerCase()) {
+      // Deployer = treasury: net = initial - denomination + protocolFee
+      const expectedTreasuryBalance = initialTreasuryBalance - denomination + protocolFee;
+      if (finalTreasuryBalance !== expectedTreasuryBalance) {
+        throw new Error(`Treasury balance mismatch. Expected: ${expectedTreasuryBalance}, Got: ${finalTreasuryBalance}`);
+      }
+      console.log(`   ✅ Treasury (deployer) balance correct: net -${Number(denomination - protocolFee) / (10 ** decimals)} ${name} (deposit - fee received)`);
+    } else {
+      const treasuryIncrease = finalTreasuryBalance - initialTreasuryBalance;
+      if (treasuryIncrease !== protocolFee) {
+        throw new Error(`Treasury fee mismatch. Expected: ${protocolFee}, Got: ${treasuryIncrease}`);
+      }
+      console.log(`   ✅ Treasury received ${Number(protocolFee) / (10 ** decimals)} ${name} fee (correct)`);
     }
-    console.log(`   ✅ Treasury received ${Number(protocolFee) / (10 ** decimals)} ${name} fee (correct)`);
     
     // 3. Check nullifier is spent
     const isSpent = await poolContract.isSpent('0x' + BigInt(nullifierHash).toString(16).padStart(64, '0'));

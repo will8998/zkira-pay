@@ -12,7 +12,7 @@ pragma solidity ^0.7.0;
  *   2. Call deployHasher(bytecode) where bytecode is the output of:
  *      import { createCode } from 'circomlibjs/src/mimcsponge_gencontract.js';
  *      createCode('mimcsponge', 220)
- *   3. The returned address implements IHasher.MiMCSponge(uint256, uint256)
+ *   3. The returned address implements IHasher.MiMCSponge(uint256, uint256, uint256)
  *
  * The bytecode is passed as a parameter (not embedded) because it's ~11.7KB
  * which would push this contract near the 24KB deployment limit.
