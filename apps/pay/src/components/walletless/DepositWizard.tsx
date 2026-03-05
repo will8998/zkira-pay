@@ -72,8 +72,8 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
   /**
    * Poll the USDC balance of the ephemeral wallet until denomination is met.
    */
-  const pollForFunds = useCallback(async (signal: AbortSignal): Promise<void> => {
-    if (!address) throw new Error('No wallet address');
+  const pollForFunds = useCallback(async (signal: AbortSignal, walletAddress: string): Promise<void> => {
+    if (!walletAddress) throw new Error('No wallet address');
 
     const { JsonRpcProvider, Contract } = await import('ethers');
     const provider = new JsonRpcProvider(rpcUrl);
@@ -84,7 +84,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
     while (!signal.aborted) {
       try {
         const usdcContract = new Contract(tokenAddress, usdcAbi, provider);
-        const balance: bigint = await usdcContract.balanceOf(address);
+        const balance: bigint = await usdcContract.balanceOf(walletAddress);
         if (balance >= denominationRaw) {
           return;
         }
@@ -100,7 +100,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
       });
     }
     throw new DOMException('Aborted', 'AbortError');
-  }, [address, denominationRaw, rpcUrl, tokenAddress]);
+  }, [denominationRaw, rpcUrl, tokenAddress]);
 
   /**
    * Generate a random bigint from 31 bytes (fits in BN254 field).
@@ -140,7 +140,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
 
     try {
       // Stage 1: Wait for USDC funds
-      await pollForFunds(controller.signal);
+      await pollForFunds(controller.signal, walletAddress);
 
       // Funds detected — move to depositing
       setIsPolling(false);

@@ -165,8 +165,7 @@ const POOL_ABI = [
       {"name": "_recipient", "type": "address"},
       {"name": "_relayer", "type": "address"},
       {"name": "_fee", "type": "uint256"},
-      {"name": "_refund", "type": "uint256"},
-      {"name": "_referrer", "type": "address"}
+      {"name": "_refund", "type": "uint256"}
     ],
     "outputs": []
   },
@@ -373,14 +372,13 @@ export class TronPoolClient {
    *
    * Rebuilds the Merkle tree from on-chain Deposit events, generates a
    * Groth16 proof matching the Tornado Cash circuit, and calls
-   * Pool.withdraw(proof, root, nullifierHash, recipient, relayer, fee, refund, referrer).
+   * Pool.withdraw(proof, root, nullifierHash, recipient, relayer, fee, refund).
    *
    * @param note - The pool note from a previous deposit
    * @param recipientAddress - Tron address (base58) to receive the withdrawal
    * @param relayerAddress - Tron address of the relayer (or recipient if self-relay)
    * @param fee - Fee amount for the relayer (0n if self-relay)
    * @param refund - Refund amount (typically 0n)
-   * @param referrer - Tron address of the referrer, or zero address if none
    * @returns Withdrawal result containing transaction hash and nullifier hash
    */
   async withdraw(
@@ -388,8 +386,7 @@ export class TronPoolClient {
     recipientAddress: string,
     relayerAddress: string,
     fee: bigint,
-    refund: bigint,
-    referrer: string
+    refund: bigint
   ): Promise<WithdrawResult> {
     // Rebuild the Merkle tree from on-chain deposit events
     const tree = await this.rebuildTree();
@@ -448,7 +445,7 @@ export class TronPoolClient {
     // Get pool contract
     const contract = await tronWeb.contract().at(this.poolAddress);
 
-    // Call contract withdraw function (8 params including referrer)
+    // Call contract withdraw function (7 params)
     const result = await contract.withdraw(
       proofHex,
       bigIntToBytes32Hex(root),
@@ -456,8 +453,7 @@ export class TronPoolClient {
       recipientAddress,
       relayerAddress,
       fee,
-      refund,
-      referrer
+      refund
     ).send({ feeLimit: 200_000_000 });
 
     return { txHash: result, nullifierHash };

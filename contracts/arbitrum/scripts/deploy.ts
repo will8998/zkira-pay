@@ -2,10 +2,20 @@ import { ethers } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
-// Arbitrum token addresses
-const USDC_ADDRESS = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // Native USDC on Arbitrum
-const DAI_ADDRESS = "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"; // DAI on Arbitrum
-const USDT_ADDRESS = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"; // USDT (USDT0) on Arbitrum
+// === Mainnet token addresses (Arbitrum One) ===
+const MAINNET_TOKENS = {
+  USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  DAI: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+  USDT: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+};
+
+// === Testnet token addresses (Arbitrum Sepolia — Aave V3 faucet tokens) ===
+const TESTNET_TOKENS = {
+  USDC: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", // Aave faucet USDC (6 decimals)
+  DAI: "0x9bc8388dd439fa3365b1f78a81242adbb4677759",  // Aave faucet DAI (18 decimals)
+  USDT: "0x93d67359a0f6f117150a70fdde6bb96782497248", // Aave faucet USDT (6 decimals)
+};
+
 const CHAINALYSIS_ORACLE = "0x40C57923924B5c5c5455c48D93317139ADDaC8fb";
 const MERKLE_TREE_HEIGHT = 20;
 
@@ -20,51 +30,84 @@ interface TokenConfig {
   denominations: Record<string, bigint>;
 }
 
-// Casino-scale denominations: $10 → $1,000,000
-const TOKENS: TokenConfig[] = [
-  {
-    name: "USDC",
-    address: USDC_ADDRESS,
-    decimals: 6,
-    hasBlacklistCheck: true, // Circle's isBlacklisted()
-    denominations: {
-      "10_USDC": 10_000_000n,
-      "100_USDC": 100_000_000n,
-      "1000_USDC": 1_000_000_000n,
-      "10000_USDC": 10_000_000_000n,
-      "100000_USDC": 100_000_000_000n,
-      "1000000_USDC": 1_000_000_000_000n,
+function getTokens(isMainnet: boolean): TokenConfig[] {
+  const addrs = isMainnet ? MAINNET_TOKENS : TESTNET_TOKENS;
+
+  return [
+    {
+      name: "USDC",
+      address: addrs.USDC,
+      decimals: 6,
+      hasBlacklistCheck: isMainnet,
+      denominations: {
+        "1_USDC": 1_000_000n,
+        "5_USDC": 5_000_000n,
+        "10_USDC": 10_000_000n,
+        "25_USDC": 25_000_000n,
+        "50_USDC": 50_000_000n,
+        "100_USDC": 100_000_000n,
+        "250_USDC": 250_000_000n,
+        "500_USDC": 500_000_000n,
+        "1000_USDC": 1_000_000_000n,
+        "2500_USDC": 2_500_000_000n,
+        "5000_USDC": 5_000_000_000n,
+        "10000_USDC": 10_000_000_000n,
+        "25000_USDC": 25_000_000_000n,
+        "50000_USDC": 50_000_000_000n,
+        "100000_USDC": 100_000_000_000n,
+        "1000000_USDC": 1_000_000_000_000n,
+      },
     },
-  },
-  {
-    name: "USDT",
-    address: USDT_ADDRESS,
-    decimals: 6,
-    hasBlacklistCheck: false, // USDT0 uses isBlocked(), different interface - skip
-    denominations: {
-      "10_USDT": 10_000_000n,
-      "100_USDT": 100_000_000n,
-      "1000_USDT": 1_000_000_000n,
-      "10000_USDT": 10_000_000_000n,
-      "100000_USDT": 100_000_000_000n,
-      "1000000_USDT": 1_000_000_000_000n,
+    {
+      name: "USDT",
+      address: addrs.USDT,
+      decimals: 6,
+      hasBlacklistCheck: false,
+      denominations: {
+        "1_USDT": 1_000_000n,
+        "5_USDT": 5_000_000n,
+        "10_USDT": 10_000_000n,
+        "25_USDT": 25_000_000n,
+        "50_USDT": 50_000_000n,
+        "100_USDT": 100_000_000n,
+        "250_USDT": 250_000_000n,
+        "500_USDT": 500_000_000n,
+        "1000_USDT": 1_000_000_000n,
+        "2500_USDT": 2_500_000_000n,
+        "5000_USDT": 5_000_000_000n,
+        "10000_USDT": 10_000_000_000n,
+        "25000_USDT": 25_000_000_000n,
+        "50000_USDT": 50_000_000_000n,
+        "100000_USDT": 100_000_000_000n,
+        "1000000_USDT": 1_000_000_000_000n,
+      },
     },
-  },
-  {
-    name: "DAI",
-    address: DAI_ADDRESS,
-    decimals: 18,
-    hasBlacklistCheck: false, // No blacklist
-    denominations: {
-      "10_DAI": 10_000_000_000_000_000_000n,           // 10e18
-      "100_DAI": 100_000_000_000_000_000_000n,          // 100e18
-      "1000_DAI": 1_000_000_000_000_000_000_000n,       // 1000e18
-      "10000_DAI": 10_000_000_000_000_000_000_000n,     // 10000e18
-      "100000_DAI": 100_000_000_000_000_000_000_000n,   // 100000e18
-      "1000000_DAI": 1_000_000_000_000_000_000_000_000n, // 1000000e18
+    {
+      name: "DAI",
+      address: addrs.DAI,
+      decimals: 18,
+      hasBlacklistCheck: false,
+      denominations: {
+        "1_DAI": 1_000_000_000_000_000_000n,
+        "5_DAI": 5_000_000_000_000_000_000n,
+        "10_DAI": 10_000_000_000_000_000_000n,
+        "25_DAI": 25_000_000_000_000_000_000n,
+        "50_DAI": 50_000_000_000_000_000_000n,
+        "100_DAI": 100_000_000_000_000_000_000n,
+        "250_DAI": 250_000_000_000_000_000_000n,
+        "500_DAI": 500_000_000_000_000_000_000n,
+        "1000_DAI": 1_000_000_000_000_000_000_000n,
+        "2500_DAI": 2_500_000_000_000_000_000_000n,
+        "5000_DAI": 5_000_000_000_000_000_000_000n,
+        "10000_DAI": 10_000_000_000_000_000_000_000n,
+        "25000_DAI": 25_000_000_000_000_000_000_000n,
+        "50000_DAI": 50_000_000_000_000_000_000_000n,
+        "100000_DAI": 100_000_000_000_000_000_000_000n,
+        "1000000_DAI": 1_000_000_000_000_000_000_000_000n,
+      },
     },
-  },
-];
+  ];
+}
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -73,10 +116,14 @@ async function main() {
   console.log("Deploying with:", deployer.address);
   console.log("Balance:", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "ETH");
 
-  // 1. Deploy SanctionsOracle (or use Chainalysis on mainnet)
+  // Detect network
   const network = await ethers.provider.getNetwork();
-  let sanctionsOracleAddress: string;
+  const isMainnet = network.chainId === 42161n;
+  const tokens = getTokens(isMainnet);
+  console.log(`Network: ${isMainnet ? 'Arbitrum One (mainnet)' : 'Arbitrum Sepolia (testnet)'}`);
 
+  // 1. Deploy SanctionsOracle (or use Chainalysis on mainnet)
+  let sanctionsOracleAddress: string;
   if (network.chainId === 42161n) {
     // Mainnet: use Chainalysis oracle
     sanctionsOracleAddress = CHAINALYSIS_ORACLE;
@@ -140,7 +187,7 @@ async function main() {
   // 4. Deploy ERC20Pool for each token and denomination
   const deployedPools: Record<string, Record<string, string>> = {};
 
-  for (const token of TOKENS) {
+  for (const token of tokens) {
     deployedPools[token.name] = {};
     console.log(`\n--- Deploying ${token.name} pools ---`);
     

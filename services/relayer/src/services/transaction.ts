@@ -67,7 +67,6 @@ export class TransactionValidator {
     relayer: string;
     fee: string;
     refund: string;
-    referrer: string;
     poolAddress: string;
   }): { valid: boolean; error?: string } {
     if (!this.isValidHexBytes(params.proof)) {
@@ -96,10 +95,6 @@ export class TransactionValidator {
 
     if (!this.isValidUint256(params.refund)) {
       return { valid: false, error: 'Invalid refund (must be uint256 decimal string)' };
-    }
-
-    if (!this.isValidAddress(params.referrer)) {
-      return { valid: false, error: 'Invalid referrer address' };
     }
 
     if (!this.isAllowedPool(params.poolAddress)) {

@@ -23,7 +23,7 @@ export async function validateWithdrawRequest(c: Context, next: Next) {
     // Validate required fields exist and are strings
     const requiredFields = [
       'proof', 'root', 'nullifierHash', 'recipient',
-      'relayer', 'fee', 'refund', 'referrer', 'poolAddress',
+      'relayer', 'fee', 'refund', 'poolAddress',
     ] as const;
 
     for (const field of requiredFields) {
@@ -73,16 +73,6 @@ export async function validateWithdrawRequest(c: Context, next: Next) {
       );
     }
 
-    if (!isAddress(body.referrer)) {
-      return c.json(
-        {
-          success: false,
-          error: 'Invalid referrer address',
-          code: 'INVALID_REFERRER',
-        },
-        400,
-      );
-    }
 
     // Store validated body in context
     c.set('validatedBody', body);

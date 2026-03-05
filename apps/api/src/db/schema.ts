@@ -460,3 +460,24 @@ export const distributorPayouts = pgTable('distributor_payouts', {
   distributorIdIdx: index('distributor_payouts_distributor_id_idx').on(table.distributorId),
   statusIdx: index('distributor_payouts_status_idx').on(table.status),
 }));
+
+// ═══════════════════════════════════════════════════════════
+// PARTNER (WHITELABEL) WITHDRAWAL TRACKING
+// ═══════════════════════════════════════════════════════════
+
+// Tracks every withdrawal that came through a whitelabel partner's frontend.
+// Used for volume reporting and revenue share calculations.
+export const partnerWithdrawals = pgTable('partner_withdrawals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  distributorId: uuid('distributor_id').notNull().references(() => distributors.id),
+  poolAddress: text('pool_address').notNull(),
+  txHash: text('tx_hash').notNull().unique(),
+  recipient: text('recipient').notNull(),
+  chain: text('chain').notNull(), // 'arbitrum' | 'tron'
+  denomination: numeric('denomination', { precision: 20, scale: 6 }), // Pool denomination (resolved async)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  distributorIdIdx: index('partner_withdrawals_distributor_id_idx').on(table.distributorId),
+  chainIdx: index('partner_withdrawals_chain_idx').on(table.chain),
+  createdAtIdx: index('partner_withdrawals_created_at_idx').on(table.createdAt),
+}));

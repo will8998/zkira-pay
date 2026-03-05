@@ -12,10 +12,10 @@ export interface WhitelabelConfig {
   primaryColor: string;
   /** Footer text */
   footerText: string;
-  /** Partner referrer address for withdrawal fee splitting */
-  referrerAddress: string;
   /** Whether this is a whitelabel deployment */
   isWhitelabel: boolean;
+  /** Partner/distributor ID for volume tracking (UUID from distributors table) */
+  partnerId: string | null;
 }
 
 /**
@@ -28,8 +28,8 @@ export interface WhitelabelConfig {
  * NEXT_PUBLIC_LOGO_URL="https://betshield.com/logo.svg"
  * NEXT_PUBLIC_PRIMARY_COLOR="#10b981"
  * NEXT_PUBLIC_FOOTER_TEXT="© 2026 BetShield. Powered by ZKIRA."
- * NEXT_PUBLIC_REFERRER_ADDRESS="0x1234...partner_address"
  * NEXT_PUBLIC_IS_WHITELABEL=true
+ * NEXT_PUBLIC_PARTNER_ID="uuid-of-distributor"
  * ```
  */
 export function getWhitelabelConfig(): WhitelabelConfig {
@@ -38,8 +38,8 @@ export function getWhitelabelConfig(): WhitelabelConfig {
     logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || '/logo.svg',
     primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#6366f1',
     footerText: process.env.NEXT_PUBLIC_FOOTER_TEXT || '© 2026 ZKIRA Pay. Private payments on Arbitrum.',
-    referrerAddress: process.env.NEXT_PUBLIC_REFERRER_ADDRESS || '0x0000000000000000000000000000000000000000',
     isWhitelabel: process.env.NEXT_PUBLIC_IS_WHITELABEL === 'true',
+    partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || null,
   };
 }
 

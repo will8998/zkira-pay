@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
+import { CodeBlock } from '@/components/learn/CodeBlock';
 
 export default function LearnPage() {
-  const t = useTranslations('learnPage');
+  const t = useTranslations('learnHub');
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
@@ -16,10 +17,10 @@ export default function LearnPage() {
       {/* Hero Section */}
       <section className="mb-12">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--color-text)] mb-4 font-[family-name:var(--font-sans)]">
-          Everything you need to build with ZKIRA
+          {t('heroTitle')}
         </h1>
         <p className="text-lg text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-          From stealth address fundamentals to production API integration — master private payments on Solana.
+          {t('heroSubtitle')}
         </p>
       </section>
 
@@ -40,33 +41,10 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  Documentation
+                  {t('documentationTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Comprehensive guides covering stealth addresses, payment flows, SDK integration, and Solana program architecture.
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          {/* Use Cases Card */}
-          <Link 
-            href="/learn/use-cases"
-            className="card-interactive bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all p-6 block animate-entrance"
-            style={{ animationDelay: '100ms' }}
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-6 h-6">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 1l2.5 7h7L13 12.5l2.5 7L9 15l-6.5 4.5L5 12.5 0.5 8h7L9 1z" fill="currentColor"/>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  Use Cases
-                </h3>
-                <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Real-world applications: private payroll, anonymous donations, escrow services, multi-sig treasury, and e-commerce.
+                  {t('documentationDesc')}
                 </p>
               </div>
             </div>
@@ -76,7 +54,7 @@ export default function LearnPage() {
           <Link 
             href="/learn/api"
             className="card-interactive bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all p-6 block animate-entrance"
-            style={{ animationDelay: '200ms' }}
+            style={{ animationDelay: '100ms' }}
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-6 h-6">
@@ -86,10 +64,33 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  API Reference
+                  {t('apiReferenceTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Complete REST API and TypeScript SDK reference with endpoints, parameters, responses, and code examples.
+                  {t('apiReferenceDesc')}
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Use Cases Card */}
+          <Link 
+            href="/learn/use-cases"
+            className="card-interactive bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all p-6 block animate-entrance"
+            style={{ animationDelay: '200ms' }}
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-6 h-6">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 1l2.5 7h7L13 12.5l2.5 7L9 15l-6.5 4.5L5 12.5 0.5 8h7L9 1z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
+                  {t('useCasesTitle')}
+                </h3>
+                <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
+                  {t('useCasesDesc')}
                 </p>
               </div>
             </div>
@@ -109,10 +110,56 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  Blog
+                  {t('blogTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Technical deep-dives, protocol updates, privacy research, and insights from the ZKIRA team.
+                  {t('blogDesc')}
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Gateway Integration Card */}
+          <Link 
+            href="/learn/docs#casino-gateway"
+            className="card-interactive bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all p-6 block animate-entrance"
+            style={{ animationDelay: '400ms' }}
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-6 h-6">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 2L7 7H2l4 3-1.5 5L9 12l4.5 3L12 10l4-3h-5l-2-5z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
+                  {t('gatewayIntegrationTitle')}
+                </h3>
+                <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
+                  {t('gatewayIntegrationDesc')}
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Merchant Guide Card */}
+          <Link 
+            href="/learn/docs#merchant-dashboard"
+            className="card-interactive bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all p-6 block animate-entrance"
+            style={{ animationDelay: '500ms' }}
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-6 h-6">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 3h12v12H3V3zm2 2v8h8V5H5zm1 1h6v1H6V6zm0 2h6v1H6V8zm0 2h4v1H6v-1z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
+                  {t('merchantGuideTitle')}
+                </h3>
+                <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
+                  {t('merchantGuideDesc')}
                 </p>
               </div>
             </div>
@@ -123,56 +170,50 @@ export default function LearnPage() {
       {/* Quick Links Section */}
       <section className="mb-16">
         <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-6 font-[family-name:var(--font-sans)]">
-          Quick Links
+          {t('quickLinksTitle')}
         </h2>
         <div className="flex flex-wrap gap-3">
           <Link 
             href="/learn/docs#getting-started"
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
-            Getting Started
+            {t('quickLinkGettingStarted')}
+          </Link>
+          <Link 
+            href="/learn/docs#casino-gateway"
+            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
+          >
+            {t('quickLinkCasinoGateway')}
           </Link>
           <Link 
             href="/learn/docs#stealth-addresses"
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
-            Stealth Addresses
-          </Link>
-          <Link 
-            href="/learn/api#create-payment"
-            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
-          >
-            Create Payment API
-          </Link>
-          <Link 
-            href="/learn/docs#widget"
-            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
-          >
-            Widget Integration
-          </Link>
-          <Link 
-            href="/learn/use-cases#payroll"
-            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
-          >
-            Private Payroll
+            {t('quickLinkStealthAddresses')}
           </Link>
           <Link 
             href="/learn/docs#shielded-pool"
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
-            Shielded Pool
+            {t('quickLinkShieldedPool')}
           </Link>
           <Link 
-            href="/learn/docs#privacy-transport"
+            href="/learn/docs#merchant-dashboard"
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
-            Privacy Transport
+            {t('quickLinkMerchantDashboard')}
           </Link>
           <Link 
-            href="/learn/docs#timing-defenses"
+            href="/learn/docs#sdk-reference"
             className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
           >
-            Timing Defenses
+            {t('quickLinkSdkReference')}
+          </Link>
+          <Link 
+            href="/learn/api"
+            className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none text-[var(--color-text)] hover:border-[var(--border-subtle-hover)] transition-all font-[family-name:var(--font-sans)]"
+          >
+            {t('quickLinkOpenApiSpec')}
           </Link>
         </div>
       </section>
@@ -180,32 +221,40 @@ export default function LearnPage() {
       {/* Developer Quick Start */}
       <section>
         <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-6 font-[family-name:var(--font-sans)]">
-          Developer Quick Start
+          {t('developerQuickStartTitle')}
         </h2>
         <div className="mb-4">
-          <pre className="bg-[#0A0A0A] border border-[var(--border-subtle)] p-4 font-[family-name:var(--font-mono)] text-[13px] text-[rgba(255,255,255,0.75)] overflow-x-auto">
-{`curl -X POST https://api.zkira.io/v1/payments \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "amount": "1000000",
-    "token": "USDC",
-    "recipient": "stealth_address_here",
-    "metadata": {
-      "description": "Private payment"
-    }
-  }'`}
-          </pre>
+          <CodeBlock 
+            code={`import { GatewayClient } from '@zkira/gateway-client';
+
+// Initialize casino gateway client
+const client = new GatewayClient({
+  baseUrl: 'https://api.zkira.xyz',
+  apiKey: 'YOUR_API_KEY'
+});
+
+// Create deposit session for player
+const session = await client.createSession({
+  playerId: 'player_123',
+  amount: '100',
+  token: 'USDC'
+});
+
+console.log('Deposit URL:', session.depositUrl);
+console.log('Session ID:', session.sessionId);`}
+            language="typescript"
+            title="Gateway Client Quick Start"
+          />
         </div>
         <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-          Get your API key from the{' '}
+          {t('developerQuickStartDesc')}{' '}
           <Link 
             href="/developers" 
             className="text-[#FFFFFF] hover:underline"
           >
-            Developer Dashboard
+            {t('developerDashboardLink')}
           </Link>{' '}
-          to start making private payments.
+          {t('developerQuickStartDesc2')}
         </p>
       </section>
     </div>

@@ -25,8 +25,7 @@ interface TronContract {
     recipient: string, 
     relayer: string, 
     fee: string, 
-    refund: string, 
-    referrer: string
+    refund: string
   ): { send(opts: { feeLimit: number; callValue?: number }): Promise<string> };
   denomination(): { call(): Promise<{ _hex?: string } | bigint | string> };
   nextIndex(): { call(): Promise<{ _hex?: string } | bigint | string> };

@@ -1,6 +1,7 @@
 // Request/Response types for session routes
 export interface SessionCreateRequest {
   address: string; // 0x EVM address
+  partnerId?: string; // Distributor UUID for volume tracking
 }
 
 export interface SessionCreateResponse {
@@ -11,6 +12,7 @@ export interface SessionCreateResponse {
 
 export interface DepositBroadcastRequest {
   signedTransaction: string; // 0x-prefixed hex of signed tx
+  partnerId?: string; // Distributor UUID for volume tracking
 }
 
 export interface WithdrawRelayRequest {
@@ -21,8 +23,8 @@ export interface WithdrawRelayRequest {
   relayer: string;         // 0x address (relayer's own address)
   fee: string;             // uint256 decimal string
   refund: string;          // uint256 decimal string (usually "0")
-  referrer: string;        // 0x address (partner referrer, or zero address)
   poolAddress: string;     // Which pool to withdraw from
+  partnerId?: string;      // Distributor UUID for volume tracking
 }
 
 export interface RelayResponse {
@@ -91,8 +93,8 @@ export interface TronWithdrawRelayRequest {
   relayer: string;         // base58 Tron address (relayer's own)
   fee: string;             // uint256 decimal string
   refund: string;          // uint256 decimal string (usually "0")
-  referrer: string;        // base58 Tron address (or zero)
   poolAddress: string;     // base58 Tron pool address
+  partnerId?: string;      // Distributor UUID for volume tracking
 }
 
 export interface TronRelayResponse {

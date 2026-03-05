@@ -16,7 +16,9 @@ export { ReceiptManager } from './receipt.js';
 // Pool registry (chain/token/denomination mappings)
 export {
   CHAIN_CONFIGS,
+  CHAIN_CONFIGS_TESTNET,
   POOL_REGISTRY,
+  POOL_REGISTRY_TESTNET,
   getChainConfig,
   getAvailableChains,
   getTokensForChain,
@@ -37,9 +39,9 @@ export type {
   EncryptedReceipt,
   TornadoFormattedProof,
   // Multi-chain types
-  TronPoolConfig,
   Chain,
   TokenId,
+  NetworkMode,
   ChainConfig,
   TokenInfo,
   PoolEntry,

@@ -317,6 +317,7 @@ export function WithdrawWizard({ onComplete }: WithdrawWizardProps) {
 
       // Use different relayer endpoints for different chains
       const relayerEndpoint = detectedChain === 'tron' ? '/tron/relay/withdraw' : '/session/withdraw';
+      const whitelabelConfig = getWhitelabelConfig();
       const withdrawResponse = await fetch(`${RELAYER_URL}${relayerEndpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -329,7 +330,7 @@ export function WithdrawWizard({ onComplete }: WithdrawWizardProps) {
           relayer: '0x0000000000000000000000000000000000000000',
           fee: '0',
           refund: '0',
-          referrer: config.referrerAddress, // Partner referrer address for fee splitting
+          ...(whitelabelConfig.partnerId && { partnerId: whitelabelConfig.partnerId }),
         }),
       });
 

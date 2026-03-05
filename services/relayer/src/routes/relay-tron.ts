@@ -29,8 +29,7 @@ interface TronContract {
     recipient: string, 
     relayer: string, 
     fee: string, 
-    refund: string, 
-    referrer: string
+    refund: string
   ): { send(opts: { feeLimit: number; callValue?: number }): Promise<string> };
   isSpent(nullifierHash: string): { call(): Promise<boolean> };
   paused(): { call(): Promise<boolean> };
@@ -113,8 +112,7 @@ export function createTronRelayRoutes(wallet: TronRelayerWallet, config: Relayer
         body.recipient,
         body.relayer,
         body.fee,
-        body.refund,
-        body.referrer
+        body.refund
       ).send({
         feeLimit: 200_000_000, // 200 TRX max energy fee
         callValue: parseInt(body.refund, 10) || 0,
@@ -124,6 +122,23 @@ export function createTronRelayRoutes(wallet: TronRelayerWallet, config: Relayer
         success: true,
         txId,
       };
+
+      // Fire-and-forget: report withdrawal volume to API for partner tracking
+      if (body.partnerId) {
+        fetch(`${config.apiUrl}/api/relayer/withdrawal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Relayer-Secret': config.apiSecret },
+          body: JSON.stringify({
+            partnerId: body.partnerId,
+            poolAddress: body.poolAddress,
+            txHash: txId,
+            recipient: body.recipient,
+            chain: 'tron',
+          }),
+        }).catch((err) => {
+          console.error('Failed to report withdrawal volume:', err);
+        });
+      }
 
       return c.json(response);
     } catch (err) {

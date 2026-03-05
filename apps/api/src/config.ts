@@ -4,6 +4,7 @@ export interface ApiConfig {
   indexIntervalMs: number;
   databaseUrl: string;
   adminPassword: string;
+  relayerSecret: string; // Shared secret for relayer→API calls
 }
 
 export function loadConfig(): ApiConfig {
@@ -21,5 +22,6 @@ export function loadConfig(): ApiConfig {
     indexIntervalMs: parseInt(process.env.INDEX_INTERVAL || '10000', 10),
     databaseUrl,
     adminPassword,
+    relayerSecret: process.env.RELAYER_SECRET || adminPassword, // Falls back to admin password if not set
   };
 }

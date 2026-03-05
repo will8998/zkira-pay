@@ -24,6 +24,10 @@ export interface RelayerConfig {
   tronPrivateKey: string;            // Tron relayer private key (hex)
   tronPoolAddresses: string[];       // Tron USDT pool addresses (base58)
   tronUsdtAddress: string;           // USDT TRC-20: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+
+  // === API integration ===
+  apiUrl: string;                     // ZKIRA API base URL for volume tracking
+  apiSecret: string;                  // Shared secret for relayer→API auth
 }
 
 function getEnvVar(name: string, defaultValue?: string): string {
@@ -80,5 +84,9 @@ export function loadConfig(): RelayerConfig {
     tronPrivateKey: getEnvVar('TRON_PRIVATE_KEY', ''),
     tronPoolAddresses: getEnvArray('TRON_POOL_ADDRESSES', []),
     tronUsdtAddress: getEnvVar('TRON_USDT_ADDRESS', 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'),
+
+    // API integration
+    apiUrl: getEnvVar('API_URL', 'http://localhost:3021'),
+    apiSecret: getEnvVar('RELAYER_SECRET', ''),
   };
 }

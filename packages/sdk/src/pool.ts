@@ -153,7 +153,7 @@ function bigIntToBytes32Hex(value: bigint): string {
 /** Minimal ABI for the ERC20Pool contract. */
 const POOL_ABI = [
   'function deposit(bytes32 _commitment) external payable',
-  'function withdraw(bytes calldata _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient, address payable _relayer, uint256 _fee, uint256 _refund, address _referrer) external payable',
+  'function withdraw(bytes calldata _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient, address payable _relayer, uint256 _fee, uint256 _refund) external payable',
   'function denomination() external view returns (uint256)',
   'function nextIndex() external view returns (uint32)',
   'function getLastRoot() external view returns (bytes32)',
@@ -287,14 +287,13 @@ export class PoolClient {
    *
    * Rebuilds the Merkle tree from on-chain Deposit events, generates a
    * Groth16 proof matching the Tornado Cash circuit, and calls
-   * ERC20Pool.withdraw(proof, root, nullifierHash, recipient, relayer, fee, refund, referrer).
+   * ERC20Pool.withdraw(proof, root, nullifierHash, recipient, relayer, fee, refund).
    *
    * @param note - The pool note from a previous deposit
    * @param recipientAddress - EVM address (0x...) to receive the withdrawal
    * @param relayerAddress - EVM address of the relayer (or recipient if self-relay)
    * @param fee - Fee amount for the relayer (0n if self-relay)
    * @param refund - Refund amount (typically 0n)
-   * @param referrer - EVM address of the referrer, or zero address if none
    * @returns Withdrawal result containing transaction hash and nullifier hash
    */
   async withdraw(
@@ -302,8 +301,7 @@ export class PoolClient {
     recipientAddress: string,
     relayerAddress: string,
     fee: bigint,
-    refund: bigint,
-    referrer: string
+    refund: bigint
   ): Promise<WithdrawResult> {
     // Rebuild the Merkle tree from on-chain deposit events
     const tree = await this.rebuildTree();
@@ -352,7 +350,7 @@ export class PoolClient {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
 
-    // Call contract withdraw function (8 params including referrer)
+    // Call contract withdraw function (7 params)
     const tx = await this.contract.withdraw(
       proofHex,
       bigIntToBytes32Hex(root),
@@ -360,8 +358,7 @@ export class PoolClient {
       recipientAddress,
       relayerAddress,
       fee,
-      refund,
-      referrer
+      refund
     );
     const receipt = await tx.wait();
 

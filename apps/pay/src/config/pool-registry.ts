@@ -8,36 +8,78 @@
 
 import {
   CHAIN_CONFIGS,
+  CHAIN_CONFIGS_TESTNET,
   POOL_REGISTRY,
-  getChainConfig,
-  getAvailableChains,
-  getTokensForChain,
-  getPoolsForChainAndToken,
-  getExplorerTxUrl,
-  getExplorerAddressUrl,
+  POOL_REGISTRY_TESTNET,
+  getChainConfig as sdkGetChainConfig,
+  getAvailableChains as sdkGetAvailableChains,
+  getTokensForChain as sdkGetTokensForChain,
+  getPoolsForChainAndToken as sdkGetPoolsForChainAndToken,
+  getExplorerTxUrl as sdkGetExplorerTxUrl,
+  getExplorerAddressUrl as sdkGetExplorerAddressUrl,
   type Chain,
   type TokenId,
+  type NetworkMode,
   type ChainConfig,
   type TokenInfo,
   type PoolEntry,
 } from '@zkira/sdk';
 
-// Re-export everything from SDK registry
+// Re-export configs and types from SDK
 export {
   CHAIN_CONFIGS,
+  CHAIN_CONFIGS_TESTNET,
   POOL_REGISTRY,
-  getChainConfig,
-  getAvailableChains,
-  getTokensForChain,
-  getPoolsForChainAndToken,
-  getExplorerTxUrl,
-  getExplorerAddressUrl,
+  POOL_REGISTRY_TESTNET,
   type Chain,
   type TokenId,
+  type NetworkMode,
   type ChainConfig,
   type TokenInfo,
   type PoolEntry,
 };
+
+/**
+ * Get stored EVM network mode from sessionStorage.
+ * This is the single source of truth for the current network mode.
+ */
+export function getStoredEVMNetworkMode(): NetworkMode {
+  if (typeof window === 'undefined') return 'testnet';
+  const stored = sessionStorage.getItem('zkira_evm_network');
+  if (stored === 'testnet' || stored === 'mainnet') return stored;
+  return 'testnet';
+}
+
+export function storeEVMNetworkMode(mode: NetworkMode): void {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('zkira_evm_network', mode);
+  }
+}
+
+// Mode-aware wrappers that read from stored network mode
+export function getChainConfig(chain: Chain, mode?: NetworkMode): ChainConfig {
+  return sdkGetChainConfig(chain, mode ?? getStoredEVMNetworkMode());
+}
+
+export function getAvailableChains(mode?: NetworkMode): Chain[] {
+  return sdkGetAvailableChains(mode ?? getStoredEVMNetworkMode());
+}
+
+export function getTokensForChain(chain: Chain, mode?: NetworkMode): TokenInfo[] {
+  return sdkGetTokensForChain(chain, mode ?? getStoredEVMNetworkMode());
+}
+
+export function getPoolsForChainAndToken(chain: Chain, token: TokenId, mode?: NetworkMode): PoolEntry[] {
+  return sdkGetPoolsForChainAndToken(chain, token, mode ?? getStoredEVMNetworkMode());
+}
+
+export function getExplorerTxUrl(chain: Chain, txHash: string, mode?: NetworkMode): string {
+  return sdkGetExplorerTxUrl(chain, txHash, mode ?? getStoredEVMNetworkMode());
+}
+
+export function getExplorerAddressUrl(chain: Chain, address: string, mode?: NetworkMode): string {
+  return sdkGetExplorerAddressUrl(chain, address, mode ?? getStoredEVMNetworkMode());
+}
 
 /** Default chain selection (Arbitrum is primary) */
 export const DEFAULT_CHAIN: Chain = 'arbitrum';

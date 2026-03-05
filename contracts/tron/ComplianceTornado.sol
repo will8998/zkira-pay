@@ -7,16 +7,14 @@ import "./interfaces/ISanctionsOracle.sol";
 
 /**
  * @title ComplianceTornado
- * @dev Base mixer contract with built-in compliance checks (sanctions oracle + blocklist),
- * protocol fee system, and referral partner network.
+ * @dev Base mixer contract with built-in compliance checks (sanctions oracle + blocklist)
+ * and protocol fee system.
  * Replaces the original Tornado.sol with added deposit-side compliance for regulatory requirements.
  * Withdrawal side preserves privacy for legitimate users, with on-chain fee deductions.
  *
  * Fee architecture:
  * - Protocol fee (up to 5%): deducted on withdrawal, sent to treasury
- * - Referral fee (up to 3% per referrer): deducted on withdrawal, sent directly to referrer
  * - Relayer fee: standard Tornado Cash relayer fee (part of ZK proof)
- * - The _referrer parameter is NOT part of the ZK proof — it's an extra withdrawal parameter
  */
 abstract contract ComplianceTornado is MerkleTreeWithHistory {
   // === Tornado Cash original state ===
@@ -35,10 +33,6 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
   uint256 public protocolFeeBps; // e.g., 100 = 1%
   address public treasury; // Where protocol fees go
 
-  // === Referral System ===
-  mapping(address => bool) public registeredReferrers;
-  mapping(address => uint256) public referralFeeBps; // Per-referrer fee in bps
-  mapping(address => uint256) public referralEarnings; // Track total earnings per referrer
   uint256 public totalProtocolFees; // Track total protocol fees collected
 
   // === Reentrancy guard (inlined, no OpenZeppelin dependency) ===
@@ -58,14 +52,10 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
   event Paused(bool isPaused);
 
-  // === Protocol Fee & Referral Events ===
+  // === Protocol Fee Events ===
   event ProtocolFeeUpdated(uint256 oldFeeBps, uint256 newFeeBps);
   event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
-  event ReferrerRegistered(address indexed referrer, uint256 feeBps);
-  event ReferrerDeregistered(address indexed referrer);
-  event ReferrerFeeUpdated(address indexed referrer, uint256 oldFeeBps, uint256 newFeeBps);
   event ProtocolFeePayment(address indexed treasury, uint256 amount);
-  event ReferralPayment(address indexed referrer, uint256 amount, bytes32 nullifierHash);
 
   modifier onlyOwner() {
     require(msg.sender == owner, "Not owner");
@@ -125,7 +115,7 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
   /** @dev this function is defined in a child contract */
   function _processDeposit() internal virtual;
 
-  // === WITHDRAWAL: Modified with referrer parameter ===
+  // === WITHDRAWAL ===
   /**
    * @dev Withdraw a deposit from the mixer. `proof` is a zkSNARK proof data, and input is an array of circuit public inputs.
    * `input` array consists of:
@@ -133,8 +123,6 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
    *   - hash of unique deposit nullifier to prevent double spends
    *   - the recipient of funds
    *   - optional fee that goes to the transaction sender (usually a relay)
-   * @param _referrer address of the referral partner (address(0) if no referrer)
-   *   NOTE: _referrer is NOT part of the ZK proof — it's an extra withdrawal parameter
    */
   function withdraw(
     bytes calldata _proof,
@@ -143,14 +131,13 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
     address payable _recipient,
     address payable _relayer,
     uint256 _fee,
-    uint256 _refund,
-    address _referrer
+    uint256 _refund
   ) external payable nonReentrant whenNotPaused {
     require(_fee <= denomination, "Fee exceeds transfer value");
     require(!nullifierHashes[_nullifierHash], "The note has been already spent");
     require(isKnownRoot(_root), "Cannot find your merkle root");
 
-    // Verify proof with original 6 public inputs (referrer is NOT in the proof)
+    // Verify proof with original 6 public inputs
     require(
       verifier.verifyProof(
         _proof,
@@ -159,13 +146,8 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
       "Invalid withdraw proof"
     );
 
-    // Validate referrer if provided
-    if (_referrer != address(0)) {
-      require(registeredReferrers[_referrer], "Referrer not registered");
-    }
-
     nullifierHashes[_nullifierHash] = true;
-    _processWithdraw(_recipient, _relayer, _fee, _refund, _referrer, _nullifierHash);
+    _processWithdraw(_recipient, _relayer, _fee, _refund, _nullifierHash);
     emit Withdrawal(_recipient, _nullifierHash, _relayer, _fee);
   }
 
@@ -175,7 +157,6 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
     address payable _relayer,
     uint256 _fee,
     uint256 _refund,
-    address _referrer,
     bytes32 _nullifierHash
   ) internal virtual;
 
@@ -229,29 +210,6 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
     emit TreasuryUpdated(oldTreasury, _newTreasury);
   }
 
-  // === REFERRAL MANAGEMENT ===
-
-  function registerReferrer(address _referrer, uint256 _feeBps) external onlyOwner {
-    require(_referrer != address(0), "Referrer cannot be zero address");
-    require(_feeBps <= 300, "Referral fee cannot exceed 3%");
-    registeredReferrers[_referrer] = true;
-    referralFeeBps[_referrer] = _feeBps;
-    emit ReferrerRegistered(_referrer, _feeBps);
-  }
-
-  function deregisterReferrer(address _referrer) external onlyOwner {
-    registeredReferrers[_referrer] = false;
-    referralFeeBps[_referrer] = 0;
-    emit ReferrerDeregistered(_referrer);
-  }
-
-  function updateReferrerFee(address _referrer, uint256 _newFeeBps) external onlyOwner {
-    require(registeredReferrers[_referrer], "Referrer not registered");
-    require(_newFeeBps <= 300, "Referral fee cannot exceed 3%");
-    uint256 oldFee = referralFeeBps[_referrer];
-    referralFeeBps[_referrer] = _newFeeBps;
-    emit ReferrerFeeUpdated(_referrer, oldFee, _newFeeBps);
-  }
 
   // === VIEW FUNCTIONS ===
 
@@ -278,16 +236,8 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
     return blocklist[_addr];
   }
 
-  /** @dev Get referrer info: registration status, fee rate, and total earnings */
-  function getReferrerInfo(address _referrer) external view returns (bool registered, uint256 feeBps, uint256 earnings) {
-    return (registeredReferrers[_referrer], referralFeeBps[_referrer], referralEarnings[_referrer]);
-  }
-
-  /** @dev Calculate fees for a withdrawal given a referrer address */
-  function calculateFees(address _referrer) external view returns (uint256 protocolFee, uint256 referralFee) {
+  /** @dev Calculate protocol fee for a withdrawal */
+  function calculateFees() external view returns (uint256 protocolFee) {
     protocolFee = (denomination * protocolFeeBps) / 10000;
-    if (_referrer != address(0) && registeredReferrers[_referrer]) {
-      referralFee = (denomination * referralFeeBps[_referrer]) / 10000;
-    }
   }
 }

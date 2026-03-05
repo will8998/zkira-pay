@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { EVMNetworkToggle } from './EVMNetworkToggle';
 
 export function TopBar() {
   return (
@@ -14,8 +15,9 @@ export function TopBar() {
       {/* Spacer on desktop (logo is in sidebar) */}
       <div className="hidden md:block" />
 
-      {/* Right — Language */}
-      <div className="flex items-center gap-2">
+      {/* Right — Network toggle + Language */}
+      <div className="flex items-center gap-3">
+        <EVMNetworkToggle />
         <LanguageSwitcher />
       </div>
     </div>

@@ -137,8 +137,9 @@ export function SendPaymentWizard() {
     tokenAddress: string,
     rpcUrl: string,
     requiredAmount: bigint,
+    walletAddress: string,
   ): Promise<void> => {
-    if (!address) throw new Error('No wallet address');
+    if (!walletAddress) throw new Error('No wallet address');
     const { JsonRpcProvider, Contract } = await import('ethers');
     const provider = new JsonRpcProvider(rpcUrl);
     const abi = ['function balanceOf(address) view returns (uint256)'];
@@ -146,7 +147,7 @@ export function SendPaymentWizard() {
     while (!signal.aborted) {
       try {
         const contract = new Contract(tokenAddress, abi, provider);
-        const balance: bigint = await contract.balanceOf(address);
+        const balance: bigint = await contract.balanceOf(walletAddress);
         if (balance >= requiredAmount) return;
       } catch {
         // keep polling
@@ -160,7 +161,7 @@ export function SendPaymentWizard() {
       });
     }
     throw new DOMException('Aborted', 'AbortError');
-  }, [address]);
+  }, []);
 
   // Generate random field element for MiMC commitment
   const randomFieldElement = (): bigint => {
@@ -207,7 +208,7 @@ export function SendPaymentWizard() {
 
     // Wait for funds
     setDepositStatus('funding');
-    await pollForFunds(signal, tokenAddress, rpcUrl, denominationRaw);
+    await pollForFunds(signal, tokenAddress, rpcUrl, denominationRaw, walletAddress);
 
     // Approve + deposit
     setDepositStatus('approving');
@@ -250,7 +251,7 @@ export function SendPaymentWizard() {
       chain,
       token,
     };
-  }, [address, privateKey, chain, token, pollForFunds]);
+  }, [privateKey, chain, token, pollForFunds]);
 
   // Start the full send flow
   const startSendFlow = useCallback(async () => {
@@ -422,22 +423,6 @@ export function SendPaymentWizard() {
         <div className="space-y-6">
           {/* Main card container */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 md:p-8">
-            
-            {/* Wallet Balance Bar */}
-            {address && (
-              <div className="flex justify-between items-center mb-6 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg">
-                <span 
-                  className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)]"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                >
-                  WALLET BALANCE
-                </span>
-                <div className="flex gap-4 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
-                  <span className="text-[var(--color-text)]">0.00 USDC</span>
-                  <span className="text-[var(--color-text)]">4.99 SOL</span>
-                </div>
-              </div>
-            )}
 
             {/* Amount Input Section */}
             <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-6 mb-3">

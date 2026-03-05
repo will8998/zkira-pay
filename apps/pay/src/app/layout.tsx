@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Chakra_Petch, Share_Tech_Mono } from 'next/font/google';
 import { BrowserWalletProvider } from '@/components/BrowserWalletProvider';
+import { EVMNetworkProvider } from '@/components/EVMNetworkProvider';
 import { getWhitelabelConfig } from '@/config/whitelabel';
 import { TopBar } from '@/components/TopBar';
 import { Sidebar } from '@/components/Sidebar';
@@ -64,6 +65,7 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
+              <EVMNetworkProvider>
               <BrowserWalletProvider>
               <CommandPaletteProvider>
                 <div className="relative z-10 flex h-dvh overflow-hidden">
@@ -89,6 +91,7 @@ export default async function RootLayout({
               </CommandPaletteProvider>
               <BottomTabBar />
               </BrowserWalletProvider>
+              </EVMNetworkProvider>
         </NextIntlClientProvider>
       </body>
     </html>

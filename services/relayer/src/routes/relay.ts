@@ -11,7 +11,7 @@ import type {
 } from '../types.js';
 
 const POOL_ABI = [
-  'function withdraw(bytes calldata _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient, address payable _relayer, uint256 _fee, uint256 _refund, address _referrer) external payable',
+  'function withdraw(bytes calldata _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient, address payable _relayer, uint256 _fee, uint256 _refund) external payable',
   'function denomination() external view returns (uint256)',
   'function nextIndex() external view returns (uint32)',
   'function isSpent(bytes32 _nullifierHash) external view returns (bool)',
@@ -76,7 +76,6 @@ export function createRelayRoutes(wallet: RelayerWallet, config: RelayerConfig):
         body.relayer,
         body.fee,
         body.refund,
-        body.referrer,
         { value: body.refund },
       );
 
@@ -96,6 +95,23 @@ export function createRelayRoutes(wallet: RelayerWallet, config: RelayerConfig):
         success: true,
         txHash: receipt.hash,
       };
+
+      // Fire-and-forget: report withdrawal volume to API for partner tracking
+      if (body.partnerId) {
+        fetch(`${config.apiUrl}/api/relayer/withdrawal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Relayer-Secret': config.apiSecret },
+          body: JSON.stringify({
+            partnerId: body.partnerId,
+            poolAddress: body.poolAddress,
+            txHash: receipt.hash,
+            recipient: body.recipient,
+            chain: 'arbitrum',
+          }),
+        }).catch((err) => {
+          console.error('Failed to report withdrawal volume:', err);
+        });
+      }
 
       return c.json(response);
     } catch (err) {
