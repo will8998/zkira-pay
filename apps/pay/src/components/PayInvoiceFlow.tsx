@@ -25,7 +25,7 @@ interface DenominationEntry {
 }
 
 export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
-  const { address, privateKey, isCreated, createWallet } = useBrowserWallet();
+  const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   const [step, setStep] = useState<FlowStep>('loading');
   const [invoice, setInvoice] = useState<{
@@ -260,6 +260,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
 
       setStep('complete');
       toast.success('Invoice paid!');
+      clearWallet();
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
       toast.error(error instanceof Error ? error.message : 'Payment failed');

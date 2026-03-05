@@ -1,187 +1,603 @@
 import { Hono } from 'hono';
 import { timingSafeEqual } from 'node:crypto';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { sha256 } from '@noble/hashes/sha256';
 import { db } from '../db/index.js';
-import { users, payments, invoices, apiKeys, escrowsCache, transactions } from '../db/schema.js';
-import { eq, count, sum, desc, gte, sql, and } from 'drizzle-orm';
+import { merchants, gatewaySessions, ephemeralWallets, apiKeys } from '../db/schema.js';
+import { eq, count, sum, desc, gte, lte, sql, and, like, or } from 'drizzle-orm';
 import { loadConfig } from '../config.js';
-import { GHOST_REGISTRY_PROGRAM_ID, PAYMENT_ESCROW_PROGRAM_ID, CONDITIONAL_ESCROW_PROGRAM_ID, MULTISIG_ESCROW_PROGRAM_ID, SEEDS } from '@zkira/common';
 
-const adminRoutes = new Hono();
+const adminRoutes = new Hono<{
+  Variables: {
+    adminRole: 'master' | 'merchant';
+    merchantId: string | null;
+    merchantName?: string;
+  }
+}>();
 
-// Admin auth middleware
-const adminAuth = async (c: any, next: any) => {
+// Dual admin authentication middleware
+const dualAdminAuth = async (c: any, next: any) => {
   const adminPassword = c.req.header('X-Admin-Password');
+  const apiKey = c.req.header('X-API-Key');
   const config = loadConfig();
 
-  if (!adminPassword) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  try {
-    const provided = Buffer.from(adminPassword);
-    const expected = Buffer.from(config.adminPassword);
-    if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
-      return c.json({ error: 'Unauthorized' }, 401);
+  // First try admin password (master role)
+  if (adminPassword) {
+    try {
+      const provided = Buffer.from(adminPassword);
+      const expected = Buffer.from(config.adminPassword);
+      if (provided.length === expected.length && timingSafeEqual(provided, expected)) {
+        c.set('adminRole', 'master');
+        c.set('merchantId', null);
+        await next();
+        return;
+      }
+    } catch {
+      // Continue to API key check
     }
-  } catch {
-    return c.json({ error: 'Unauthorized' }, 401);
   }
 
-  await next();
+  // Then try API key (merchant role)
+  if (apiKey) {
+    try {
+      // Hash the provided API key
+      const keyHash = Array.from(sha256(apiKey), byte => byte.toString(16).padStart(2, '0')).join('');
+
+      // Look up the API key in the database
+      const apiKeyResult = await db.select().from(apiKeys).where(
+        and(
+          eq(apiKeys.keyHash, keyHash),
+          eq(apiKeys.isActive, true)
+        )
+      ).limit(1);
+
+      if (apiKeyResult.length > 0) {
+        const apiKeyRow = apiKeyResult[0];
+
+        // Look up the merchant by wallet address
+        const merchantResult = await db.select().from(merchants).where(
+          and(
+            eq(merchants.walletAddress, apiKeyRow.walletAddress),
+            eq(merchants.status, 'active')
+          )
+        ).limit(1);
+
+        if (merchantResult.length > 0) {
+          const merchantRow = merchantResult[0];
+          c.set('adminRole', 'merchant');
+          c.set('merchantId', merchantRow.id);
+          c.set('merchantName', merchantRow.name);
+          await next();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('API key validation error:', error);
+    }
+  }
+
+  return c.json({ error: 'Unauthorized' }, 401);
 };
 
-// Apply admin auth to all admin routes
-adminRoutes.use('/api/admin/*', adminAuth);
+// Apply dual admin auth to all admin routes
+adminRoutes.use('/api/admin/*', dualAdminAuth);
+
+// POST /api/admin/login - Login endpoint for dual authentication
+adminRoutes.post('/api/admin/login', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { credential } = body;
+
+    if (!credential) {
+      return c.json({ error: 'Credential is required' }, 400);
+    }
+
+    const config = loadConfig();
+
+    // First try to match against admin password
+    try {
+      const provided = Buffer.from(credential);
+      const expected = Buffer.from(config.adminPassword);
+      if (provided.length === expected.length && timingSafeEqual(provided, expected)) {
+        return c.json({
+          role: 'master',
+          merchantId: null,
+          merchantName: null
+        });
+      }
+    } catch {
+      // Continue to API key check
+    }
+
+    // Then try as API key
+    try {
+      const keyHash = Array.from(sha256(credential), byte => byte.toString(16).padStart(2, '0')).join('');
+
+      const apiKeyResult = await db.select().from(apiKeys).where(
+        and(
+          eq(apiKeys.keyHash, keyHash),
+          eq(apiKeys.isActive, true)
+        )
+      ).limit(1);
+
+      if (apiKeyResult.length > 0) {
+        const apiKeyRow = apiKeyResult[0];
+
+        const merchantResult = await db.select().from(merchants).where(
+          and(
+            eq(merchants.walletAddress, apiKeyRow.walletAddress),
+            eq(merchants.status, 'active')
+          )
+        ).limit(1);
+
+        if (merchantResult.length > 0) {
+          const merchantRow = merchantResult[0];
+          return c.json({
+            role: 'merchant',
+            merchantId: merchantRow.id,
+            merchantName: merchantRow.name
+          });
+        }
+      }
+    } catch (error) {
+      console.error('API key validation error:', error);
+    }
+
+    return c.json({ error: 'Invalid credentials' }, 401);
+  } catch (error) {
+    console.error('Login error:', error);
+    return c.json({ error: 'Login failed' }, 500);
+  }
+});
 
 // GET /api/admin/stats - Overview stats
 adminRoutes.get('/api/admin/stats', async (c) => {
   try {
-    const [
-      totalUsersResult,
-      totalPaymentsResult,
-      totalVolumeResult,
-      activeApiKeysResult,
-      pendingEscrowsResult,
-      totalInvoicesResult,
-      totalTransactionsResult,
-    ] = await Promise.all([
-      db.select({ count: count() }).from(users),
-      db.select({ count: count() }).from(payments),
-      db.select({ total: sum(payments.amount) }).from(payments),
-      db.select({ count: count() }).from(apiKeys).where(eq(apiKeys.isActive, true)),
-      db.select({ count: count() }).from(escrowsCache).where(eq(escrowsCache.claimed, false)),
-      db.select({ count: count() }).from(invoices),
-      db.select({ count: count() }).from(transactions),
-    ]);
+    const adminRole = c.get('adminRole');
+    const merchantId = c.get('merchantId') as string | null;
 
-    return c.json({
-      totalUsers: totalUsersResult[0]?.count || 0,
-      totalPayments: totalPaymentsResult[0]?.count || 0,
-      totalVolume: totalVolumeResult[0]?.total || '0',
-      activeApiKeys: activeApiKeysResult[0]?.count || 0,
-      pendingEscrows: pendingEscrowsResult[0]?.count || 0,
-      totalInvoices: totalInvoicesResult[0]?.count || 0,
-      totalTransactions: totalTransactionsResult[0]?.count || 0,
-    });
+    if (adminRole === 'master') {
+      // Master role: global stats
+      const [
+        totalSessionsResult,
+        totalVolumeResult,
+        totalMerchantsResult,
+        activeWalletsResult,
+        pendingWithdrawalsResult
+      ] = await Promise.all([
+        db.select({ count: count() }).from(gatewaySessions),
+        db.select({ total: sum(gatewaySessions.amount) }).from(gatewaySessions)
+          .where(eq(gatewaySessions.status, 'completed')),
+        db.select({ count: count() }).from(merchants).where(eq(merchants.status, 'active')),
+        db.select({ count: count() }).from(ephemeralWallets).where(eq(ephemeralWallets.status, 'active')),
+        db.select({ count: count() }).from(gatewaySessions)
+          .where(and(
+            eq(gatewaySessions.sessionType, 'withdraw'),
+            eq(gatewaySessions.status, 'pending')
+          ))
+      ]);
+
+      return c.json({
+        totalSessions: totalSessionsResult[0]?.count || 0,
+        totalVolume: totalVolumeResult[0]?.total || '0',
+        totalMerchants: totalMerchantsResult[0]?.count || 0,
+        activeWallets: activeWalletsResult[0]?.count || 0,
+        pendingWithdrawals: pendingWithdrawalsResult[0]?.count || 0
+      });
+    } else if (merchantId) {
+      // Merchant role: scoped stats
+      // Merchant role: scoped stats
+      const [
+        totalSessionsResult,
+        totalVolumeResult,
+        activeWalletsResult,
+        pendingWithdrawalsResult
+      ] = await Promise.all([
+        db.select({ count: count() }).from(gatewaySessions)
+          .where(eq(gatewaySessions.merchantId, merchantId)),
+        db.select({ total: sum(gatewaySessions.amount) }).from(gatewaySessions)
+          .where(and(
+            eq(gatewaySessions.merchantId, merchantId),
+            eq(gatewaySessions.status, 'completed')
+          )),
+        db.select({ count: count() })
+          .from(ephemeralWallets)
+          .innerJoin(gatewaySessions, eq(ephemeralWallets.address, gatewaySessions.ephemeralWallet))
+          .where(and(
+            eq(gatewaySessions.merchantId, merchantId),
+            eq(ephemeralWallets.status, 'active')
+          )),
+        db.select({ count: count() }).from(gatewaySessions)
+          .where(and(
+            eq(gatewaySessions.merchantId, merchantId),
+            eq(gatewaySessions.sessionType, 'withdraw'),
+            eq(gatewaySessions.status, 'pending')
+          ))
+      ]);
+
+      return c.json({
+        totalSessions: totalSessionsResult[0]?.count || 0,
+        totalVolume: totalVolumeResult[0]?.total || '0',
+        activeWallets: activeWalletsResult[0]?.count || 0,
+        pendingWithdrawals: pendingWithdrawalsResult[0]?.count || 0
+      });
+    } else {
+      return c.json({ error: 'Merchant ID not found' }, 400);
+    }
   } catch (error) {
     console.error('Failed to get admin stats:', error);
     return c.json({ error: 'Failed to get admin stats' }, 500);
   }
 });
 
-// GET /api/admin/users - List all users with pagination
-adminRoutes.get('/api/admin/users', async (c) => {
+// GET /api/admin/sessions - Gateway sessions list with pagination
+adminRoutes.get('/api/admin/sessions', async (c) => {
   try {
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const limit = parseInt(c.req.query('limit') || '50', 10);
-    const search = c.req.query('search');
-    const offset = (page - 1) * limit;
-
-    let usersList;
+    const adminRole = c.get('adminRole');
+    const userMerchantId = c.get('merchantId') as string | null;
     
-    if (search) {
-      usersList = await db.select().from(users)
-        .where(sql`${users.walletAddress} ILIKE ${`%${search}%`}`)
-        .orderBy(desc(users.lastSeen))
-        .limit(limit)
-        .offset(offset);
-    } else {
-      usersList = await db.select().from(users)
-        .orderBy(desc(users.lastSeen))
-        .limit(limit)
-        .offset(offset);
-    }
-
-    // Get total count
-    const totalResult = await db.select({ count: count() }).from(users);
-    const total = totalResult[0]?.count || 0;
-
-    // Transform DB column names to match frontend expected shape
-    const transformedUsers = usersList.map((u: any) => ({
-      wallet: u.walletAddress,
-      firstSeen: u.firstSeen,
-      lastSeen: u.lastSeen,
-      totalPayments: u.totalPayments,
-      totalVolume: parseFloat(u.totalVolume || '0'),
-    }));
-    return c.json({ users: transformedUsers, page, limit, total });
-  } catch (error) {
-    console.error('Failed to get users:', error);
-    return c.json({ error: 'Failed to get users' }, 500);
-  }
-});
-
-// GET /api/admin/payments - List all payments with filters
-adminRoutes.get('/api/admin/payments', async (c) => {
-  try {
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = parseInt(c.req.query('limit') || '50', 10);
     const status = c.req.query('status');
     const search = c.req.query('search');
+    const merchantIdParam = c.req.query('merchantId');
     const offset = (page - 1) * limit;
 
-    let paymentsList;
-    
-    if (status && search) {
-      paymentsList = await db.select().from(payments)
-        .where(
-          and(
-            eq(payments.status, status),
-            sql`${payments.paymentId} ILIKE ${`%${search}%`} OR ${payments.creatorWallet} ILIKE ${`%${search}%`}`
-          )
-        )
-        .orderBy(desc(payments.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } else if (status) {
-      paymentsList = await db.select().from(payments)
-        .where(eq(payments.status, status))
-        .orderBy(desc(payments.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } else if (search) {
-      paymentsList = await db.select().from(payments)
-        .where(sql`${payments.paymentId} ILIKE ${`%${search}%`} OR ${payments.creatorWallet} ILIKE ${`%${search}%`}`)
-        .orderBy(desc(payments.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } else {
-      paymentsList = await db.select().from(payments)
-        .orderBy(desc(payments.createdAt))
-        .limit(limit)
-        .offset(offset);
+    // Build where conditions
+    let whereConditions = [];
+
+    // Role-based filtering
+    if (adminRole === 'merchant' && userMerchantId) {
+      // Merchant role: always filter by their merchantId
+      whereConditions.push(eq(gatewaySessions.merchantId, userMerchantId));
+    } else if (merchantIdParam) {
+      // Master role: optionally filter by merchantId param
+      whereConditions.push(eq(gatewaySessions.merchantId, merchantIdParam));
     }
-    return c.json({ payments: paymentsList, page, limit });
+
+    // Status filter
+    if (status) {
+      whereConditions.push(eq(gatewaySessions.status, status));
+    }
+
+    // Search filter
+    if (search) {
+      whereConditions.push(
+        or(
+          like(gatewaySessions.playerRef, `%${search}%`),
+          like(gatewaySessions.ephemeralWallet, `%${search}%`),
+          like(gatewaySessions.txHash, `%${search}%`)
+        )
+      );
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    // Get sessions with merchant info
+    const sessionsQuery = db.select({
+      id: gatewaySessions.id,
+      merchantId: gatewaySessions.merchantId,
+      merchantName: merchants.name,
+      sessionType: gatewaySessions.sessionType,
+      playerRef: gatewaySessions.playerRef,
+      amount: gatewaySessions.amount,
+      token: gatewaySessions.token,
+      chain: gatewaySessions.chain,
+      status: gatewaySessions.status,
+      ephemeralWallet: gatewaySessions.ephemeralWallet,
+      txHash: gatewaySessions.txHash,
+      createdAt: gatewaySessions.createdAt,
+      expiresAt: gatewaySessions.expiresAt
+    })
+    .from(gatewaySessions)
+    .innerJoin(merchants, eq(gatewaySessions.merchantId, merchants.id))
+    .orderBy(desc(gatewaySessions.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+    if (whereClause) {
+      sessionsQuery.where(whereClause);
+    }
+
+    const sessions = await sessionsQuery;
+
+    // Get total count
+    const totalQuery = db.select({ count: count() }).from(gatewaySessions);
+    if (whereClause) {
+      totalQuery.where(whereClause);
+    }
+    const totalResult = await totalQuery;
+    const total = totalResult[0]?.count || 0;
+
+    return c.json({ sessions, page, limit, total });
   } catch (error) {
-    console.error('Failed to get payments:', error);
-    return c.json({ error: 'Failed to get payments' }, 500);
+    console.error('Failed to get sessions:', error);
+    return c.json({ error: 'Failed to get sessions' }, 500);
   }
 });
 
-// GET /api/admin/invoices - List all invoices with pagination
-adminRoutes.get('/api/admin/invoices', async (c) => {
+// GET /api/admin/wallets - Ephemeral wallets list
+adminRoutes.get('/api/admin/wallets', async (c) => {
   try {
+    const adminRole = c.get('adminRole');
+    const userMerchantId = c.get('merchantId') as string | null;
+    
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = parseInt(c.req.query('limit') || '50', 10);
+    const status = c.req.query('status');
+    const chain = c.req.query('chain');
     const offset = (page - 1) * limit;
 
-    const invoicesList = await db.select().from(invoices).orderBy(desc(invoices.createdAt)).limit(limit).offset(offset);
-    return c.json({ invoices: invoicesList, page, limit });
+    // Build where conditions
+    let whereConditions = [];
+
+    // Status filter
+    if (status) {
+      whereConditions.push(eq(ephemeralWallets.status, status));
+    }
+
+    // Chain filter
+    if (chain) {
+      whereConditions.push(eq(ephemeralWallets.chain, chain));
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    if (adminRole === 'merchant' && userMerchantId) {
+      // Merchant role: join with gatewaySessions to filter by merchantId
+      const walletsQuery = db.select({
+        id: ephemeralWallets.id,
+        address: ephemeralWallets.address,
+        chain: ephemeralWallets.chain,
+        token: ephemeralWallets.token,
+        amount: ephemeralWallets.amount,
+        flow: ephemeralWallets.flow,
+        status: ephemeralWallets.status,
+        txHash: ephemeralWallets.txHash,
+        createdAt: ephemeralWallets.createdAt,
+        expiresAt: ephemeralWallets.expiresAt
+      })
+      .from(ephemeralWallets)
+      .innerJoin(gatewaySessions, eq(ephemeralWallets.address, gatewaySessions.ephemeralWallet))
+      .where(and(
+        eq(gatewaySessions.merchantId, userMerchantId),
+        ...(whereClause ? [whereClause] : [])
+      ))
+      .orderBy(desc(ephemeralWallets.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+      const wallets = await walletsQuery;
+
+      // Get total count for merchant
+      const totalResult = await db.select({ count: count() })
+        .from(ephemeralWallets)
+        .innerJoin(gatewaySessions, eq(ephemeralWallets.address, gatewaySessions.ephemeralWallet))
+        .where(and(
+          eq(gatewaySessions.merchantId, userMerchantId),
+          ...(whereClause ? [whereClause] : [])
+        ));
+
+      const total = totalResult[0]?.count || 0;
+      return c.json({ wallets, page, limit, total });
+    } else {
+      // Master role: show all wallets
+      const walletsQuery = db.select().from(ephemeralWallets)
+        .orderBy(desc(ephemeralWallets.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      if (whereClause) {
+        walletsQuery.where(whereClause);
+      }
+
+      const wallets = await walletsQuery;
+
+      // Get total count
+      const totalQuery = db.select({ count: count() }).from(ephemeralWallets);
+      if (whereClause) {
+        totalQuery.where(whereClause);
+      }
+      const totalResult = await totalQuery;
+      const total = totalResult[0]?.count || 0;
+
+      return c.json({ wallets, page, limit, total });
+    }
   } catch (error) {
-    console.error('Failed to get invoices:', error);
-    return c.json({ error: 'Failed to get invoices' }, 500);
+    console.error('Failed to get wallets:', error);
+    return c.json({ error: 'Failed to get wallets' }, 500);
   }
 });
 
-// GET /api/admin/api-keys - List all API keys with pagination
+// GET /api/admin/volume - Volume analytics
+adminRoutes.get('/api/admin/volume', async (c) => {
+  try {
+    const adminRole = c.get('adminRole');
+    const userMerchantId = c.get('merchantId') as string | null;
+    
+    const from = c.req.query('from');
+    const to = c.req.query('to');
+    const groupBy = c.req.query('groupBy') || 'day';
+
+    // Build date filters
+    let dateConditions = [
+      eq(gatewaySessions.status, 'completed'),
+      eq(gatewaySessions.sessionType, 'deposit')
+    ];
+
+    if (from) {
+      dateConditions.push(gte(gatewaySessions.createdAt, new Date(from)));
+    }
+    if (to) {
+      dateConditions.push(lte(gatewaySessions.createdAt, new Date(to)));
+    }
+
+    // Role-based filtering
+    if (adminRole === 'merchant' && userMerchantId) {
+      dateConditions.push(eq(gatewaySessions.merchantId, userMerchantId));
+    }
+
+    const whereClause = and(...dateConditions);
+
+    // Get summary stats
+    const summaryResult = await db.select({
+      totalVolume: sum(gatewaySessions.amount),
+      totalSessions: count()
+    }).from(gatewaySessions).where(whereClause);
+
+    const summary = {
+      totalVolume: summaryResult[0]?.totalVolume || '0',
+      totalSessions: summaryResult[0]?.totalSessions || 0
+    };
+
+    // Get time series data
+    let dateFormat;
+    switch (groupBy) {
+      case 'week':
+        dateFormat = sql`DATE_TRUNC('week', ${gatewaySessions.createdAt})`;
+        break;
+      case 'month':
+        dateFormat = sql`DATE_TRUNC('month', ${gatewaySessions.createdAt})`;
+        break;
+      default:
+        dateFormat = sql`DATE_TRUNC('day', ${gatewaySessions.createdAt})`;
+    }
+
+    const timeSeriesResult = await db.select({
+      date: dateFormat,
+      volume: sum(gatewaySessions.amount),
+      sessions: count()
+    })
+    .from(gatewaySessions)
+    .where(whereClause)
+    .groupBy(dateFormat)
+    .orderBy(dateFormat);
+
+    const timeSeries = timeSeriesResult.map(row => ({
+      date: row.date,
+      volume: row.volume || '0',
+      sessions: row.sessions || 0
+    }));
+
+    let merchantsData: Array<{merchantId: string; merchantName: string; volume: string; sessions: number}> = [];
+    if (adminRole === 'master') {
+      // Get per-merchant breakdown for master role
+      const merchantsResult = await db.select({
+        merchantId: gatewaySessions.merchantId,
+        merchantName: merchants.name,
+        volume: sum(gatewaySessions.amount),
+        sessions: count()
+      })
+      .from(gatewaySessions)
+      .innerJoin(merchants, eq(gatewaySessions.merchantId, merchants.id))
+      .where(whereClause)
+      .groupBy(gatewaySessions.merchantId, merchants.name)
+      .orderBy(desc(sum(gatewaySessions.amount)));
+
+      merchantsData = merchantsResult.map(row => ({
+        merchantId: row.merchantId,
+        merchantName: row.merchantName,
+        volume: row.volume || '0',
+        sessions: row.sessions || 0
+      }));
+    }
+
+    return c.json({
+      summary,
+      timeSeries,
+      ...(adminRole === 'master' ? { merchants: merchantsData } : {})
+    });
+  } catch (error) {
+    console.error('Failed to get volume analytics:', error);
+    return c.json({ error: 'Failed to get volume analytics' }, 500);
+  }
+});
+
+// GET /api/admin/merchants - List merchants (master only)
+adminRoutes.get('/api/admin/merchants', async (c) => {
+  try {
+    const adminRole = c.get('adminRole');
+
+    if (adminRole !== 'master') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    const page = parseInt(c.req.query('page') || '1', 10);
+    const limit = parseInt(c.req.query('limit') || '50', 10);
+    const search = c.req.query('search');
+    const status = c.req.query('status');
+    const offset = (page - 1) * limit;
+
+    // Build where conditions
+    let whereConditions = [];
+
+    if (status) {
+      whereConditions.push(eq(merchants.status, status));
+    }
+
+    if (search) {
+      whereConditions.push(
+        or(
+          like(merchants.name, `%${search}%`),
+          like(merchants.walletAddress, `%${search}%`)
+        )
+      );
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    const merchantsQuery = db.select().from(merchants)
+      .orderBy(desc(merchants.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    if (whereClause) {
+      merchantsQuery.where(whereClause);
+    }
+
+    const merchantsList = await merchantsQuery;
+
+    // Get total count
+    const totalQuery = db.select({ count: count() }).from(merchants);
+    if (whereClause) {
+      totalQuery.where(whereClause);
+    }
+    const totalResult = await totalQuery;
+    const total = totalResult[0]?.count || 0;
+
+    return c.json({ merchants: merchantsList, page, limit, total });
+  } catch (error) {
+    console.error('Failed to get merchants:', error);
+    return c.json({ error: 'Failed to get merchants' }, 500);
+  }
+});
+
+// GET /api/admin/api-keys - List API keys with scoping
 adminRoutes.get('/api/admin/api-keys', async (c) => {
   try {
+    const adminRole = c.get('adminRole');
+    const userMerchantId = c.get('merchantId') as string | null;
+    
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = parseInt(c.req.query('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    const keysList = await db.select({
+    let whereConditions = [];
+
+    if (adminRole === 'merchant' && userMerchantId) {
+      // Merchant role: only show their API keys
+      const merchantResult = await db.select({ walletAddress: merchants.walletAddress })
+        .from(merchants)
+        .where(eq(merchants.id, userMerchantId))
+        .limit(1);
+
+      if (merchantResult.length === 0) {
+        return c.json({ error: 'Merchant not found' }, 404);
+      }
+
+      whereConditions.push(eq(apiKeys.walletAddress, merchantResult[0].walletAddress));
+    }
+
+    const keysQuery = db.select({
       id: apiKeys.id,
       walletAddress: apiKeys.walletAddress,
       keyPrefix: apiKeys.keyPrefix,
@@ -189,7 +605,14 @@ adminRoutes.get('/api/admin/api-keys', async (c) => {
       createdAt: apiKeys.createdAt,
       lastUsed: apiKeys.lastUsed,
       isActive: apiKeys.isActive,
-    }).from(apiKeys).orderBy(desc(apiKeys.createdAt)).limit(limit).offset(offset);
+    }).from(apiKeys)
+    .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+    .orderBy(desc(apiKeys.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+
+    const keysList = await keysQuery;
 
     return c.json({ apiKeys: keysList, page, limit });
   } catch (error) {
@@ -198,611 +621,53 @@ adminRoutes.get('/api/admin/api-keys', async (c) => {
   }
 });
 
-// GET /api/admin/escrows - List all cached escrows with pagination
-adminRoutes.get('/api/admin/escrows', async (c) => {
-  try {
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const limit = parseInt(c.req.query('limit') || '50', 10);
-    const offset = (page - 1) * limit;
-
-    const escrowsList = await db.select().from(escrowsCache).orderBy(desc(escrowsCache.updatedAt)).limit(limit).offset(offset);
-    return c.json({ escrows: escrowsList, page, limit });
-  } catch (error) {
-    console.error('Failed to get escrows:', error);
-    return c.json({ error: 'Failed to get escrows' }, 500);
-  }
-});
-
-// GET /api/admin/transactions - List all transactions with pagination
-adminRoutes.get('/api/admin/transactions', async (c) => {
-  try {
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const limit = parseInt(c.req.query('limit') || '50', 10);
-    const offset = (page - 1) * limit;
-
-    const transactionsList = await db.select().from(transactions).orderBy(desc(transactions.createdAt)).limit(limit).offset(offset);
-    return c.json({ transactions: transactionsList, page, limit });
-  } catch (error) {
-    console.error('Failed to get transactions:', error);
-    return c.json({ error: 'Failed to get transactions' }, 500);
-  }
-});
-
-// GET /api/admin/analytics - Time-series data for charts
-adminRoutes.get('/api/admin/analytics', async (c) => {
-  try {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-    const [paymentsByDay, volumeByDay, usersByDay] = await Promise.all([
-      db.select({
-        date: sql<string>`DATE(${payments.createdAt})`,
-        count: count(),
-      }).from(payments).where(gte(payments.createdAt, thirtyDaysAgo)).groupBy(sql`DATE(${payments.createdAt})`).orderBy(sql`DATE(${payments.createdAt})`),
-
-      db.select({
-        date: sql<string>`DATE(${payments.createdAt})`,
-        volume: sum(payments.amount),
-      }).from(payments).where(gte(payments.createdAt, thirtyDaysAgo)).groupBy(sql`DATE(${payments.createdAt})`).orderBy(sql`DATE(${payments.createdAt})`),
-
-      db.select({
-        date: sql<string>`DATE(${users.firstSeen})`,
-        count: count(),
-      }).from(users).where(gte(users.firstSeen, thirtyDaysAgo)).groupBy(sql`DATE(${users.firstSeen})`).orderBy(sql`DATE(${users.firstSeen})`),
-    ]);
-
-    return c.json({
-      paymentsByDay,
-      volumeByDay,
-      usersByDay,
-    });
-  } catch (error) {
-    console.error('Failed to get analytics:', error);
-    return c.json({ error: 'Failed to get analytics' }, 500);
-  }
-});
-
-// DELETE /api/admin/api-keys/:id - Revoke API key
+// DELETE /api/admin/api-keys/:id - Revoke API key with role check
 adminRoutes.delete('/api/admin/api-keys/:id', async (c) => {
   const keyId = c.req.param('id');
+  const adminRole = c.get('adminRole');
+  const userMerchantId = c.get('merchantId') as string | null;
 
   if (!keyId) {
     return c.json({ error: 'API key ID parameter is required' }, 400);
   }
 
   try {
+    // Get the API key first to check ownership
+    const apiKeyResult = await db.select().from(apiKeys).where(eq(apiKeys.id, keyId)).limit(1);
+
+    if (apiKeyResult.length === 0) {
+      return c.json({ error: 'API key not found' }, 404);
+    }
+
+    const apiKeyRow = apiKeyResult[0];
+
+    // Role-based access control
+    if (adminRole === 'merchant' && userMerchantId) {
+      // Merchant can only revoke their own API keys
+      const merchantResult = await db.select({ walletAddress: merchants.walletAddress })
+        .from(merchants)
+        .where(eq(merchants.id, userMerchantId))
+        .limit(1);
+
+      if (merchantResult.length === 0 || merchantResult[0].walletAddress !== apiKeyRow.walletAddress) {
+        return c.json({ error: 'Access denied' }, 403);
+      }
+    }
+
+    // Revoke the API key
     const result = await db.update(apiKeys)
       .set({ isActive: false })
       .where(eq(apiKeys.id, keyId))
       .returning();
 
     if (result.length === 0) {
-      return c.json({ error: 'API key not found' }, 404);
+      return c.json({ error: 'Failed to revoke API key' }, 500);
     }
 
     return c.json({ message: 'API key revoked successfully' });
   } catch (error) {
     console.error('Failed to revoke API key:', error);
     return c.json({ error: 'Failed to revoke API key' }, 500);
-  }
-});
-
-// DELETE /api/admin/users/:walletAddress - Delete user
-adminRoutes.delete('/api/admin/users/:walletAddress', async (c) => {
-  const walletAddress = c.req.param('walletAddress');
-
-  if (!walletAddress) {
-    return c.json({ error: 'Wallet address parameter is required' }, 400);
-  }
-
-  try {
-    const result = await db.delete(users).where(eq(users.walletAddress, walletAddress)).returning();
-
-    if (result.length === 0) {
-      return c.json({ error: 'User not found' }, 404);
-    }
-
-    return c.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Failed to delete user:', error);
-    return c.json({ error: 'Failed to delete user' }, 500);
-  }
-});
-
-
-// RPC URLs for multi-network support
-const RPC_URLS: Record<string, string> = {
-  'devnet': 'https://api.devnet.solana.com',
-  'testnet': 'https://api.testnet.solana.com',
-  'mainnet-beta': 'https://api.mainnet-beta.solana.com',
-};
-
-// USDC mints per network
-const USDC_MINTS: Record<string, string> = {
-  'devnet': '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-  'mainnet-beta': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-};
-
-const BPF_UPGRADE_LOADER_ID = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
-
-function getConnection(network?: string): { connection: Connection; cluster: string } {
-  const cluster = network && RPC_URLS[network] ? network : 'devnet';
-  const rpcUrl = RPC_URLS[cluster] || loadConfig().solanaRpcUrl;
-  return { connection: new Connection(rpcUrl, 'confirmed'), cluster };
-}
-// GET /api/admin/ops/network-health - RPC health, slot, block time, TPS estimate
-adminRoutes.get('/api/admin/ops/network-health', async (c) => {
-  try {
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    const startTime = Date.now();
-    const [slot, blockTime, blockHeight, epochInfo, performanceSamples, version] = await Promise.all([
-      connection.getSlot(),
-      connection.getBlockTime(await connection.getSlot()),
-      connection.getBlockHeight(),
-      connection.getEpochInfo(),
-      connection.getRecentPerformanceSamples(1),
-      connection.getVersion()
-    ]);
-    const latencyMs = Date.now() - startTime;
-    
-    const tps = performanceSamples.length > 0 ? performanceSamples[0].numTransactions / performanceSamples[0].samplePeriodSecs : 0;
-    
-    return c.json({
-      rpcUrl: RPC_URLS[cluster] || loadConfig().solanaRpcUrl,
-      cluster,
-      slot,
-      blockTime,
-      blockHeight,
-      epochInfo: {
-        epoch: epochInfo.epoch,
-        slotIndex: epochInfo.slotIndex,
-        slotsInEpoch: epochInfo.slotsInEpoch,
-        absoluteSlot: epochInfo.absoluteSlot
-      },
-      version: version['solana-core'],
-      tps: Math.round(tps),
-      healthy: true,
-      latencyMs
-    });
-  } catch (error) {
-    console.error('Failed to get network health:', error);
-    return c.json({ healthy: false, error: error instanceof Error ? error.message : 'Unknown error' });
-  }
-});
-
-// GET /api/admin/ops/programs - Status of all 4 on-chain programs
-adminRoutes.get('/api/admin/ops/programs', async (c) => {
-  try {
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    const programIds = [
-      { name: 'Ghost Registry', programId: GHOST_REGISTRY_PROGRAM_ID },
-      { name: 'Payment Escrow', programId: PAYMENT_ESCROW_PROGRAM_ID },
-      { name: 'Conditional Escrow', programId: CONDITIONAL_ESCROW_PROGRAM_ID },
-      { name: 'Multisig Escrow', programId: MULTISIG_ESCROW_PROGRAM_ID }
-    ];
-    
-    const programs = await Promise.all(
-      programIds.map(async ({ name, programId }) => {
-        try {
-          const accountInfo = await connection.getAccountInfo(programId);
-          
-          if (!accountInfo) {
-            return {
-              name,
-              programId: programId.toString(),
-              executable: false,
-              error: 'Program not found'
-            };
-          }
-          
-          // Get upgrade authority
-          let upgradeAuthority: string | null = null;
-          let programDataAddress: string | null = null;
-          
-          try {
-            const [programDataPda] = PublicKey.findProgramAddressSync(
-              [programId.toBuffer()],
-              BPF_UPGRADE_LOADER_ID
-            );
-            programDataAddress = programDataPda.toString();
-            
-            const programDataInfo = await connection.getParsedAccountInfo(programDataPda);
-            if (programDataInfo.value?.data && 'parsed' in programDataInfo.value.data) {
-              upgradeAuthority = programDataInfo.value.data.parsed.info.authority || null;
-            }
-          } catch (upgradeError) {
-            // Program might not be upgradeable
-          }
-          
-          return {
-            name,
-            programId: programId.toString(),
-            executable: accountInfo.executable,
-            owner: accountInfo.owner.toString(),
-            dataLength: accountInfo.data.length,
-            lamports: accountInfo.lamports,
-            upgradeAuthority,
-            programDataAddress
-          };
-        } catch (error) {
-          return {
-            name,
-            programId: programId.toString(),
-            executable: false,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          };
-        }
-      })
-    );
-    
-    return c.json({ programs, cluster });
-  } catch (error) {
-    console.error('Failed to get programs status:', error);
-    return c.json({ error: 'Failed to get programs status' }, 500);
-  }
-});
-// GET /api/admin/ops/wallets - Balance info for configured wallets
-adminRoutes.get('/api/admin/ops/wallets', async (c) => {
-  try {
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    const wallets = [];
-    
-    // Add config PDA wallet
-    try {
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [SEEDS.CONFIG, PAYMENT_ESCROW_PROGRAM_ID.toBuffer()],
-        PAYMENT_ESCROW_PROGRAM_ID
-      );
-      
-      const balance = await connection.getBalance(configPda);
-      
-      // Check USDC balance
-      let usdcBalance = 0;
-      const usdcMint = USDC_MINTS[cluster];
-      if (usdcMint) {
-        try {
-          const tokenAccounts = await connection.getTokenAccountsByOwner(
-            configPda,
-            { mint: new PublicKey(usdcMint) }
-          );
-          if (tokenAccounts.value.length > 0) {
-            const data = tokenAccounts.value[0].account.data;
-            const amount = data.readBigUInt64LE(64); // offset 64 = after mint(32) + owner(32)
-            usdcBalance = Number(amount) / 1_000_000; // USDC has 6 decimals
-          }
-        } catch (usdcError) {
-          // USDC account might not exist
-        }
-      }
-      
-      wallets.push({
-        label: 'Config PDA',
-        address: configPda.toString(),
-        solBalance: balance / 1e9,
-        lamports: balance,
-        usdcBalance
-      });
-    } catch (error) {
-      wallets.push({
-        label: 'Config PDA',
-        address: 'Error deriving PDA',
-        solBalance: 0,
-        lamports: 0,
-        usdcBalance: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-    
-    // Add addresses from query params
-    const addressesParam = c.req.query('addresses');
-    if (addressesParam) {
-      const addresses = addressesParam.split(',').map(addr => addr.trim()).filter(Boolean);
-      
-      for (const address of addresses) {
-        try {
-          const pubkey = new PublicKey(address);
-          const balance = await connection.getBalance(pubkey);
-          
-          // Check USDC balance
-          let usdcBalance = 0;
-          const usdcMint = USDC_MINTS[cluster];
-          if (usdcMint) {
-            try {
-              const tokenAccounts = await connection.getTokenAccountsByOwner(
-                pubkey,
-                { mint: new PublicKey(usdcMint) }
-              );
-              if (tokenAccounts.value.length > 0) {
-                const data = tokenAccounts.value[0].account.data;
-                const amount = data.readBigUInt64LE(64); // offset 64 = after mint(32) + owner(32)
-                usdcBalance = Number(amount) / 1_000_000; // USDC has 6 decimals
-              }
-            } catch (usdcError) {
-              // USDC account might not exist
-            }
-          }
-          
-          wallets.push({
-            label: `Wallet ${address.slice(0, 8)}...`,
-            address,
-            solBalance: balance / 1e9,
-            lamports: balance,
-            usdcBalance
-          });
-        } catch (error) {
-          wallets.push({
-            label: `Wallet ${address.slice(0, 8)}...`,
-            address,
-            solBalance: 0,
-            lamports: 0,
-            usdcBalance: 0,
-            error: error instanceof Error ? error.message : 'Invalid address'
-          });
-        }
-      }
-    }
-    
-    return c.json({ wallets, cluster });
-  } catch (error) {
-    console.error('Failed to get wallet balances:', error);
-    return c.json({ error: 'Failed to get wallet balances' }, 500);
-  }
-});
-// GET /api/admin/ops/tx-lookup?sig=... - Decode a transaction by signature
-adminRoutes.get('/api/admin/ops/tx-lookup', async (c) => {
-  try {
-    const sig = c.req.query('sig');
-    
-    if (!sig) {
-      return c.json({ error: 'Transaction signature parameter is required' }, 400);
-    }
-    
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    const transaction = await connection.getTransaction(sig, { maxSupportedTransactionVersion: 0 });
-    
-    if (!transaction) {
-      return c.json({ error: 'Transaction not found' }, 404);
-    }
-    
-    const status = transaction.meta?.err ? 'failed' : 'success';
-    const fee = transaction.meta?.fee || 0;
-    const logMessages = transaction.meta?.logMessages || [];
-    
-    // Extract account keys and instructions from the transaction
-    let accounts: string[] = [];
-    let instructions: { programId: string; data: string }[] = [];
-    
-    const message = transaction.transaction.message;
-    const accountKeys = message.getAccountKeys();
-    accounts = accountKeys.keySegments().flat().map(key => key.toString());
-    instructions = message.compiledInstructions.map(ix => ({
-      programId: accounts[ix.programIdIndex],
-      data: Buffer.from(ix.data).toString('base64')
-    }));
-    
-    return c.json({
-      signature: sig,
-      slot: transaction.slot,
-      blockTime: transaction.blockTime,
-      status,
-      fee,
-      err: transaction.meta?.err || null,
-      logMessages,
-      accounts,
-      instructions,
-      cluster
-    });
-  } catch (error) {
-    console.error('Failed to lookup transaction:', error);
-    return c.json({ error: 'Failed to lookup transaction' }, 500);
-  }
-});
-// GET /api/admin/ops/escrow?address=...&network=... - Look up a single escrow account
-adminRoutes.get('/api/admin/ops/escrow', async (c) => {
-  try {
-    const address = c.req.query('address');
-    
-    if (!address) {
-      return c.json({ error: 'Address parameter is required' }, 400);
-    }
-    
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    // Fetch on-chain data
-    let onChain;
-    try {
-      const pubkey = new PublicKey(address);
-      const accountInfo = await connection.getAccountInfo(pubkey);
-      
-      if (accountInfo) {
-        onChain = {
-          owner: accountInfo.owner.toString(),
-          lamports: accountInfo.lamports,
-          dataLength: accountInfo.data.length,
-          exists: true
-        };
-      } else {
-        onChain = {
-          exists: false
-        };
-      }
-    } catch (error) {
-      onChain = {
-        exists: false,
-        error: error instanceof Error ? error.message : 'Invalid address'
-      };
-    }
-    
-    // Fetch cached data
-    let cached = null;
-    try {
-      const cachedEscrow = await db.select().from(escrowsCache)
-        .where(eq(escrowsCache.address, address))
-        .limit(1);
-      
-      if (cachedEscrow.length > 0) {
-        const escrow = cachedEscrow[0];
-        cached = {
-          creator: escrow.creator,
-          amount: escrow.amount,
-          tokenMint: escrow.tokenMint,
-          claimed: escrow.claimed,
-          expiry: escrow.expiry ? new Date(escrow.expiry * 1000).toISOString() : null,
-          createdAt: escrow.createdAt ? new Date(escrow.createdAt * 1000).toISOString() : null
-        };
-      }
-    } catch (error) {
-      // DB error, but continue
-    }
-    
-    return c.json({
-      address,
-      cluster,
-      onChain,
-      cached
-    });
-  } catch (error) {
-    console.error('Failed to lookup escrow:', error);
-    return c.json({ error: 'Failed to lookup escrow' }, 500);
-  }
-});
-
-// GET /api/admin/ops/escrows/search?creator=... - Query escrows by creator wallet
-adminRoutes.get('/api/admin/ops/escrows/search', async (c) => {
-  try {
-    const creator = c.req.query('creator');
-    
-    if (!creator) {
-      return c.json({ error: 'Creator parameter is required' }, 400);
-    }
-    
-    const escrows = await db.select().from(escrowsCache)
-      .where(eq(escrowsCache.creator, creator))
-      .orderBy(desc(escrowsCache.updatedAt))
-      .limit(50);
-    
-    return c.json({ escrows, creator });
-  } catch (error) {
-    console.error('Failed to search escrows:', error);
-    return c.json({ error: 'Failed to search escrows' }, 500);
-  }
-});
-
-// GET /api/admin/ops/escrows/stuck - Find expired unclaimed escrows
-adminRoutes.get('/api/admin/ops/escrows/stuck', async (c) => {
-  try {
-    const now = Math.floor(Date.now() / 1000); // Current timestamp in seconds
-    
-    const stuckEscrows = await db.select().from(escrowsCache)
-      .where(
-        and(
-          eq(escrowsCache.claimed, false),
-          sql`${escrowsCache.expiry} < ${now}`
-        )
-      )
-      .orderBy(desc(escrowsCache.updatedAt))
-      .limit(50);
-    
-    return c.json({ stuckEscrows, count: stuckEscrows.length });
-  } catch (error) {
-    console.error('Failed to get stuck escrows:', error);
-    return c.json({ error: 'Failed to get stuck escrows' }, 500);
-  }
-});
-
-// GET /api/admin/ops/account?address=...&network=... - Generic Solana account inspector
-adminRoutes.get('/api/admin/ops/account', async (c) => {
-  try {
-    const address = c.req.query('address');
-    
-    if (!address) {
-      return c.json({ error: 'Address parameter is required' }, 400);
-    }
-    
-    const { connection, cluster } = getConnection(c.req.query('network'));
-    
-    let pubkey;
-    try {
-      pubkey = new PublicKey(address);
-    } catch (error) {
-      return c.json({ error: 'Invalid address format' }, 400);
-    }
-    
-    const accountInfo = await connection.getAccountInfo(pubkey);
-    
-    if (!accountInfo) {
-      return c.json({
-        address,
-        cluster,
-        exists: false
-      });
-    }
-    
-    // Determine account type
-    let type = 'unknown';
-    let additionalInfo: any = {};
-    
-    if (accountInfo.executable) {
-      type = 'program';
-      
-      // For programs, try to get upgrade authority
-      try {
-        const [programDataPda] = PublicKey.findProgramAddressSync(
-          [pubkey.toBuffer()],
-          BPF_UPGRADE_LOADER_ID
-        );
-        
-        const programDataInfo = await connection.getParsedAccountInfo(programDataPda);
-        if (programDataInfo.value?.data && 'parsed' in programDataInfo.value.data) {
-          additionalInfo.upgradeAuthority = programDataInfo.value.data.parsed.info.authority || null;
-          additionalInfo.programDataAddress = programDataPda.toString();
-        }
-      } catch (upgradeError) {
-        // Program might not be upgradeable
-      }
-    } else if (accountInfo.owner.toString() === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') {
-      type = 'token';
-      
-      // Parse token account data
-      try {
-        const data = accountInfo.data;
-        if (data.length >= 72) {
-          const mint = new PublicKey(data.slice(0, 32)).toString();
-          const tokenOwner = new PublicKey(data.slice(32, 64)).toString();
-          const amount = data.readBigUInt64LE(64);
-          
-          additionalInfo = {
-            mint,
-            tokenOwner,
-            amount: amount.toString()
-          };
-        }
-      } catch (parseError) {
-        // Failed to parse token data
-      }
-    } else if (accountInfo.owner.toString() === '11111111111111111111111111111111') {
-      type = 'system';
-    }
-    
-    return c.json({
-      address,
-      cluster,
-      exists: true,
-      owner: accountInfo.owner.toString(),
-      lamports: accountInfo.lamports,
-      solBalance: accountInfo.lamports / 1e9,
-      executable: accountInfo.executable,
-      dataLength: accountInfo.data.length,
-      rentEpoch: accountInfo.rentEpoch,
-      type,
-      ...additionalInfo
-    });
-  } catch (error) {
-    console.error('Failed to lookup account:', error);
-    return c.json({ error: 'Failed to lookup account' }, 500);
   }
 });
 

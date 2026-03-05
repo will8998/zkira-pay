@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { isAdminAuthenticated, adminLogout } from '@/lib/admin-api';
+import { isAdminAuthenticated, adminLogout, getAdminSession, type AdminRole, type AdminSession } from '@/lib/admin-api';
 
 interface AdminAuthGateProps {
   children: React.ReactNode;
@@ -10,18 +10,28 @@ interface AdminAuthGateProps {
 
 interface AdminAuthContextType {
   logout: () => void;
+  role: AdminRole;
+  merchantId: string | null;
+  merchantName: string | null;
+  isMaster: boolean;
 }
 
-export const AdminAuthContext = React.createContext<AdminAuthContextType>({
+const defaultContext: AdminAuthContextType = {
   logout: () => {},
-});
+  role: 'master',
+  merchantId: null,
+  merchantName: null,
+  isMaster: true,
+};
+
+export const AdminAuthContext = React.createContext<AdminAuthContextType>(defaultContext);
 
 export function AdminAuthGate({ children }: AdminAuthGateProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [session, setSession] = useState<AdminSession | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Login page should always render without auth check
   const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
@@ -34,7 +44,9 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
       const authenticated = isAdminAuthenticated();
       setIsAuthenticated(authenticated);
 
-      if (!authenticated) {
+      if (authenticated) {
+        setSession(getAdminSession());
+      } else {
         router.push('/admin/login');
       }
     };
@@ -46,10 +58,18 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
     adminLogout();
   };
 
+  const contextValue: AdminAuthContextType = {
+    logout,
+    role: session?.role || 'master',
+    merchantId: session?.merchantId || null,
+    merchantName: session?.merchantName || null,
+    isMaster: session?.role === 'master',
+  };
+
   // Login page bypasses auth gate entirely
   if (isLoginPage) {
     return (
-      <AdminAuthContext.Provider value={{ logout }}>
+      <AdminAuthContext.Provider value={contextValue}>
         {children}
       </AdminAuthContext.Provider>
     );
@@ -75,7 +95,7 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
   }
 
   return (
-    <AdminAuthContext.Provider value={{ logout }}>
+    <AdminAuthContext.Provider value={contextValue}>
       {children}
     </AdminAuthContext.Provider>
   );

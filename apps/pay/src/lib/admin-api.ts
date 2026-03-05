@@ -1,25 +1,66 @@
 const API_URL = '';
 
+export type AdminRole = 'master' | 'merchant';
+
+export interface AdminSession {
+  role: AdminRole;
+  credential: string; // admin password or API key
+  merchantId: string | null;
+  merchantName: string | null;
+}
+
+function getSession(): AdminSession | null {
+  if (typeof window === 'undefined') return null;
+  const raw = sessionStorage.getItem('zkira_admin_session');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as AdminSession;
+  } catch {
+    // Legacy format: plain password string
+    sessionStorage.removeItem('zkira_admin_session');
+    return null;
+  }
+}
+
+function setSession(session: AdminSession) {
+  sessionStorage.setItem('zkira_admin_session', JSON.stringify(session));
+}
+
+function clearSession() {
+  sessionStorage.removeItem('zkira_admin_session');
+}
+
 export async function adminFetch(path: string, options?: RequestInit) {
-  const password = sessionStorage.getItem('zkira_admin_session');
-  if (!password) throw new Error('Not authenticated');
-  
+  const session = getSession();
+  if (!session) throw new Error('Not authenticated');
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  // Master uses admin password header, merchant uses API key header
+  if (session.role === 'master') {
+    headers['X-Admin-Password'] = session.credential;
+  } else {
+    headers['X-API-Key'] = session.credential;
+    headers['X-Admin-Password'] = session.credential; // Dual header for backward compat
+  }
+
   try {
     const res = await fetch(`${API_URL}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Password': password,
+        ...headers,
         ...options?.headers,
       },
     });
-    
+
     if (res.status === 401) {
-      sessionStorage.removeItem('zkira_admin_session');
+      clearSession();
       window.location.href = '/admin/login';
       throw new Error('Unauthorized');
     }
-    
+
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
   } catch (error) {
@@ -30,26 +71,36 @@ export async function adminFetch(path: string, options?: RequestInit) {
   }
 }
 
-export async function adminLogin(password: string): Promise<{ success: boolean; error?: string }> {
+export async function adminLogin(credential: string): Promise<{
+  success: boolean;
+  error?: string;
+  session?: AdminSession;
+}> {
   try {
-    const res = await fetch(`${API_URL}/api/admin/stats`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Password': password,
-      },
+    const res = await fetch(`${API_URL}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
     });
-    
-    if (res.status === 401 || res.status === 403) {
-      return { success: false, error: 'Invalid password' };
+
+    if (res.status === 401) {
+      return { success: false, error: 'Invalid credentials' };
     }
-    
-    if (res.ok) {
-      sessionStorage.setItem('zkira_admin_session', password);
-      return { success: true };
+
+    if (!res.ok) {
+      return { success: false, error: `Server error: ${res.status}` };
     }
-    
-    return { success: false, error: `API error: ${res.status}` };
+
+    const data = await res.json();
+    const session: AdminSession = {
+      role: data.role,
+      credential,
+      merchantId: data.merchantId || null,
+      merchantName: data.merchantName || null,
+    };
+
+    setSession(session);
+    return { success: true, session };
   } catch (error) {
     if (error instanceof TypeError) {
       return { success: false, error: 'Unable to connect to server. Please check that the API server is running.' };
@@ -59,11 +110,14 @@ export async function adminLogin(password: string): Promise<{ success: boolean; 
 }
 
 export function adminLogout() {
-  sessionStorage.removeItem('zkira_admin_session');
+  clearSession();
   window.location.href = '/admin/login';
 }
 
 export function isAdminAuthenticated(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!sessionStorage.getItem('zkira_admin_session');
+  return getSession() !== null;
+}
+
+export function getAdminSession(): AdminSession | null {
+  return getSession();
 }

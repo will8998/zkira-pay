@@ -22,7 +22,7 @@ deadDrop.post('/api/dead-drop', async (c) => {
       return c.json({ error: 'Missing required fields: dropId, payload.ciphertext, payload.nonce' }, 400);
     }
 
-    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
+    const expiresAt = new Date('9999-12-31T23:59:59Z');
 
     await db.insert(deadDropNotes).values({
       dropId,
@@ -56,10 +56,6 @@ deadDrop.get('/api/dead-drop/:dropId', async (c) => {
       return c.json({ error: 'Dead drop not found' }, 404);
     }
 
-    // Check expiry
-    if (new Date(row.expiresAt) < new Date()) {
-      return c.json({ error: 'Dead drop expired' }, 410);
-    }
 
     return c.json({
       payload: row.payload,
@@ -116,7 +112,7 @@ deadDrop.post('/api/invoices/v2', async (c) => {
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
-    const expires = expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days default
+    const expires = expiresAt ? new Date(expiresAt) : new Date('9999-12-31T23:59:59Z');
 
     await db.insert(invoicesV2).values({
       invoiceId,

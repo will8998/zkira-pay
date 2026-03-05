@@ -6,15 +6,11 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { AdminAuthGate, useAdminAuth } from '@/components/admin/AdminAuthGate';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { NetworkSelector } from '@/components/admin/NetworkSelector';
-import { AdminNetworkProvider } from '@/lib/admin-network';
 
 export const dynamic = 'force-dynamic';
 
 function AdminTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
-  const { logout } = useAdminAuth();
-  const pathname = usePathname();
-  const isOpsPage = pathname?.startsWith('/admin/ops');
+  const { logout, isMaster, merchantName } = useAdminAuth();
 
   return (
     <div className="h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] flex items-center justify-between px-3 sm:px-6">
@@ -34,7 +30,10 @@ function AdminTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
       </div>
 
       <div className="flex items-center gap-4">
-        {isOpsPage && <NetworkSelector />}
+        {/* Role indicator */}
+        <span className="text-xs text-[var(--color-muted)] hidden sm:block">
+          {isMaster ? 'Master' : merchantName || 'Merchant'}
+        </span>
         <button
           onClick={logout}
           className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
@@ -83,15 +82,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
   return (
-    <AdminNetworkProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AdminNetworkProvider>
+    <AdminLayoutContent>{children}</AdminLayoutContent>
   );
 }

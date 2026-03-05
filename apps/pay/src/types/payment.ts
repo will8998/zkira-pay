@@ -130,10 +130,10 @@ export interface InvoiceRequest {
   memo?: string;
   /** ISO-8601 creation timestamp. */
   createdAt: string;
-  /** ISO-8601 expiry timestamp. */
-  expiresAt: string;
+  /** ISO-8601 expiry timestamp (optional — no expiry if omitted). */
+  expiresAt?: string;
   /** Status: waiting for payer deposits. */
-  status: 'pending' | 'funded' | 'withdrawn' | 'expired';
+  status: 'pending' | 'funded' | 'withdrawn';
 }
 
 /** A single encrypted note attached to an invoice (payer → requester). */

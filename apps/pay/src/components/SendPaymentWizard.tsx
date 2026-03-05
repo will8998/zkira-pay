@@ -85,7 +85,7 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
 }
 
 export function SendPaymentWizard() {
-  const { address, privateKey, isCreated, createWallet } = useBrowserWallet();
+  const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   // Wizard state
   const [step, setStep] = useState<WizardStep>('select');
@@ -95,7 +95,6 @@ export function SendPaymentWizard() {
   const [amount, setAmount] = useState<string>('');  // Amount input as string for easier handling
 
   // New state for UI enhancements
-  const [expiryDays, setExpiryDays] = useState<number>(7);
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
 
   // Deposit progress
@@ -342,6 +341,8 @@ export function SendPaymentWizard() {
         amountLabel: denomSet.totalLabel,
         claimCode: code,
       });
+
+      clearWallet();
 
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
@@ -604,40 +605,6 @@ export function SendPaymentWizard() {
               </div>
             )}
 
-            {/* Expires In */}
-            <div className="mb-6">
-              <h3 
-                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                EXPIRES IN
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {[
-                  { days: 1, label: '1 day' },
-                  { days: 3, label: '3 days' },
-                  { days: 7, label: '7 days' },
-                  { days: 14, label: '14d' },
-                  { days: 30, label: '30d' },
-                ].map(({ days, label }) => (
-                  <button
-                    key={days}
-                    onClick={() => setExpiryDays(days)}
-                    className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
-                      expiryDays === days
-                        ? 'bg-[var(--color-button)] text-[var(--color-button-text)]'
-                        : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-secondary)]'
-                    }`}
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)]">
-                Unclaimed funds are automatically returned to your wallet after the expiry period.
-              </p>
-            </div>
 
             {/* Advanced Options - Collapsible */}
             <div className="mb-6">
@@ -924,7 +891,7 @@ export function SendPaymentWizard() {
                 </div>
                 <div className="text-[var(--color-warning-text)] opacity-80">
                   Send both the claim code and password to the recipient via a secure channel.
-                  The code expires in {expiryDays} {expiryDays === 1 ? 'day' : 'days'}.
+                  Keep both codes safe — they cannot be recovered.
                 </div>
               </div>
             </div>
@@ -937,8 +904,7 @@ export function SendPaymentWizard() {
               setCollectedNotes([]);
               setDenomSet(null);
               setAmount('');
-              setExpiryDays(7);
-              setAdvancedOpen(false);
+              clearWallet();
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
           >

@@ -89,7 +89,6 @@ export function RequestPaymentWizard() {
   const [amount, setAmount] = useState<string>('');  // Amount input as string for easier handling
 
   // New state for UI enhancements
-  const [expiryDays, setExpiryDays] = useState<number>(7);
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
 
   // Wizard state
@@ -165,7 +164,6 @@ export function RequestPaymentWizard() {
       setSecretKey(keypair.secretKey);
 
       const invoiceId = (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : ([1e7]+-1e3+-4e3+-8e3+-1e11).toString().replace(/[018]/g, c => (Number(c) ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (Number(c) / 4)))).toString(16));
-      const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
 
       const denominations = denomSet.selections.map((s) => ({
         pool: s.pool.address,
@@ -186,7 +184,6 @@ export function RequestPaymentWizard() {
           totalLabel: denomSet.totalLabel,
           recipientPubkey: keypair.publicKey,
           memo: memo || null,
-          expiresAt,
         }),
       });
 
@@ -204,7 +201,6 @@ export function RequestPaymentWizard() {
         recipientPubkey: keypair.publicKey,
         memo: memo || undefined,
         createdAt: new Date().toISOString(),
-        expiresAt,
         status: 'pending',
       };
 
@@ -225,7 +221,7 @@ export function RequestPaymentWizard() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
     }
-  }, [denomSet, chain, token, memo, expiryDays]);
+  }, [denomSet, chain, token, memo]);
 
   // Start polling for notes
   const startWaiting = useCallback(() => {
@@ -507,40 +503,6 @@ export function RequestPaymentWizard() {
               </div>
             )}
 
-            {/* Expires In */}
-            <div className="mb-6">
-              <h3 
-                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                EXPIRES IN
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {[
-                  { days: 1, label: '1 day' },
-                  { days: 3, label: '3 days' },
-                  { days: 7, label: '7 days' },
-                  { days: 14, label: '14d' },
-                  { days: 30, label: '30d' },
-                ].map(({ days, label }) => (
-                  <button
-                    key={days}
-                    onClick={() => setExpiryDays(days)}
-                    className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
-                      expiryDays === days
-                        ? 'bg-[var(--color-button)] text-[var(--color-button-text)]'
-                        : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-secondary)]'
-                    }`}
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)]">
-                The invoice link expires after this period. Choose a longer window if your payer needs more time.
-              </p>
-            </div>
 
             {/* Advanced Options - Collapsible */}
             <div className="mb-6">

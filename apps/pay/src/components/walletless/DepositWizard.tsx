@@ -21,7 +21,7 @@ const POLL_INTERVAL_MS = 5000;
 
 
 export function DepositWizard({ onComplete }: DepositWizardProps) {
-  const { address, privateKey, isCreated, createWallet } = useBrowserWallet();
+  const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   const [currentStep, setCurrentStep] = useState<Step>('amount');
   const [depositNote, setDepositNote] = useState<PoolNote | null>(null);
@@ -245,6 +245,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
       setDepositNote(null);
       setPassword('');
 
+      clearWallet();
       onComplete?.();
     } catch {
       toast.error('Failed to create receipt. Please try again.');
@@ -534,6 +535,7 @@ export function DepositWizard({ onComplete }: DepositWizardProps) {
                   setSelection(null);
                   setDepositNote(null);
                   setPassword('');
+                  clearWallet();
                   onComplete?.();
                 }}
                 className="px-6 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press"

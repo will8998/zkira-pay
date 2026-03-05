@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AdminDataTable } from '@/components/admin/AdminDataTable';
 import { adminFetch } from '@/lib/admin-api';
+import { useAdminAuth } from '@/components/admin/AdminAuthGate';
 import { toast } from 'sonner';
 
 interface ApiKey {
@@ -16,6 +17,7 @@ interface ApiKey {
 }
 
 export default function ApiKeysPage() {
+  const { isMaster } = useAdminAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,10 +80,10 @@ export default function ApiKeysPage() {
 
   const getActiveBadge = (active: boolean) => {
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+      <span className={`px-2 py-1 text-xs font-medium rounded-none ${
         active 
-          ? 'bg-[#E8F5E0] text-[#4D9A2A]' 
-          : 'bg-[#FEE2E2] text-[#991B1B]'
+          ? 'bg-[var(--color-text)] text-[var(--color-bg)]' 
+          : 'bg-[var(--color-hover)] text-[var(--color-muted)]'
       }`}>
         {active ? 'Active' : 'Revoked'}
       </span>
@@ -98,7 +100,7 @@ export default function ApiKeysPage() {
         </span>
       ),
     },
-    {
+    ...(isMaster ? [{
       key: 'wallet',
       label: 'Wallet',
       render: (apiKey: ApiKey) => (
@@ -106,7 +108,7 @@ export default function ApiKeysPage() {
           {truncateWallet(apiKey.wallet)}
         </span>
       ),
-    },
+    }] : []),
     {
       key: 'name',
       label: 'Name',
@@ -134,7 +136,7 @@ export default function ApiKeysPage() {
         apiKey.active ? (
           <button
             onClick={() => handleRevokeApiKey(apiKey.id)}
-            className="text-[var(--color-red)] hover:text-red-800 text-sm font-medium"
+            className="text-[var(--color-text)] hover:text-[var(--color-muted)] text-sm font-medium"
           >
             Revoke
           </button>
@@ -157,17 +159,17 @@ export default function ApiKeysPage() {
   if (error) {
     return (
       <div className="p-4 md:p-6">
-        <div className="bg-[#FEF2F2] border border-[#FECACA] p-4 md:p-6">
+        <div className="bg-[var(--color-surface)] border-1.5 border-[var(--border-subtle)] p-4 md:p-6">
           <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-[var(--color-red)] mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[var(--color-text)] mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
             <div>
-              <h3 className="text-sm font-semibold text-[#991B1B]">Failed to load data</h3>
-              <p className="text-sm text-[var(--color-red)] mt-1">{error}</p>
+              <h3 className="text-sm font-semibold text-[var(--color-text)]">Failed to load data</h3>
+              <p className="text-sm text-[var(--color-muted)] mt-1">{error}</p>
               <button
                 onClick={() => { setError(null); setLoading(true); fetchApiKeys(); }}
-                className="mt-3 bg-[var(--color-button)] text-[var(--color-button-text)] px-4 py-2 text-sm font-medium hover:bg-[var(--color-button-hover)] transition-colors"
+                className="mt-3 bg-[var(--color-button)] text-[var(--color-bg)] px-4 py-2 text-sm font-medium hover:bg-[var(--color-button-hover)] transition-colors"
               >
                 Retry
               </button>

@@ -13,7 +13,7 @@ export const deadDropNotes = pgTable('dead_drop_notes', {
   /** Whether the recipient has retrieved this drop. */
   claimed: boolean('claimed').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  /** Auto-expire after 72 hours. */
+  /** Kept for schema compat — no expiry enforced (far-future sentinel). */
   expiresAt: timestamp('expires_at').notNull(),
 }, (table) => ({
   dropIdIdx: uniqueIndex('dead_drop_notes_drop_id_idx').on(table.dropId),
@@ -42,7 +42,7 @@ export const invoicesV2 = pgTable('invoices_v2', {
   recipientPubkey: text('recipient_pubkey').notNull(),
   /** Optional memo / description. */
   memo: text('memo'),
-  /** pending → funded → withdrawn → expired. */
+  /** pending → funded → withdrawn. */
   status: text('status').default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   expiresAt: timestamp('expires_at').notNull(),
