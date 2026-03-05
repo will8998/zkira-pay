@@ -331,7 +331,7 @@ export default function MerchantsPage() {
         </button>
       ),
     },
-
+  ];
   if (loading) {
     return (
       <div className="p-4 md:p-6">
