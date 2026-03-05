@@ -38,7 +38,7 @@ interface VolumeData {
     commissions: string;
     count: number;
   }>;
-
+}
 export default function VolumePage() {
   const { isMaster } = useAdminAuth();
   const [data, setData] = useState<VolumeData | null>(null);
