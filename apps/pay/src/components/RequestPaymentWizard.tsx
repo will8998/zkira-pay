@@ -503,6 +503,7 @@ export function RequestPaymentWizard() {
                     </div>
                   );
                 })()}
+              </div>
             )}
 
             {/* Memo Input */}

@@ -577,6 +577,7 @@ export function SendPaymentWizard() {
                     </div>
                   );
                 })()}
+              </div>
             )}
           </div>
 
