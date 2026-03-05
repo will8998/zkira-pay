@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getDenominationOptions, type Chain, type TokenId, type PoolEntry } from '@/config/pool-registry';
 import type { DenominationSelection, DenominationSet } from '@/types/payment';
 
@@ -19,8 +19,8 @@ export function DenominationBuilder({
   // State to track count for each denomination
   const [counts, setCounts] = useState<Record<string, number>>({});
 
-  // Get available denominations
-  const denominations = getDenominationOptions(chain, token);
+  // Get available denominations (memoized to prevent useEffect re-triggers)
+  const denominations = useMemo(() => getDenominationOptions(chain, token), [chain, token]);
 
   // Initialize counts to 0 for all denominations
   useEffect(() => {

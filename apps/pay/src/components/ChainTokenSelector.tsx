@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   DEFAULT_CHAIN,
   DEFAULT_TOKEN,
@@ -60,7 +60,7 @@ export function ChainTokenSelector({
   // Available options based on current selection
   const chains = getAvailableChains();
   const tokens = getAvailableTokensForChain(chain);
-  const denominations = getDenominationOptions(chain, token);
+  const denominations = useMemo(() => getDenominationOptions(chain, token), [chain, token]);
 
   // Initialize denomination when chain or token changes
   useEffect(() => {
