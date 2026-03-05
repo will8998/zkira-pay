@@ -30,6 +30,6 @@ export function loadConfig(): ApiConfig {
     databaseUrl,
     adminPassword,
     jwtSecret,
-    relayerSecret: process.env.RELAYER_SECRET || adminPassword, // Falls back to admin password if not set
+    relayerSecret: process.env.RELAYER_SECRET || (() => { throw new Error('RELAYER_SECRET environment variable is required'); })(),
   };
 }

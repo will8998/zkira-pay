@@ -505,3 +505,23 @@ export const ephemeralWallets = pgTable('ephemeral_wallets', {
   statusIdx: index('ephemeral_wallets_status_idx').on(table.status),
   createdAtIdx: index('ephemeral_wallets_created_at_idx').on(table.createdAt),
 }));
+
+// ═══════════════════════════════════════════════════════════
+// AUDIT LOG
+// ═══════════════════════════════════════════════════════════
+
+export const auditLog = pgTable('audit_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  actor: text('actor').notNull(),           // 'system', 'admin', merchant ID, etc.
+  action: text('action').notNull(),         // 'session.created', 'withdrawal.confirmed', 'merchant.created', etc.
+  resourceType: text('resource_type'),      // 'session', 'withdrawal', 'merchant', 'dispute', etc.
+  resourceId: text('resource_id'),          // UUID of the affected resource
+  details: jsonb('details'),               // Freeform context (before/after, amounts, etc.)
+  ipAddress: text('ip_address'),           // Request IP if available
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  actorIdx: index('audit_log_actor_idx').on(table.actor),
+  actionIdx: index('audit_log_action_idx').on(table.action),
+  resourceTypeIdx: index('audit_log_resource_type_idx').on(table.resourceType),
+  createdAtIdx: index('audit_log_created_at_idx').on(table.createdAt),
+}));

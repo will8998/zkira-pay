@@ -3,6 +3,7 @@ import { db } from '../db/index.js';
 import { gatewayDisputes, gatewaySessions, gatewayBalances, gatewayLedger } from '../db/schema.js';
 import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { deliverWebhook } from '../services/webhook.js';
+import { toBigInt6, fromBigInt6 } from '../utils/bigint-math.js';
 
 const gatewayDisputeRoutes = new Hono<{ Variables: { merchantId: string } }>();
 
@@ -76,15 +77,15 @@ gatewayDisputeRoutes.post('/api/gateway/disputes', async (c) => {
       }
 
       const balance = balanceResult[0];
-      const availableBalance = parseFloat(balance.availableBalance);
+      const availableBI = toBigInt6(balance.availableBalance);
       
-      if (availableBalance < holdAmount) {
+      if (availableBI < toBigInt6(holdAmount.toString())) {
         return c.json({ error: 'Insufficient available balance for hold amount' }, 400);
       }
 
       balanceBefore = balance.availableBalance;
-      balanceAfter = (availableBalance - holdAmount).toFixed(6);
-      const newPendingBalance = (parseFloat(balance.pendingBalance) + holdAmount).toFixed(6);
+      balanceAfter = fromBigInt6(availableBI - toBigInt6(holdAmount.toString()));
+      const newPendingBalance = fromBigInt6(toBigInt6(balance.pendingBalance) + toBigInt6(holdAmount.toString()));
 
       // Update balance - deduct from available, add to pending
       await db
@@ -270,7 +271,7 @@ gatewayDisputeRoutes.patch('/api/gateway/disputes/:disputeId/status', async (c) 
     if (status === 'resolved_refund' || status === 'resolved_rejected') {
       // Release held amount if exists
       if (dispute.holdAmount && dispute.holdCurrency) {
-        const holdAmount = parseFloat(dispute.holdAmount);
+        const holdAmountBI = toBigInt6(dispute.holdAmount);
         
         // Get current balance
         const balanceResult = await db
@@ -288,8 +289,8 @@ gatewayDisputeRoutes.patch('/api/gateway/disputes/:disputeId/status', async (c) 
         if (balanceResult.length > 0) {
           const balance = balanceResult[0];
           const balanceBefore = balance.availableBalance;
-          const balanceAfter = (parseFloat(balanceBefore) + holdAmount).toFixed(6);
-          const newPendingBalance = (parseFloat(balance.pendingBalance) - holdAmount).toFixed(6);
+          const balanceAfter = fromBigInt6(toBigInt6(balanceBefore) + holdAmountBI);
+          const newPendingBalance = fromBigInt6(toBigInt6(balance.pendingBalance) - holdAmountBI);
 
           // Release hold - add back to available, subtract from pending
           await db
@@ -313,7 +314,7 @@ gatewayDisputeRoutes.patch('/api/gateway/disputes/:disputeId/status', async (c) 
             merchantId,
             playerRef: dispute.playerRef,
             type: ledgerType,
-            amount: holdAmount.toString(),
+            amount: fromBigInt6(holdAmountBI),
             currency: dispute.holdCurrency,
             sessionId: dispute.sessionId,
             disputeId,

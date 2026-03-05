@@ -4,7 +4,8 @@ import { gatewaySessions, gatewayBalances, gatewayLedger, merchants } from '../d
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { deliverWebhook } from '../services/webhook.js';
 import { processCommissions } from '../services/commission.js';
-
+import { toBigInt6, fromBigInt6, SCALE } from '../utils/bigint-math.js';
+import { logAudit } from '../services/audit.js';
 const gatewayWithdrawalRoutes = new Hono<{ Variables: { merchantId: string } }>();
 
 // POST /api/gateway/withdrawals - Initiate withdrawal
@@ -45,75 +46,84 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
     }
 
     const merchant = merchantResult[0];
-    const platformFee = amount * parseFloat(merchant.feePercent) / 100;
+    const amountStr = amount.toFixed(6);
+    const amountBI = toBigInt6(amountStr);
+    const platformFeeBI = amountBI * toBigInt6(merchant.feePercent) / SCALE / BigInt(100);
+    const platformFee = fromBigInt6(platformFeeBI);
 
-    // Check player balance
-    const balance = await db.select().from(gatewayBalances).where(
-      and(
-        eq(gatewayBalances.merchantId, merchantId),
-        eq(gatewayBalances.playerRef, playerRef),
-        eq(gatewayBalances.currency, token)
-      )
-    ).limit(1);
-
-    if (balance.length === 0) {
-      return c.json({ error: 'Insufficient balance' }, 400);
-    }
-
-    const currentBalance = balance[0];
-    const availableBalance = parseFloat(currentBalance.availableBalance);
-
-    if (availableBalance < amount) {
-      return c.json({ error: 'Insufficient balance' }, 400);
-    }
-    // Place a hold: decrease availableBalance, increase pendingBalance
-    const newAvailableBalance = (availableBalance - amount).toFixed(6);
-    const newPendingBalance = (parseFloat(currentBalance.pendingBalance) + amount).toFixed(6);
-
-    await db.update(gatewayBalances)
-      .set({
-        availableBalance: newAvailableBalance,
-        pendingBalance: newPendingBalance,
-        updatedAt: new Date()
-      })
-      .where(
+    // Check balance, place hold, create session, and insert ledger entry in transaction
+    const session = await db.transaction(async (tx) => {
+      // Check player balance
+      const balance = await tx.select().from(gatewayBalances).where(
         and(
           eq(gatewayBalances.merchantId, merchantId),
           eq(gatewayBalances.playerRef, playerRef),
           eq(gatewayBalances.currency, token)
         )
-      );
+      ).limit(1);
 
-    // Create withdrawal session
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
-    const sessionResult = await db.insert(gatewaySessions).values({
-      merchantId,
-      sessionType: 'withdrawal',
-      playerRef,
-      amount: amount.toString(),
-      token,
-      chain,
-      recipientAddress,
-      referrerAddress: merchant.referrerAddress,
-      platformFee: platformFee.toString(),
-      metadata,
-      status: 'pending',
-      expiresAt
-    }).returning();
+      if (balance.length === 0) {
+        throw new Error('Insufficient balance');
+      }
 
-    const session = sessionResult[0];
+      const currentBalance = balance[0];
+      const availableBI = toBigInt6(currentBalance.availableBalance);
 
-    // Insert ledger entry for withdrawal hold
-    await db.insert(gatewayLedger).values({
-      merchantId,
-      playerRef,
-      type: 'withdrawal_hold',
-      amount: (-amount).toString(),
-      currency: token,
-      sessionId: session.id,
-      balanceBefore: availableBalance.toString(),
-      balanceAfter: newAvailableBalance,
-      description: `Withdrawal hold for session ${session.id}`
+      if (availableBI < amountBI) {
+        throw new Error('Insufficient balance');
+      }
+
+      // Place a hold: decrease availableBalance, increase pendingBalance
+      const newAvailableBalance = fromBigInt6(availableBI - amountBI);
+      const newPendingBalance = fromBigInt6(toBigInt6(currentBalance.pendingBalance) + amountBI);
+
+      await tx.update(gatewayBalances)
+        .set({
+          availableBalance: newAvailableBalance,
+          pendingBalance: newPendingBalance,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(gatewayBalances.merchantId, merchantId),
+            eq(gatewayBalances.playerRef, playerRef),
+            eq(gatewayBalances.currency, token)
+          )
+        );
+
+      // Create withdrawal session
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+      const sessionResult = await tx.insert(gatewaySessions).values({
+        merchantId,
+        sessionType: 'withdrawal',
+        playerRef,
+        amount: amount.toString(),
+        token,
+        chain,
+        recipientAddress,
+        referrerAddress: merchant.referrerAddress,
+        platformFee: platformFee.toString(),
+        metadata,
+        status: 'pending',
+        expiresAt
+      }).returning();
+
+      const session = sessionResult[0];
+
+      // Insert ledger entry for withdrawal hold
+      await tx.insert(gatewayLedger).values({
+        merchantId,
+        playerRef,
+        type: 'withdrawal_hold',
+        amount: fromBigInt6(-amountBI),
+        currency: token,
+        sessionId: session.id,
+        balanceBefore: currentBalance.availableBalance,
+        balanceAfter: newAvailableBalance,
+        description: `Withdrawal hold for session ${session.id}`
+      });
+
+      return session;
     });
 
     // Fire webhook (fire-and-forget)
@@ -134,7 +144,23 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals', async (c) => {
       }
     }).catch(err => console.warn('Failed to deliver withdrawal.initiated webhook:', err));
 
-    return c.json({ session: { ...session, referrerAddress: merchant.referrerAddress, platformFee: platformFee.toString() } }, 201);
+    // Log audit event (fire-and-forget)
+    logAudit({
+      actor: merchantId,
+      action: 'withdrawal.initiated',
+      resourceType: 'session',
+      resourceId: session.id,
+      details: {
+        playerRef,
+        amount,
+        token,
+        chain,
+        recipientAddress,
+        platformFee: session.platformFee
+      }
+    }).catch(() => {});
+
+    return c.json({ session });
   } catch (error) {
     console.error('Failed to initiate withdrawal:', error);
     return c.json({ error: 'Failed to initiate withdrawal' }, 500);
@@ -153,97 +179,104 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/confirm', asyn
       return c.json({ error: 'Valid transaction hash is required' }, 400);
     }
 
-    // Validate session exists and belongs to merchant
-    const sessionResult = await db.select().from(gatewaySessions).where(
-      and(
-        eq(gatewaySessions.id, sessionId),
-        eq(gatewaySessions.merchantId, merchantId),
-        eq(gatewaySessions.sessionType, 'withdrawal'),
-        eq(gatewaySessions.status, 'pending')
-      )
-    ).limit(1);
+    // Validate session, update status, finalize balance, and insert ledger entries in transaction
+    const { updatedSessionResult, session } = await db.transaction(async (tx) => {
+      const sessionResult = await tx.select().from(gatewaySessions).where(
+        and(
+          eq(gatewaySessions.id, sessionId),
+          eq(gatewaySessions.merchantId, merchantId),
+          eq(gatewaySessions.sessionType, 'withdrawal'),
+          eq(gatewaySessions.status, 'pending')
+        )
+      ).limit(1);
 
-    if (sessionResult.length === 0) {
-      return c.json({ error: 'Session not found or not eligible for confirmation' }, 404);
-    }
+      if (sessionResult.length === 0) {
+        throw new Error('Session not found or not eligible for confirmation');
+      }
 
-    const session = sessionResult[0];
-    const amount = parseFloat(session.amount);
+      const session = sessionResult[0];
+      const amountBI = toBigInt6(session.amount);
 
-    // Update session status
-    const updatedSessionResult = await db.update(gatewaySessions)
-      .set({
-        status: 'confirmed',
-        txHash,
-        updatedAt: new Date()
-      })
-      .where(eq(gatewaySessions.id, sessionId))
-      .returning();
-
-    // Finalize balance: decrease pendingBalance, increase totalWithdrawn
-    const balance = await db.select().from(gatewayBalances).where(
-      and(
-        eq(gatewayBalances.merchantId, merchantId),
-        eq(gatewayBalances.playerRef, session.playerRef),
-        eq(gatewayBalances.currency, session.token)
-      )
-    ).limit(1);
-
-    if (balance.length > 0) {
-      const currentBalance = balance[0];
-      const newPendingBalance = (parseFloat(currentBalance.pendingBalance) - amount).toFixed(6);
-      const newTotalWithdrawn = (parseFloat(currentBalance.totalWithdrawn) + amount).toFixed(6);
-
-      await db.update(gatewayBalances)
+      // Update session status
+      const updatedSessionResult = await tx.update(gatewaySessions)
         .set({
-          pendingBalance: newPendingBalance,
-          totalWithdrawn: newTotalWithdrawn,
+          status: 'confirmed',
+          txHash,
           updatedAt: new Date()
         })
-        .where(
-          and(
-            eq(gatewayBalances.merchantId, merchantId),
-            eq(gatewayBalances.playerRef, session.playerRef),
-            eq(gatewayBalances.currency, session.token)
-          )
-        );
+        .where(eq(gatewaySessions.id, sessionId))
+        .returning();
 
-      // Insert ledger entry for withdrawal confirmation
-      await db.insert(gatewayLedger).values({
-        merchantId,
-        playerRef: session.playerRef,
-        type: 'withdrawal_confirmed',
-        amount: amount.toString(),
-        currency: session.token,
-        sessionId: session.id,
-        balanceBefore: currentBalance.pendingBalance,
-        balanceAfter: newPendingBalance,
-        description: `Withdrawal confirmed with txHash: ${txHash}`
-      });
+      // Finalize balance: decrease pendingBalance, increase totalWithdrawn
+      const balance = await tx.select().from(gatewayBalances).where(
+        and(
+          eq(gatewayBalances.merchantId, merchantId),
+          eq(gatewayBalances.playerRef, session.playerRef),
+          eq(gatewayBalances.currency, session.token)
+        )
+      ).limit(1);
 
-      // Insert platform fee ledger entry if there's a platform fee
-      if (session.platformFee && parseFloat(session.platformFee) > 0) {
-        const platformFeeAmount = parseFloat(session.platformFee);
-        await db.insert(gatewayLedger).values({
+      if (balance.length > 0) {
+        const currentBalance = balance[0];
+        const newPendingBalance = fromBigInt6(toBigInt6(currentBalance.pendingBalance) - amountBI);
+        const newTotalWithdrawn = fromBigInt6(toBigInt6(currentBalance.totalWithdrawn) + amountBI);
+
+        await tx.update(gatewayBalances)
+          .set({
+            pendingBalance: newPendingBalance,
+            totalWithdrawn: newTotalWithdrawn,
+            updatedAt: new Date()
+          })
+          .where(
+            and(
+              eq(gatewayBalances.merchantId, merchantId),
+              eq(gatewayBalances.playerRef, session.playerRef),
+              eq(gatewayBalances.currency, session.token)
+            )
+          );
+
+        // Insert ledger entry for withdrawal confirmation
+        await tx.insert(gatewayLedger).values({
           merchantId,
           playerRef: session.playerRef,
-          type: 'platform_fee',
-          amount: platformFeeAmount.toString(),
+          type: 'withdrawal_confirmed',
+          amount: fromBigInt6(amountBI),
           currency: session.token,
           sessionId: session.id,
           balanceBefore: currentBalance.pendingBalance,
           balanceAfter: newPendingBalance,
-          description: `Platform fee for withdrawal session ${session.id}`
+          description: `Withdrawal confirmed with txHash: ${txHash}`
         });
 
-        // Process commissions (fire-and-forget)
-        processCommissions({
-          merchantId,
-          sessionId: session.id,
-          platformFee: platformFeeAmount,
-          currency: session.token
-        }).catch(err => console.error('Failed to process commissions:', err));
+        // Insert platform fee ledger entry if there's a platform fee
+        if (session.platformFee && toBigInt6(session.platformFee) > BigInt(0)) {
+          const platformFeeAmount = session.platformFee;
+          await tx.insert(gatewayLedger).values({
+            merchantId,
+            playerRef: session.playerRef,
+            type: 'platform_fee',
+            amount: platformFeeAmount,
+            currency: session.token,
+            sessionId: session.id,
+            balanceBefore: currentBalance.pendingBalance,
+            balanceAfter: newPendingBalance,
+            description: `Platform fee for withdrawal session ${session.id}`
+          });
+        }
       }
+
+      return { updatedSessionResult, session };
+    });
+
+    // Process commissions (fire-and-forget)
+    if (session.platformFee && toBigInt6(session.platformFee) > BigInt(0)) {
+      const platformFeeAmount = session.platformFee;
+      processCommissions({
+        merchantId,
+        sessionId: session.id,
+        platformFee: platformFeeAmount,
+        currency: session.token
+      }).catch(err => console.error('Failed to process commissions:', err));
     }
 
     // Fire webhook (fire-and-forget)
@@ -254,7 +287,7 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/confirm', asyn
       payload: {
         sessionId: session.id,
         playerRef: session.playerRef,
-        amount,
+        amount: session.amount,
         token: session.token,
         chain: session.chain,
         recipientAddress: session.recipientAddress,
@@ -263,6 +296,22 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/confirm', asyn
         confirmedAt: updatedSessionResult[0].updatedAt
       }
     }).catch(err => console.warn('Failed to deliver withdrawal.confirmed webhook:', err));
+
+    // Log audit event (fire-and-forget)
+    logAudit({
+      actor: merchantId,
+      action: 'withdrawal.confirmed',
+      resourceType: 'session',
+      resourceId: session.id,
+      details: {
+        txHash,
+        amount: session.amount,
+        token: session.token,
+        chain: session.chain,
+        recipientAddress: session.recipientAddress,
+        playerRef: session.playerRef
+      }
+    }).catch(() => {});
 
     return c.json({ session: updatedSessionResult[0] });
   } catch (error) {
@@ -279,74 +328,78 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/cancel', async
     const body = await c.req.json();
     const { reason } = body;
 
-    // Validate session exists and belongs to merchant
-    const sessionResult = await db.select().from(gatewaySessions).where(
-      and(
-        eq(gatewaySessions.id, sessionId),
-        eq(gatewaySessions.merchantId, merchantId),
-        eq(gatewaySessions.sessionType, 'withdrawal'),
-        eq(gatewaySessions.status, 'pending')
-      )
-    ).limit(1);
+    // Validate session, update status, release hold, and insert ledger entry in transaction
+    const { updatedSessionResult, session } = await db.transaction(async (tx) => {
+      const sessionResult = await tx.select().from(gatewaySessions).where(
+        and(
+          eq(gatewaySessions.id, sessionId),
+          eq(gatewaySessions.merchantId, merchantId),
+          eq(gatewaySessions.sessionType, 'withdrawal'),
+          eq(gatewaySessions.status, 'pending')
+        )
+      ).limit(1);
 
-    if (sessionResult.length === 0) {
-      return c.json({ error: 'Session not found or not eligible for cancellation' }, 404);
-    }
+      if (sessionResult.length === 0) {
+        throw new Error('Session not found or not eligible for cancellation');
+      }
 
-    const session = sessionResult[0];
-    const amount = parseFloat(session.amount);
+      const session = sessionResult[0];
+      const amountBI = toBigInt6(session.amount);
 
-    // Update session status
-    const updatedSessionResult = await db.update(gatewaySessions)
-      .set({
-        status: 'cancelled',
-        metadata: reason ? { ...(session.metadata as Record<string, unknown> || {}), cancellationReason: reason } : session.metadata,
-        updatedAt: new Date()
-      })
-      .where(eq(gatewaySessions.id, sessionId))
-      .returning();
-
-    // Release hold: increase availableBalance, decrease pendingBalance
-    const balance = await db.select().from(gatewayBalances).where(
-      and(
-        eq(gatewayBalances.merchantId, merchantId),
-        eq(gatewayBalances.playerRef, session.playerRef),
-        eq(gatewayBalances.currency, session.token)
-      )
-    ).limit(1);
-
-    if (balance.length > 0) {
-      const currentBalance = balance[0];
-      const newAvailableBalance = (parseFloat(currentBalance.availableBalance) + amount).toFixed(6);
-      const newPendingBalance = (parseFloat(currentBalance.pendingBalance) - amount).toFixed(6);
-
-      await db.update(gatewayBalances)
+      // Update session status
+      const updatedSessionResult = await tx.update(gatewaySessions)
         .set({
-          availableBalance: newAvailableBalance,
-          pendingBalance: newPendingBalance,
+          status: 'cancelled',
+          metadata: reason ? { ...(session.metadata as Record<string, unknown> || {}), cancellationReason: reason } : session.metadata,
           updatedAt: new Date()
         })
-        .where(
-          and(
-            eq(gatewayBalances.merchantId, merchantId),
-            eq(gatewayBalances.playerRef, session.playerRef),
-            eq(gatewayBalances.currency, session.token)
-          )
-        );
+        .where(eq(gatewaySessions.id, sessionId))
+        .returning();
 
-      // Insert ledger entry for withdrawal cancellation (reversal)
-      await db.insert(gatewayLedger).values({
-        merchantId,
-        playerRef: session.playerRef,
-        type: 'withdrawal_cancelled',
-        amount: amount.toString(),
-        currency: session.token,
-        sessionId: session.id,
-        balanceBefore: currentBalance.availableBalance,
-        balanceAfter: newAvailableBalance,
-        description: `Withdrawal cancelled${reason ? `: ${reason}` : ''}`
-      });
-    }
+      // Release hold: increase availableBalance, decrease pendingBalance
+      const balance = await tx.select().from(gatewayBalances).where(
+        and(
+          eq(gatewayBalances.merchantId, merchantId),
+          eq(gatewayBalances.playerRef, session.playerRef),
+          eq(gatewayBalances.currency, session.token)
+        )
+      ).limit(1);
+
+      if (balance.length > 0) {
+        const currentBalance = balance[0];
+        const newAvailableBalance = fromBigInt6(toBigInt6(currentBalance.availableBalance) + amountBI);
+        const newPendingBalance = fromBigInt6(toBigInt6(currentBalance.pendingBalance) - amountBI);
+
+        await tx.update(gatewayBalances)
+          .set({
+            availableBalance: newAvailableBalance,
+            pendingBalance: newPendingBalance,
+            updatedAt: new Date()
+          })
+          .where(
+            and(
+              eq(gatewayBalances.merchantId, merchantId),
+              eq(gatewayBalances.playerRef, session.playerRef),
+              eq(gatewayBalances.currency, session.token)
+            )
+          );
+
+        // Insert ledger entry for withdrawal cancellation (reversal)
+        await tx.insert(gatewayLedger).values({
+          merchantId,
+          playerRef: session.playerRef,
+          type: 'withdrawal_cancelled',
+          amount: fromBigInt6(amountBI),
+          currency: session.token,
+          sessionId: session.id,
+          balanceBefore: currentBalance.availableBalance,
+          balanceAfter: newAvailableBalance,
+          description: `Withdrawal cancelled${reason ? `: ${reason}` : ''}`
+        });
+      }
+
+      return { updatedSessionResult, session };
+    });
 
     // Fire webhook (fire-and-forget)
     deliverWebhook({
@@ -356,7 +409,7 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/cancel', async
       payload: {
         sessionId: session.id,
         playerRef: session.playerRef,
-        amount,
+        amount: session.amount,
         token: session.token,
         chain: session.chain,
         recipientAddress: session.recipientAddress,
@@ -365,6 +418,22 @@ gatewayWithdrawalRoutes.post('/api/gateway/withdrawals/:sessionId/cancel', async
         cancelledAt: updatedSessionResult[0].updatedAt
       }
     }).catch(err => console.warn('Failed to deliver withdrawal.cancelled webhook:', err));
+
+    // Log audit event (fire-and-forget)
+    logAudit({
+      actor: merchantId,
+      action: 'withdrawal.cancelled',
+      resourceType: 'session',
+      resourceId: session.id,
+      details: {
+        reason,
+        amount: session.amount,
+        token: session.token,
+        chain: session.chain,
+        recipientAddress: session.recipientAddress,
+        playerRef: session.playerRef
+      }
+    }).catch(() => {});
 
     return c.json({ session: updatedSessionResult[0] });
   } catch (error) {

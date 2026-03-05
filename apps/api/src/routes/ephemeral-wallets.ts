@@ -38,8 +38,8 @@ const adminAuth = async (c: any, next: any) => {
   await next();
 };
 
-// POST /api/ephemeral-wallets — Save an ephemeral wallet (public, called from frontend)
-ephemeralWalletRoutes.post('/api/ephemeral-wallets', async (c) => {
+// POST /api/ephemeral-wallets — Save an ephemeral wallet (requires relayer secret or admin auth)
+ephemeralWalletRoutes.post('/api/ephemeral-wallets', adminAuth, async (c) => {
   try {
     const body = await c.req.json();
     const { address, privateKey, chain, token, amount, flow } = body;

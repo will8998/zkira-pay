@@ -1,11 +1,12 @@
 import { db } from '../db/index.js';
 import { merchants, distributors, distributorCommissions } from '../db/schema.js';
+import { toBigInt6, fromBigInt6, SCALE } from '../utils/bigint-math.js';
 import { eq } from 'drizzle-orm';
 
 interface ProcessCommissionsParams {
   merchantId: string;
   sessionId: string;
-  platformFee: number;
+  platformFee: string;
   currency: string;
 }
 
@@ -25,12 +26,12 @@ export async function processCommissions(params: ProcessCommissionsParams): Prom
 
     const merchant = merchantResult[0];
     let currentDistributorId = merchant.distributorId;
-    let remainingFee = platformFee;
+    let remainingFeeBI = toBigInt6(platformFee);
     let level = 0;
     const maxLevels = 3; // Circuit breaker to prevent infinite loops
 
     // Walk up the distributor hierarchy
-    while (currentDistributorId && remainingFee > 0 && level < maxLevels) {
+    while (currentDistributorId && remainingFeeBI > BigInt(0) && level < maxLevels) {
       // Fetch current distributor
       const distributorResult = await db.select().from(distributors).where(
         eq(distributors.id, currentDistributorId)
@@ -41,24 +42,25 @@ export async function processCommissions(params: ProcessCommissionsParams): Prom
       }
 
       const distributor = distributorResult[0];
-      const commissionPercent = parseFloat(distributor.commissionPercent);
+      const commissionPercentBI = toBigInt6(distributor.commissionPercent);
 
-      if (commissionPercent > 0) {
-        const commission = remainingFee * commissionPercent / 100;
+      if (commissionPercentBI > BigInt(0)) {
+        const commissionBI = remainingFeeBI * commissionPercentBI / SCALE / BigInt(100);
+        const commission = fromBigInt6(commissionBI);
 
         // Insert distributor commission record
         await db.insert(distributorCommissions).values({
           distributorId: distributor.id,
           merchantId,
           sessionId,
-          amount: commission.toString(),
+          amount: commission,
           currency,
-          sourceAmount: platformFee.toString(),
+          sourceAmount: platformFee,
           tier: distributor.tier,
           status: 'pending'
         });
 
-        remainingFee -= commission;
+        remainingFeeBI -= commissionBI;
       }
 
       // Move to parent distributor
@@ -66,8 +68,8 @@ export async function processCommissions(params: ProcessCommissionsParams): Prom
       level++;
     }
 
-    // Remaining fee goes to ZKIRA (no additional record needed)
-    console.log(`Commission processing completed for session ${sessionId}. ZKIRA keeps: ${remainingFee.toFixed(6)} ${currency}`);
+    // Remaining fee goes to OMNIPAY (no additional record needed)
+    console.log(`Commission processing completed for session ${sessionId}. OMNIPAY keeps: ${fromBigInt6(remainingFeeBI)} ${currency}`);
 
   } catch (error) {
     console.error('Error processing commissions:', error);

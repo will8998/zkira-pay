@@ -4,8 +4,8 @@ const ALGORITHM = 'aes-256-gcm';
 const LEGACY_SALT = 'zkira-ephemeral-wallets';
 
 function deriveKey(salt: string): Buffer {
-  const secret = process.env.EPHEMERAL_WALLET_SECRET || process.env.ADMIN_PASSWORD;
-  if (!secret) throw new Error('EPHEMERAL_WALLET_SECRET or ADMIN_PASSWORD must be set');
+  const secret = process.env.EPHEMERAL_WALLET_SECRET;
+  if (!secret) throw new Error('EPHEMERAL_WALLET_SECRET environment variable must be set');
   // Derive a 32-byte key from the secret using scrypt
   return scryptSync(secret, salt, 32);
 }

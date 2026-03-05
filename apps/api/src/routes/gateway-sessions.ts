@@ -1,9 +1,13 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { gatewaySessions, gatewayBalances, gatewayLedger, merchants, distributors, distributorCommissions } from '../db/schema.js';
+import { gatewaySessions, gatewayBalances, gatewayLedger, merchants, ephemeralWallets } from '../db/schema.js';
 import { eq, and, desc, sql, lte } from 'drizzle-orm';
 import { deliverWebhook } from '../services/webhook.js';
 import { randomUUID } from 'node:crypto';
+import { Wallet } from 'ethers';
+import { encryptPrivateKey } from '../services/crypto.js';
+import { logAudit } from '../services/audit.js';
+import { toBigInt6, fromBigInt6 } from '../utils/bigint-math.js';
 
 const gatewaySessionRoutes = new Hono<{ Variables: { merchantId: string } }>();
 
@@ -67,6 +71,34 @@ gatewaySessionRoutes.post('/api/gateway/sessions', async (c) => {
 
     const session = result[0];
 
+    // Generate ephemeral wallet for deposit sessions
+    if (session.sessionType === 'deposit') {
+      const ephWallet = Wallet.createRandom();
+      const encrypted = encryptPrivateKey(ephWallet.privateKey);
+      
+      // Insert ephemeral wallet
+      await db.insert(ephemeralWallets).values({
+        address: ephWallet.address.toLowerCase(),
+        encryptedKey: encrypted.encrypted,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
+        salt: encrypted.salt,
+        chain,
+        token,
+        amount: amount.toString(),
+        flow: 'deposit',
+        expiresAt,
+      });
+      
+      // Update the session with ephemeral wallet address
+      await db.update(gatewaySessions)
+        .set({ ephemeralWallet: ephWallet.address.toLowerCase() })
+        .where(eq(gatewaySessions.id, session.id));
+      
+      // Update the session object before returning
+      session.ephemeralWallet = ephWallet.address.toLowerCase();
+    }
+
     // Fire webhook (fire-and-forget)
     deliverWebhook({
       merchantId,
@@ -75,6 +107,20 @@ gatewaySessionRoutes.post('/api/gateway/sessions', async (c) => {
       payload: { session },
     }).catch(console.warn);
 
+    // Log audit event (fire-and-forget)
+    logAudit({
+      actor: merchantId,
+      action: 'session.created',
+      resourceType: 'session',
+      resourceId: session.id,
+      details: {
+        sessionType: session.sessionType,
+        playerRef: session.playerRef,
+        amount: session.amount,
+        token: session.token,
+        chain: session.chain
+      }
+    }).catch(() => {});
     return c.json({ session }, 201);
   } catch (error) {
     console.error('Failed to create session:', error);
@@ -188,91 +234,95 @@ gatewaySessionRoutes.post('/api/gateway/sessions/:sessionId/confirm', async (c) 
       return c.json({ error: 'Valid amount is required' }, 400);
     }
 
-    // Get session and validate
-    const sessionResult = await db
-      .select()
-      .from(gatewaySessions)
-      .where(
-        and(
-          eq(gatewaySessions.id, sessionId),
-          eq(gatewaySessions.merchantId, merchantId),
-          eq(gatewaySessions.status, 'pending')
+    // Get session and validate, update status, handle balance, and insert ledger entry in transaction
+    const { updatedSession, session } = await db.transaction(async (tx) => {
+      const sessionResult = await tx
+        .select()
+        .from(gatewaySessions)
+        .where(
+          and(
+            eq(gatewaySessions.id, sessionId),
+            eq(gatewaySessions.merchantId, merchantId),
+            eq(gatewaySessions.status, 'pending')
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (sessionResult.length === 0) {
-      return c.json({ error: 'Session not found or not pending' }, 404);
-    }
+      if (sessionResult.length === 0) {
+        throw new Error('Session not found or not pending');
+      }
 
-    const session = sessionResult[0];
+      const session = sessionResult[0];
 
-    // Update session status
-    const updatedSession = await db
-      .update(gatewaySessions)
-      .set({
-        status: 'confirmed',
-        txHash,
-        commitment,
-        updatedAt: new Date(),
-      })
-      .where(eq(gatewaySessions.id, sessionId))
-      .returning();
-
-    // Get or create balance
-    const existingBalance = await db
-      .select()
-      .from(gatewayBalances)
-      .where(
-        and(
-          eq(gatewayBalances.merchantId, merchantId),
-          eq(gatewayBalances.playerRef, session.playerRef),
-          eq(gatewayBalances.currency, session.token)
-        )
-      )
-      .limit(1);
-
-    const balanceBefore = existingBalance.length > 0 ? existingBalance[0].availableBalance : '0';
-    const balanceAfter = (parseFloat(balanceBefore) + confirmedAmount).toFixed(6);
-
-    if (existingBalance.length === 0) {
-      await db.insert(gatewayBalances).values({
-        merchantId,
-        playerRef: session.playerRef,
-        currency: session.token,
-        availableBalance: confirmedAmount.toString(),
-        pendingBalance: '0',
-        totalDeposited: confirmedAmount.toString(),
-        totalWithdrawn: '0',
-      });
-    } else {
-      await db
-        .update(gatewayBalances)
+      // Update session status
+      const updatedSession = await tx
+        .update(gatewaySessions)
         .set({
-          availableBalance: balanceAfter,
-          totalDeposited: sql`${gatewayBalances.totalDeposited}::numeric + ${confirmedAmount}`,
+          status: 'confirmed',
+          txHash,
+          commitment,
           updatedAt: new Date(),
         })
+        .where(eq(gatewaySessions.id, sessionId))
+        .returning();
+
+      // Get or create balance
+      const existingBalance = await tx
+        .select()
+        .from(gatewayBalances)
         .where(
           and(
             eq(gatewayBalances.merchantId, merchantId),
             eq(gatewayBalances.playerRef, session.playerRef),
             eq(gatewayBalances.currency, session.token)
           )
-        );
-    }
+        )
+        .limit(1);
 
-    // Insert ledger entry
-    await db.insert(gatewayLedger).values({
-      merchantId,
-      playerRef: session.playerRef,
-      type: 'deposit',
-      amount: confirmedAmount.toString(),
-      currency: session.token,
-      sessionId,
-      balanceBefore,
-      balanceAfter,
-      description: `Deposit confirmed: ${txHash}`,
+      const balanceBefore = existingBalance.length > 0 ? existingBalance[0].availableBalance : '0';
+      const balanceAfter = fromBigInt6(toBigInt6(balanceBefore) + toBigInt6(confirmedAmount.toString()));
+
+      if (existingBalance.length === 0) {
+        await tx.insert(gatewayBalances).values({
+          merchantId,
+          playerRef: session.playerRef,
+          currency: session.token,
+          availableBalance: confirmedAmount.toString(),
+          pendingBalance: '0',
+          totalDeposited: confirmedAmount.toString(),
+          totalWithdrawn: '0',
+        });
+      } else {
+        await tx
+          .update(gatewayBalances)
+          .set({
+            availableBalance: balanceAfter,
+            totalDeposited: sql`${gatewayBalances.totalDeposited}::numeric + ${confirmedAmount}`,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(gatewayBalances.merchantId, merchantId),
+              eq(gatewayBalances.playerRef, session.playerRef),
+              eq(gatewayBalances.currency, session.token)
+            )
+          );
+      }
+
+      // Insert ledger entry
+      await tx.insert(gatewayLedger).values({
+        merchantId,
+        playerRef: session.playerRef,
+        type: 'deposit',
+        amount: confirmedAmount.toString(),
+        currency: session.token,
+        sessionId,
+        balanceBefore,
+        balanceAfter,
+        description: `Deposit confirmed: ${txHash}`,
+      });
+
+      return { updatedSession, session };
     });
 
     // Fire webhook (fire-and-forget)
@@ -283,49 +333,20 @@ gatewaySessionRoutes.post('/api/gateway/sessions/:sessionId/confirm', async (c) 
       payload: { session: updatedSession[0] },
     }).catch(console.warn);
 
-    // === Auto-commission accrual ===
-    // Look up merchant's distributor and accrue commission if applicable
-    try {
-      const merchantResult = await db
-        .select({ distributorId: merchants.distributorId })
-        .from(merchants)
-        .where(eq(merchants.id, merchantId))
-        .limit(1);
-
-      const distId = merchantResult[0]?.distributorId;
-      if (distId) {
-        const distributorResult = await db
-          .select({
-            commissionPercent: distributors.commissionPercent,
-            tier: distributors.tier,
-            status: distributors.status,
-          })
-          .from(distributors)
-          .where(eq(distributors.id, distId))
-          .limit(1);
-
-        const dist = distributorResult[0];
-        if (dist && dist.status === 'active' && parseFloat(dist.commissionPercent) > 0) {
-          const commissionAmount = (confirmedAmount * parseFloat(dist.commissionPercent) / 100).toFixed(6);
-
-          await db.insert(distributorCommissions).values({
-            distributorId: distId,
-            merchantId,
-            sessionId,
-            amount: commissionAmount,
-            currency: session.token,
-            sourceAmount: confirmedAmount.toString(),
-            tier: dist.tier,
-            status: 'pending',
-          });
-
-          console.log(`Commission accrued: ${commissionAmount} ${session.token} for distributor ${distId} (session ${sessionId})`);
-        }
+    // Log audit event (fire-and-forget)
+    logAudit({
+      actor: 'system',
+      action: 'deposit.confirmed',
+      resourceType: 'session',
+      resourceId: sessionId,
+      details: {
+        txHash,
+        commitment,
+        amount: confirmedAmount,
+        playerRef: session.playerRef,
+        token: session.token
       }
-    } catch (commErr) {
-      // Commission accrual should never block the deposit confirmation
-      console.warn('Failed to accrue distributor commission:', commErr);
-    }
+    }).catch(() => {});
 
     return c.json({ session: updatedSession[0] });
   } catch (error) {
@@ -383,6 +404,32 @@ gatewaySessionRoutes.post('/api/gateway/sessions/:sessionId/expire', async (c) =
   } catch (error) {
     console.error('Failed to expire session:', error);
     return c.json({ error: 'Failed to expire session' }, 500);
+  }
+});
+
+// GET /api/gateway/sessions/:sessionId/public - Public session info (for payment page)
+gatewaySessionRoutes.get('/api/gateway/sessions/:sessionId/public', async (c) => {
+  const sessionId = c.req.param('sessionId');
+  if (!sessionId) return c.json({ error: 'Session ID required' }, 400);
+  
+  try {
+    const session = await db.select({
+      id: gatewaySessions.id,
+      status: gatewaySessions.status,
+      amount: gatewaySessions.amount,
+      token: gatewaySessions.token,
+      chain: gatewaySessions.chain,
+      ephemeralWallet: gatewaySessions.ephemeralWallet,
+      expiresAt: gatewaySessions.expiresAt,
+      createdAt: gatewaySessions.createdAt,
+    }).from(gatewaySessions)
+      .where(eq(gatewaySessions.id, sessionId))
+      .limit(1);
+    
+    if (session.length === 0) return c.json({ error: 'Session not found' }, 404);
+    return c.json({ session: session[0] });
+  } catch (error) {
+    return c.json({ error: 'Failed to get session' }, 500);
   }
 });
 

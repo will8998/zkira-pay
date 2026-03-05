@@ -28,6 +28,8 @@ import analyticsRoutes from './routes/analytics.js';
 import deadDropRoutes from './routes/dead-drop.js';
 import { merchantApiKeyAuth } from './middleware/merchant-auth.js';
 import { DepositMonitor } from './services/deposit-monitor.js';
+import { EphemeralBalanceMonitor } from './services/ephemeral-balance-monitor.js';
+import { SweepService } from './services/sweep.js';
 import { startWebhookProcessor, stopWebhookProcessor } from './services/webhook.js';
 import gatewaySessionRoutes from './routes/gateway-sessions.js';
 import gatewayWithdrawalRoutes from './routes/gateway-withdrawals.js';
@@ -71,6 +73,7 @@ app.use('/api/api-keys/*', createPathBasedAuth('/api/api-keys'));
 // Gateway routes use merchant API key auth (except distributor admin routes)
 app.use('/api/gateway/*', async (c, next) => {
   if (c.req.path.startsWith('/api/gateway/distributors')) return next();
+  if (c.req.path.endsWith('/public')) return next();
   return merchantApiKeyAuth(c, next);
 });
 
@@ -114,38 +117,45 @@ async function startServer() {
 
 
 
-  // Initialize Solana connection
-  const connection = new Connection(config.solanaRpcUrl, 'confirmed');
-
-  // Initialize and start indexer
-  const indexer = new AccountIndexer(connection, config.indexIntervalMs);
-  
-  // Set indexer for all route handlers
-  setAnnouncementIndexer(indexer);
-  setEscrowIndexer(indexer);
-  setPaymentIndexer(indexer);
-
-  // Start indexing
-  indexer.start();
+  // Initialize Solana connection (legacy — skip if no RPC configured)
+  let indexer: AccountIndexer | null = null;
+  if (config.solanaRpcUrl && config.solanaRpcUrl !== 'disabled') {
+    const connection = new Connection(config.solanaRpcUrl, 'confirmed');
+    indexer = new AccountIndexer(connection, config.indexIntervalMs);
+    setAnnouncementIndexer(indexer);
+    setEscrowIndexer(indexer);
+    setPaymentIndexer(indexer);
+    indexer.start();
+  }
 
   // Start gateway services
   const depositMonitor = new DepositMonitor(30_000);
   depositMonitor.start();
+  const arbRpcUrl = process.env.ARB_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc';
+  const balanceMonitor = new EphemeralBalanceMonitor(arbRpcUrl, 15_000);
+  balanceMonitor.start();
+  const treasuryAddress = process.env.TREASURY_ADDRESS || '';
+  const sweepService = new SweepService(arbRpcUrl, treasuryAddress, 60_000);
+  sweepService.start();
   const webhookProcessorId = startWebhookProcessor();
 
   // Graceful shutdown
   process.on('SIGINT', () => {
     // Graceful shutdown initiated
-    indexer.stop();
+    indexer?.stop();
     depositMonitor.stop();
+    balanceMonitor.stop();
+    sweepService.stop();
     stopWebhookProcessor(webhookProcessorId);
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
     // Graceful shutdown initiated
-    indexer.stop();
+    indexer?.stop();
     depositMonitor.stop();
+    balanceMonitor.stop();
+    sweepService.stop();
     stopWebhookProcessor(webhookProcessorId);
     process.exit(0);
   });

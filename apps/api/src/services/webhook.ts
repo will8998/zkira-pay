@@ -96,9 +96,9 @@ export async function deliverWebhook(params: {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-ZKIRA-Signature': `sha256=${signature}`,
-        'X-ZKIRA-Timestamp': timestamp.toString(),
-        'X-ZKIRA-Event': event,
+        'X-OMNIPAY-Signature': `sha256=${signature}`,
+        'X-OMNIPAY-Timestamp': timestamp.toString(),
+        'X-OMNIPAY-Event': event,
       },
       body: payloadJson,
       signal: AbortSignal.timeout(10_000), // 10 second timeout
@@ -224,9 +224,9 @@ export async function processWebhookRetries(): Promise<number> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-ZKIRA-Signature': `sha256=${signature}`,
-          'X-ZKIRA-Timestamp': timestamp.toString(),
-          'X-ZKIRA-Event': webhook.event,
+          'X-OMNIPAY-Signature': `sha256=${signature}`,
+          'X-OMNIPAY-Timestamp': timestamp.toString(),
+          'X-OMNIPAY-Event': webhook.event,
         },
         body: payloadJson,
         signal: AbortSignal.timeout(10_000),
