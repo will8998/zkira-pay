@@ -24,6 +24,7 @@ module.exports = {
         DATABASE_URL: "postgresql://zkira:zkira_s3cure_2026!@localhost:5432/zkira",
         ADMIN_PASSWORD: "zkira_admin_2026",
         RELAYER_SECRET: "zkira_relayer_s3cret_2026",
+      },
     },
     {
       name: "zkira-relayer",
