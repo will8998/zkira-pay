@@ -2,22 +2,13 @@
   "nav": {
     "send": "Envoyer",
     "request": "Demander",
-    "escrow": "Séquestre",
+    "claim": "Réclamer",
     "learn": "Apprendre",
     "home": "Accueil",
     "pool": "Pool",
     "more": "Plus",
     "menu": "Menu",
     "history": "Historique",
-    "contacts": "Contacts",
-    "points": "Points",
-    "leaderboard": "Classement",
-    "referral": "Parrainage",
-    "apiKeys": "Clés API",
-    "analytics": "Analyses",
-    "roadmap": "Feuille de Route",
-    "batch": "Lot",
-    "multiSig": "Multi-signature",
     "docs": "Docs",
     "learnHub": "Centre d'Apprentissage",
     "documentation": "Documentation",
@@ -53,33 +44,29 @@
     "share": "Partager",
     "viewAll": "Voir tout",
     "noActivityYet": "Aucune activité pour le moment",
-    "sol": "SOL",
-    "usdc": "USDC"
+    "usdc": "USDC",
+    "usdt": "USDT",
+    "dai": "DAI"
   },
   "hero": {
-    "title": "Paiements Stealth",
-    "titleHighlight": "sur Solana",
-    "subtitle": "Envoyez des paiements confidentiels avec des adresses stealth.",
+    "title": "Paiements Privés",
+    "titleHighlight": "Paiements Privés",
+    "subtitle": "Envoyez des paiements anonymes via un mélangeur de confidentialité.",
     "subtitleLine2": "Zéro traçabilité. Règlement instantané.",
-    "featureStealth": "Stealth",
+    "featureStealth": "Confidentialité",
     "featureInvoices": "Factures",
-    "featureEscrow": "Séquestre",
-    "featureMultiSig": "Multi-signature"
+    "featurePool": "Pool Blindé"
   },
   "dashboard": {
     "totalSent": "Total Envoyé",
     "totalReceived": "Total Reçu",
-    "activeEscrows": "Séquestres Actifs",
     "points": "Points",
     "viewRewards": "Voir les récompenses →",
     "payment": "{count, plural, one {# paiement} other {# paiements}}",
-    "pendingEscrow": "{count, plural, one {# séquestre en attente} other {# séquestres en attente}}",
     "sendPayment": "Envoyer un Paiement",
-    "sendPaymentDesc": "Envoyer un paiement confidentiel via une adresse stealth",
+    "sendPaymentDesc": "Envoyer un paiement anonyme via un mélangeur de confidentialité",
     "requestPayment": "Demander un Paiement",
     "requestPaymentDesc": "Générer un lien de facture pour un paiement entrant",
-    "createEscrow": "Créer un Séquestre",
-    "createEscrowDesc": "Configurer un paiement de séquestre basé sur des jalons",
     "recentActivity": "Activité Récente",
     "noTransactions": "Aucune transaction pour le moment",
     "noTransactionsDesc": "Commencez par créer un paiement ou en demander un",
@@ -104,9 +91,8 @@
   },
   "createPage": {
     "title": "Envoyer un Paiement",
-    "description": "Générer un lien de paiement confidentiel",
+    "description": "Envoyer un paiement anonyme via un mélangeur de confidentialité",
     "successDescription": "Paiement créé avec succès",
-    "connectNotice": "Connectez votre portefeuille Solana pour créer un paiement confidentiel. Votre portefeuille signe la transaction — nous ne stockons jamais vos clés.",
     "paymentCreated": "Lien de paiement créé"
   },
   "claimPage": {
@@ -129,54 +115,9 @@
     "withdraw": "Retirer",
     "notes": "Notes"
   },
-  "escrowPage": {
-    "title": "Tableau de Bord Séquestre",
-    "description": "Gérez vos paiements de séquestre basés sur des jalons",
-    "createNew": "Créer Nouveau",
-    "noEscrows": "Aucun séquestre pour le moment",
-    "noEscrowsDesc": "Créez un séquestre basé sur des jalons pour commencer",
-    "totalAmount": "Montant Total",
-    "released": "Libéré",
-    "milestones": "Jalons",
-    "releaseMilestone": "Libérer le Jalon",
-    "refund": "Remboursement",
-    "expired": "Expiré"
-  },
-  "escrowCreatePage": {
-    "title": "Créer un Séquestre",
-    "description": "Configurer un paiement de séquestre basé sur des jalons"
-  },
-  "batchPage": {
-    "title": "Paiements par Lot",
-    "description": "Envoyer plusieurs paiements en une seule transaction"
-  },
-  "multisigPage": {
-    "title": "Multi-Signature",
-    "description": "Créer et gérer des portefeuilles multi-signature"
-  },
-  "multisigCreatePage": {
-    "title": "Créer Multi-Signature",
-    "description": "Configurer un nouveau portefeuille multi-signature"
-  },
-  "contactsPage": {
-    "title": "Contacts",
-    "description": "Gérez vos adresses de portefeuille sauvegardées"
-  },
   "historyPage": {
     "title": "Historique des Transactions",
     "description": "Voir toutes vos transactions passées"
-  },
-  "pointsPage": {
-    "title": "Points",
-    "description": "Gagnez des récompenses en utilisant ZKIRA Pay"
-  },
-  "leaderboardPage": {
-    "title": "Classement",
-    "description": "Meilleurs utilisateurs de ZKIRA Pay par points"
-  },
-  "referralPage": {
-    "title": "Programme de Parrainage",
-    "description": "Invitez des amis et gagnez des récompenses"
   },
   "developersPage": {
     "title": "Tableau de Bord Développeur",
@@ -185,18 +126,6 @@
   "developerDocsPage": {
     "title": "Documentation Développeur",
     "description": "Intégrez ZKIRA Pay dans votre application"
-  },
-  "tokenomicsPage": {
-    "title": "Tokenomics",
-    "description": "Distribution et économie du token $ZKR"
-  },
-  "analyticsPage": {
-    "title": "Analyses",
-    "description": "Suivez votre activité de paiement et vos métriques"
-  },
-  "roadmapPage": {
-    "title": "Feuille de Route",
-    "description": "Chronologie de développement de ZKIRA Pay"
   },
   "learnPage": {
     "title": "Apprendre",
@@ -210,8 +139,8 @@
     "blog": "Blog",
     "blogDesc": "Mises à jour d'ingénierie et annonces",
     "quickLinks": "Liens Rapides",
-    "stealthAddresses": "Adresses Stealth",
-    "stealthAddressesDesc": "Comment les adresses stealth basées sur ECDH protègent votre vie privée",
+    "privacyMixer": "Mélangeur de Confidentialité",
+    "privacyMixerDesc": "Comment les mélangeurs de confidentialité protègent votre confidentialité des transactions",
     "shieldedPool": "Pool Blindé",
     "shieldedPoolDesc": "Système de dépôt et retrait à divulgation nulle",
     "privacyTransport": "Transport de Confidentialité",

@@ -2,22 +2,13 @@
   "nav": {
     "send": "发送",
     "request": "请求",
-    "escrow": "托管",
+    "claim": "领取",
     "learn": "学习",
     "home": "首页",
     "pool": "资金池",
     "more": "更多",
     "menu": "菜单",
     "history": "历史",
-    "contacts": "联系人",
-    "points": "积分",
-    "leaderboard": "排行榜",
-    "referral": "推荐",
-    "apiKeys": "API 密钥",
-    "analytics": "分析",
-    "roadmap": "路线图",
-    "batch": "批量",
-    "multiSig": "多重签名",
     "docs": "文档",
     "learnHub": "学习中心",
     "documentation": "文档",
@@ -53,33 +44,29 @@
     "share": "分享",
     "viewAll": "查看全部",
     "noActivityYet": "暂无活动",
-    "sol": "SOL",
-    "usdc": "USDC"
+    "usdc": "USDC",
+    "usdt": "USDT",
+    "dai": "DAI"
   },
   "hero": {
-    "title": "隐身支付",
-    "titleHighlight": "在 Solana",
-    "subtitle": "使用隐身地址发送机密支付。",
+    "title": "私密支付",
+    "titleHighlight": "私密支付",
+    "subtitle": "通过隐私混合器发送匿名支付。",
     "subtitleLine2": "零可追溯性。即时结算。",
-    "featureStealth": "隐身",
+    "featureStealth": "隐私",
     "featureInvoices": "发票",
-    "featureEscrow": "托管",
-    "featureMultiSig": "多重签名"
+    "featurePool": "屏蔽资金池"
   },
   "dashboard": {
     "totalSent": "总发送",
     "totalReceived": "总接收",
-    "activeEscrows": "活跃托管",
     "points": "积分",
     "viewRewards": "查看奖励 →",
     "payment": "{count, plural, one {# 笔支付} other {# 笔支付}}",
-    "pendingEscrow": "{count, plural, one {# 个待处理托管} other {# 个待处理托管}}",
     "sendPayment": "发送支付",
-    "sendPaymentDesc": "通过隐身地址发送机密支付",
+    "sendPaymentDesc": "通过隐私混合器发送匿名支付",
     "requestPayment": "请求支付",
     "requestPaymentDesc": "生成接收支付的发票链接",
-    "createEscrow": "创建托管",
-    "createEscrowDesc": "设置基于里程碑的托管支付",
     "recentActivity": "最近活动",
     "noTransactions": "暂无交易",
     "noTransactionsDesc": "从创建支付或请求支付开始",
@@ -104,9 +91,8 @@
   },
   "createPage": {
     "title": "发送支付",
-    "description": "生成机密支付链接",
+    "description": "通过隐私混合器发送匿名支付",
     "successDescription": "支付创建成功",
-    "connectNotice": "连接您的 Solana 钱包以创建机密支付。您的钱包签署交易——我们从不存储您的密钥。",
     "paymentCreated": "支付链接已创建"
   },
   "claimPage": {
@@ -129,54 +115,9 @@
     "withdraw": "取款",
     "notes": "票据"
   },
-  "escrowPage": {
-    "title": "托管仪表板",
-    "description": "管理您的基于里程碑的托管支付",
-    "createNew": "创建新的",
-    "noEscrows": "暂无托管",
-    "noEscrowsDesc": "创建基于里程碑的托管以开始",
-    "totalAmount": "总金额",
-    "released": "已释放",
-    "milestones": "里程碑",
-    "releaseMilestone": "释放里程碑",
-    "refund": "退款",
-    "expired": "已过期"
-  },
-  "escrowCreatePage": {
-    "title": "创建托管",
-    "description": "设置基于里程碑的托管支付"
-  },
-  "batchPage": {
-    "title": "批量支付",
-    "description": "在单个交易中发送多笔支付"
-  },
-  "multisigPage": {
-    "title": "多重签名",
-    "description": "创建和管理多重签名钱包"
-  },
-  "multisigCreatePage": {
-    "title": "创建多重签名",
-    "description": "设置新的多重签名钱包"
-  },
-  "contactsPage": {
-    "title": "联系人",
-    "description": "管理您保存的钱包地址"
-  },
   "historyPage": {
     "title": "交易历史",
     "description": "查看您的所有历史交易"
-  },
-  "pointsPage": {
-    "title": "积分",
-    "description": "使用 ZKIRA Pay 赚取奖励"
-  },
-  "leaderboardPage": {
-    "title": "排行榜",
-    "description": "按积分排名的顶级 ZKIRA Pay 用户"
-  },
-  "referralPage": {
-    "title": "推荐计划",
-    "description": "邀请朋友并赚取奖励"
   },
   "developersPage": {
     "title": "开发者仪表板",
@@ -185,18 +126,6 @@
   "developerDocsPage": {
     "title": "开发者文档",
     "description": "将 ZKIRA Pay 集成到您的应用程序中"
-  },
-  "tokenomicsPage": {
-    "title": "代币经济学",
-    "description": "$ZKR 代币分配和经济学"
-  },
-  "analyticsPage": {
-    "title": "分析",
-    "description": "跟踪您的支付活动和指标"
-  },
-  "roadmapPage": {
-    "title": "路线图",
-    "description": "ZKIRA Pay 开发时间线"
   },
   "learnPage": {
     "title": "学习",
@@ -210,8 +139,8 @@
     "blog": "博客",
     "blogDesc": "工程更新和公告",
     "quickLinks": "快速链接",
-    "stealthAddresses": "隐身地址",
-    "stealthAddressesDesc": "基于 ECDH 的隐身地址如何保护您的隐私",
+    "privacyMixer": "隐私混合器",
+    "privacyMixerDesc": "隐私混合器如何保护您的交易隐私",
     "shieldedPool": "屏蔽资金池",
     "shieldedPoolDesc": "零知识存取款系统",
     "privacyTransport": "隐私传输",

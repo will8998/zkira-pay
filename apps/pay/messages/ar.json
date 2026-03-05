@@ -2,22 +2,13 @@
   "nav": {
     "send": "إرسال",
     "request": "طلب",
-    "escrow": "الضمان",
+    "claim": "المطالبة",
     "learn": "تعلم",
     "home": "الرئيسية",
     "pool": "المجموعة",
     "more": "المزيد",
     "menu": "القائمة",
     "history": "التاريخ",
-    "contacts": "جهات الاتصال",
-    "points": "النقاط",
-    "leaderboard": "لوحة المتصدرين",
-    "referral": "الإحالة",
-    "apiKeys": "مفاتيح API",
-    "analytics": "التحليلات",
-    "roadmap": "خارطة الطريق",
-    "batch": "دفعة",
-    "multiSig": "التوقيع المتعدد",
     "docs": "المستندات",
     "learnHub": "مركز التعلم",
     "documentation": "التوثيق",
@@ -53,33 +44,29 @@
     "share": "مشاركة",
     "viewAll": "عرض الكل",
     "noActivityYet": "لا يوجد نشاط بعد",
-    "sol": "SOL",
-    "usdc": "USDC"
+    "usdc": "USDC",
+    "usdt": "USDT",
+    "dai": "DAI"
   },
   "hero": {
-    "title": "المدفوعات الخفية",
-    "titleHighlight": "على Solana",
-    "subtitle": "أرسل مدفوعات سرية باستخدام العناوين الخفية.",
+    "title": "المدفوعات الخاصة",
+    "titleHighlight": "المدفوعات الخاصة",
+    "subtitle": "أرسل مدفوعات مجهولة عبر خلاط الخصوصية.",
     "subtitleLine2": "عدم قابلية التتبع. تسوية فورية.",
-    "featureStealth": "خفي",
+    "featureStealth": "الخصوصية",
     "featureInvoices": "الفواتير",
-    "featureEscrow": "الضمان",
-    "featureMultiSig": "التوقيع المتعدد"
+    "featurePool": "المجموعة المحمية"
   },
   "dashboard": {
     "totalSent": "إجمالي المرسل",
     "totalReceived": "إجمالي المستلم",
-    "activeEscrows": "الضمانات النشطة",
     "points": "النقاط",
     "viewRewards": "عرض المكافآت ←",
     "payment": "{count, plural, one {# دفعة} other {# دفعات}}",
-    "pendingEscrow": "{count, plural, one {# ضمان معلق} other {# ضمانات معلقة}}",
     "sendPayment": "إرسال دفعة",
-    "sendPaymentDesc": "إرسال دفعة سرية عبر العنوان الخفي",
+    "sendPaymentDesc": "إرسال دفعة مجهولة عبر خلاط الخصوصية",
     "requestPayment": "طلب دفعة",
     "requestPaymentDesc": "إنشاء رابط فاتورة للدفعة الواردة",
-    "createEscrow": "إنشاء ضمان",
-    "createEscrowDesc": "إعداد دفعة ضمان قائمة على المعالم",
     "recentActivity": "النشاط الأخير",
     "noTransactions": "لا توجد معاملات بعد",
     "noTransactionsDesc": "ابدأ بإنشاء دفعة أو طلب واحدة",
@@ -104,9 +91,8 @@
   },
   "createPage": {
     "title": "إرسال دفعة",
-    "description": "إنشاء رابط دفعة سرية",
+    "description": "إرسال دفعة مجهولة عبر خلاط الخصوصية",
     "successDescription": "تم إنشاء الدفعة بنجاح",
-    "connectNotice": "اربط محفظة Solana الخاصة بك لإنشاء دفعة سرية. محفظتك توقع المعاملة — نحن لا نخزن مفاتيحك أبداً.",
     "paymentCreated": "تم إنشاء رابط الدفعة"
   },
   "claimPage": {
@@ -129,54 +115,9 @@
     "withdraw": "سحب",
     "notes": "الملاحظات"
   },
-  "escrowPage": {
-    "title": "لوحة تحكم الضمان",
-    "description": "إدارة مدفوعات الضمان القائمة على المعالم",
-    "createNew": "إنشاء جديد",
-    "noEscrows": "لا توجد ضمانات بعد",
-    "noEscrowsDesc": "أنشئ ضماناً قائماً على المعالم للبدء",
-    "totalAmount": "المبلغ الإجمالي",
-    "released": "تم الإفراج",
-    "milestones": "المعالم",
-    "releaseMilestone": "إطلاق المعلم",
-    "refund": "استرداد",
-    "expired": "منتهي الصلاحية"
-  },
-  "escrowCreatePage": {
-    "title": "إنشاء ضمان",
-    "description": "إعداد دفعة ضمان قائمة على المعالم"
-  },
-  "batchPage": {
-    "title": "الدفعات المجمعة",
-    "description": "إرسال دفعات متعددة في معاملة واحدة"
-  },
-  "multisigPage": {
-    "title": "التوقيع المتعدد",
-    "description": "إنشاء وإدارة محافظ التوقيع المتعدد"
-  },
-  "multisigCreatePage": {
-    "title": "إنشاء توقيع متعدد",
-    "description": "إعداد محفظة توقيع متعدد جديدة"
-  },
-  "contactsPage": {
-    "title": "جهات الاتصال",
-    "description": "إدارة عناوين المحافظ المحفوظة"
-  },
   "historyPage": {
     "title": "تاريخ المعاملات",
     "description": "عرض جميع معاملاتك السابقة"
-  },
-  "pointsPage": {
-    "title": "النقاط",
-    "description": "اكسب مكافآت لاستخدام ZKIRA Pay"
-  },
-  "leaderboardPage": {
-    "title": "لوحة المتصدرين",
-    "description": "أفضل مستخدمي ZKIRA Pay حسب النقاط"
-  },
-  "referralPage": {
-    "title": "برنامج الإحالة",
-    "description": "ادع الأصدقاء واكسب مكافآت"
   },
   "developersPage": {
     "title": "لوحة تحكم المطور",
@@ -185,18 +126,6 @@
   "developerDocsPage": {
     "title": "توثيق المطور",
     "description": "دمج ZKIRA Pay في تطبيقك"
-  },
-  "tokenomicsPage": {
-    "title": "اقتصاديات الرمز",
-    "description": "توزيع واقتصاديات رمز $ZKR"
-  },
-  "analyticsPage": {
-    "title": "التحليلات",
-    "description": "تتبع نشاط الدفع والمقاييس الخاصة بك"
-  },
-  "roadmapPage": {
-    "title": "خارطة الطريق",
-    "description": "الجدول الزمني لتطوير ZKIRA Pay"
   },
   "learnPage": {
     "title": "تعلم",
@@ -210,8 +139,8 @@
     "blog": "المدونة",
     "blogDesc": "تحديثات الهندسة والإعلانات",
     "quickLinks": "روابط سريعة",
-    "stealthAddresses": "العناوين الخفية",
-    "stealthAddressesDesc": "كيف تحمي العناوين الخفية القائمة على ECDH خصوصيتك",
+    "privacyMixer": "خلاط الخصوصية",
+    "privacyMixerDesc": "كيف يحمي خلاط الخصوصية خصوصية معاملاتك",
     "shieldedPool": "المجموعة المحمية",
     "shieldedPoolDesc": "نظام إيداع وسحب المعرفة الصفرية",
     "privacyTransport": "نقل الخصوصية",

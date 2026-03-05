@@ -2,22 +2,13 @@
   "nav": {
     "send": "Отправить",
     "request": "Запросить",
-    "escrow": "Эскроу",
+    "claim": "Получить",
     "learn": "Изучить",
     "home": "Главная",
     "pool": "Пул",
     "more": "Ещё",
     "menu": "Меню",
     "history": "История",
-    "contacts": "Контакты",
-    "points": "Очки",
-    "leaderboard": "Рейтинг",
-    "referral": "Реферальная",
-    "apiKeys": "API ключи",
-    "analytics": "Аналитика",
-    "roadmap": "Дорожная карта",
-    "batch": "Пакет",
-    "multiSig": "Мульти-подпись",
     "docs": "Документы",
     "learnHub": "Центр обучения",
     "documentation": "Документация",
@@ -53,33 +44,29 @@
     "share": "Поделиться",
     "viewAll": "Посмотреть все",
     "noActivityYet": "Пока нет активности",
-    "sol": "SOL",
-    "usdc": "USDC"
+    "usdc": "USDC",
+    "usdt": "USDT",
+    "dai": "DAI"
   },
   "hero": {
-    "title": "Stealth платежи",
-    "titleHighlight": "на Solana",
-    "subtitle": "Отправляйте конфиденциальные платежи с stealth адресами.",
+    "title": "Приватные платежи",
+    "titleHighlight": "Приватные платежи",
+    "subtitle": "Отправляйте анонимные платежи через микшер конфиденциальности.",
     "subtitleLine2": "Нулевая отслеживаемость. Мгновенный расчёт.",
-    "featureStealth": "Stealth",
+    "featureStealth": "Конфиденциальность",
     "featureInvoices": "Счета",
-    "featureEscrow": "Эскроу",
-    "featureMultiSig": "Мульти-подпись"
+    "featurePool": "Защищённый пул"
   },
   "dashboard": {
     "totalSent": "Всего отправлено",
     "totalReceived": "Всего получено",
-    "activeEscrows": "Активные эскроу",
     "points": "Очки",
     "viewRewards": "Посмотреть награды →",
     "payment": "{count, plural, one {# платёж} few {# платежа} other {# платежей}}",
-    "pendingEscrow": "{count, plural, one {# ожидающее эскроу} few {# ожидающих эскроу} other {# ожидающих эскроу}}",
     "sendPayment": "Отправить платёж",
-    "sendPaymentDesc": "Отправить конфиденциальный платёж через stealth адрес",
+    "sendPaymentDesc": "Отправить анонимный платёж через микшер конфиденциальности",
     "requestPayment": "Запросить платёж",
     "requestPaymentDesc": "Создать ссылку счёта для входящего платежа",
-    "createEscrow": "Создать эскроу",
-    "createEscrowDesc": "Настроить платёж эскроу на основе этапов",
     "recentActivity": "Недавняя активность",
     "noTransactions": "Пока нет транзакций",
     "noTransactionsDesc": "Начните с создания платежа или запроса",
@@ -104,9 +91,8 @@
   },
   "createPage": {
     "title": "Отправить платёж",
-    "description": "Создать ссылку конфиденциального платежа",
+    "description": "Отправить анонимный платёж через микшер конфиденциальности",
     "successDescription": "Платёж успешно создан",
-    "connectNotice": "Подключите ваш Solana кошелёк для создания конфиденциального платежа. Ваш кошелёк подписывает транзакцию — мы никогда не храним ваши ключи.",
     "paymentCreated": "Ссылка платежа создана"
   },
   "claimPage": {
@@ -129,54 +115,9 @@
     "withdraw": "Вывод",
     "notes": "Заметки"
   },
-  "escrowPage": {
-    "title": "Панель эскроу",
-    "description": "Управляйте вашими платежами эскроу на основе этапов",
-    "createNew": "Создать новое",
-    "noEscrows": "Пока нет эскроу",
-    "noEscrowsDesc": "Создайте эскроу на основе этапов для начала",
-    "totalAmount": "Общая сумма",
-    "released": "Освобождено",
-    "milestones": "Этапы",
-    "releaseMilestone": "Освободить этап",
-    "refund": "Возврат",
-    "expired": "Истекло"
-  },
-  "escrowCreatePage": {
-    "title": "Создать эскроу",
-    "description": "Настроить платёж эскроу на основе этапов"
-  },
-  "batchPage": {
-    "title": "Пакетные платежи",
-    "description": "Отправить несколько платежей в одной транзакции"
-  },
-  "multisigPage": {
-    "title": "Мульти-подпись",
-    "description": "Создание и управление кошельками с мульти-подписью"
-  },
-  "multisigCreatePage": {
-    "title": "Создать мульти-подпись",
-    "description": "Настроить новый кошелёк с мульти-подписью"
-  },
-  "contactsPage": {
-    "title": "Контакты",
-    "description": "Управляйте сохранёнными адресами кошельков"
-  },
   "historyPage": {
     "title": "История транзакций",
     "description": "Просмотреть все ваши прошлые транзакции"
-  },
-  "pointsPage": {
-    "title": "Очки",
-    "description": "Зарабатывайте награды за использование ZKIRA Pay"
-  },
-  "leaderboardPage": {
-    "title": "Рейтинг",
-    "description": "Топ пользователей ZKIRA Pay по очкам"
-  },
-  "referralPage": {
-    "title": "Реферальная программа",
-    "description": "Приглашайте друзей и зарабатывайте награды"
   },
   "developersPage": {
     "title": "Панель разработчика",
@@ -185,18 +126,6 @@
   "developerDocsPage": {
     "title": "Документация разработчика",
     "description": "Интегрируйте ZKIRA Pay в ваше приложение"
-  },
-  "tokenomicsPage": {
-    "title": "Токеномика",
-    "description": "Распределение и экономика токена $ZKR"
-  },
-  "analyticsPage": {
-    "title": "Аналитика",
-    "description": "Отслеживайте активность платежей и метрики"
-  },
-  "roadmapPage": {
-    "title": "Дорожная карта",
-    "description": "График разработки ZKIRA Pay"
   },
   "learnPage": {
     "title": "Изучить",
@@ -210,8 +139,8 @@
     "blog": "Блог",
     "blogDesc": "Инженерные обновления и объявления",
     "quickLinks": "Быстрые ссылки",
-    "stealthAddresses": "Stealth адреса",
-    "stealthAddressesDesc": "Как ECDH-основанные stealth адреса защищают вашу приватность",
+    "privacyMixer": "Микшер конфиденциальности",
+    "privacyMixerDesc": "Как микшеры конфиденциальности защищают вашу приватность платежей",
     "shieldedPool": "Защищённый пул",
     "shieldedPoolDesc": "Система депозитов и выводов с нулевым разглашением",
     "privacyTransport": "Приватный транспорт",
