@@ -601,7 +601,7 @@ export function SendPaymentWizard() {
                     onClick={() => setExpiryDays(days)}
                     className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
                       expiryDays === days
-                        ? 'bg-[var(--color-button)] text-white'
+                        ? 'bg-[var(--color-button)] text-[var(--color-button-text)]'
                         : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-secondary)]'
                     }`}
                     style={{ fontFamily: 'var(--font-mono)' }}
@@ -712,7 +712,7 @@ export function SendPaymentWizard() {
             <button
               onClick={startSendFlow}
               disabled={!denomSet || denomSet.selections.length === 0 || denomSet.totalRaw === 0n}
-              className="w-full py-4 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
+              className="w-full py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               <span className="uppercase tracking-wide">Generate Payment Link</span>
@@ -762,7 +762,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(address, () => toast.success('Address copied'))}
-                  className="px-4 py-2 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
                 >
                   📋 Copy Address
                 </button>
@@ -859,7 +859,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(claimCode.code, setCopiedCode)}
-                  className="px-4 py-2 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
                 >
                   {copiedCode ? '✓ Copied' : '📋 Copy Code'}
                 </button>
@@ -879,7 +879,7 @@ export function SendPaymentWizard() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(claimCode.encryptionKey, setCopiedFull)}
-                  className="px-4 py-2 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
+                  className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded"
                 >
                   {copiedFull ? '✓ Copied' : '📋 Copy Password'}
                 </button>

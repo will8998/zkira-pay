@@ -139,7 +139,7 @@ await pool.withdraw(note, recipientAddress);`}
           title="Simple SDK Usage"
         />
         
-        <blockquote className="border-l-2 border-[#FF2828] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
+        <blockquote className="border-l-2 border-[#FFFFFF] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
           "Privacy is not about hiding wrongdoing. It's about preserving human dignity in an age of total surveillance."
         </blockquote>
       </div>
@@ -200,7 +200,7 @@ await pool.withdraw(note, recipientAddress);`}
           We're shipping our developer SDK, embeddable payment widget, and REST API to make private payments accessible to every Solana application. Whether you're building a DeFi protocol, marketplace, or Web3 game, you can now offer your users the privacy they deserve without compromising on performance.
         </p>
 
-        <blockquote className="border-l-2 border-[#FF2828] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
+        <blockquote className="border-l-2 border-[#FFFFFF] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
           "Privacy is not about hiding. It's about autonomy."
         </blockquote>
       </div>
@@ -721,7 +721,7 @@ function PaymentButton() {
     <button 
       onClick={handlePayment}
       disabled={isLoading}
-      className="bg-[#FF2828] text-white px-6 py-3"
+      className="bg-[#FFFFFF] text-black px-6 py-3"
     >
       {isLoading ? 'Creating...' : 'Pay Privately'}
     </button>
@@ -901,7 +901,7 @@ const config = {
           From the foundational stealth address protocol to advanced zero-knowledge features, we're committed to building privacy tools that actually work. Not theoretical privacy that might work someday – practical privacy that developers can deploy and users can trust today.
         </p>
 
-        <blockquote className="border-l-2 border-[#FF2828] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
+        <blockquote className="border-l-2 border-[#FFFFFF] pl-4 italic text-[var(--color-text-secondary)] text-sm leading-relaxed mt-6">
           "We're building the privacy layer that Solana deserves."
         </blockquote>
       </div>
@@ -935,7 +935,7 @@ export default function BlogPage() {
           
           <article className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6">
             <div className="mb-6">
-              <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">
+              <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">
                 {selectedPost.category}
               </span>
               <div className="flex items-center gap-2 mt-1 mb-3">
@@ -964,7 +964,7 @@ export default function BlogPage() {
               onClick={() => setSelectedArticle(post.id)}
             >
               <div className="mb-2">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">
                   {post.category}
                 </span>
               </div>
@@ -983,7 +983,7 @@ export default function BlogPage() {
                 {post.excerpt}
               </p>
               
-              <span className="text-[13px] text-[#FF2828] hover:underline">
+              <span className="text-[13px] text-[#FFFFFF] hover:underline">
                 Read more →
               </span>
             </article>

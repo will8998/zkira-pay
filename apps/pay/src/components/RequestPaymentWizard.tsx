@@ -525,7 +525,7 @@ export function RequestPaymentWizard() {
                     onClick={() => setExpiryDays(days)}
                     className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
                       expiryDays === days
-                        ? 'bg-[var(--color-button)] text-white'
+                        ? 'bg-[var(--color-button)] text-[var(--color-button-text)]'
                         : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-secondary)]'
                     }`}
                     style={{ fontFamily: 'var(--font-mono)' }}
@@ -661,7 +661,7 @@ export function RequestPaymentWizard() {
             <button
               onClick={createInvoice}
               disabled={!denomSet || denomSet.selections.length === 0 || denomSet.totalRaw === 0n}
-              className="w-full py-4 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
+              className="w-full py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               <span className="uppercase tracking-wide">Generate Invoice Link</span>
@@ -695,7 +695,7 @@ export function RequestPaymentWizard() {
 
             <button
               onClick={() => copyToClipboard(invoiceUrl, setCopiedUrl)}
-              className="px-6 py-3 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
+              className="px-6 py-3 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               {copiedUrl ? '✓ Copied' : '📋 Copy Invoice Link'}
@@ -704,7 +704,7 @@ export function RequestPaymentWizard() {
 
           <button
             onClick={startWaiting}
-            className="w-full px-6 py-4 bg-[var(--color-button)] text-white hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             WAIT FOR PAYMENT →

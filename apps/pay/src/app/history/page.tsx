@@ -28,7 +28,7 @@ export default function HistoryPage() {
   const statusColor: Record<string, string> = {
     complete: 'bg-[rgba(156,220,106,0.15)] text-[#9CDC6A]',
     pending: 'bg-[rgba(255,209,70,0.15)] text-[#FFD146]',
-    failed: 'bg-[rgba(255,40,40,0.15)] text-[#FF2828]',
+    failed: 'bg-[rgba(255,40,40,0.15)] text-[#FFFFFF]',
   };
 
   return (

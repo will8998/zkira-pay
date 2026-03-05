@@ -201,7 +201,7 @@ export default function LearnPage() {
           Get your API key from the{' '}
           <Link 
             href="/developers" 
-            className="text-[#FF2828] hover:underline"
+            className="text-[#FFFFFF] hover:underline"
           >
             Developer Dashboard
           </Link>{' '}

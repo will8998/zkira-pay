@@ -148,7 +148,7 @@ export default function LeaderboardAdminPage() {
         <div className={`p-3 rounded-none text-[13px] ${
           feedback.type === 'success' 
             ? 'bg-[rgba(156,220,106,0.15)] text-[#9CDC6A] border border-[#a7f3d0]' 
-            : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828] border border-[#fecaca]'
+            : 'bg-[rgba(255,40,40,0.15)] text-[#FFFFFF] border border-[#fecaca]'
         }`}>
           {feedback.message}
         </div>
@@ -251,7 +251,7 @@ export default function LeaderboardAdminPage() {
                     </td>
                     <td className="p-3 text-center">
                       {entry.flagged ? (
-                        <span className="bg-[rgba(255,40,40,0.15)] text-[#FF2828] px-2 py-1 rounded-none text-[11px] font-medium">
+                        <span className="bg-[rgba(255,40,40,0.15)] text-[#FFFFFF] px-2 py-1 rounded-none text-[11px] font-medium">
                           FLAGGED
                         </span>
                       ) : (

@@ -41,9 +41,9 @@ export const NETWORK_CONFIG: Record<SolanaNetwork, NetworkConfig> = {
     usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     label: 'Mainnet',
     badge: {
-      bgClass: 'bg-emerald-50',
-      textClass: 'text-emerald-700',
-      borderClass: 'border-emerald-200',
+      bgClass: 'bg-zinc-900',
+      textClass: 'text-zinc-200',
+      borderClass: 'border-zinc-700',
     },
   },
 };

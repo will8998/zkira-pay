@@ -93,7 +93,7 @@ export function ChainTokenSelector({
   }, []);
 
   const btnBase = 'flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all';
-  const btnActive = 'border-emerald-500 bg-emerald-500/10 text-emerald-400';
+  const btnActive = 'border-zinc-300 bg-zinc-300/10 text-zinc-400';
   const btnInactive = 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600';
   const btnDisabled = 'opacity-50 cursor-not-allowed';
 

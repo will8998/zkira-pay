@@ -26,7 +26,7 @@ export default async function Image() {
             width: 80,
             height: 80,
             borderRadius: 16,
-            background: '#FF2828',
+            background: '#FFFFFF',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

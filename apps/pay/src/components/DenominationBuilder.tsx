@@ -86,7 +86,7 @@ export function DenominationBuilder({
   }, []);
 
   const btnBase = 'w-8 h-8 rounded border text-sm font-medium transition-all flex items-center justify-center';
-  const btnActive = 'border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 cursor-pointer';
+  const btnActive = 'border-zinc-300 bg-zinc-300/10 text-zinc-400 hover:bg-zinc-300/20 cursor-pointer';
   const btnInactive = 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600 hover:bg-zinc-800 cursor-pointer';
   const btnDisabled = 'opacity-30 cursor-not-allowed border-zinc-800 bg-zinc-900/30 text-zinc-600';
 
@@ -194,7 +194,7 @@ export function DenominationBuilder({
           style={{ fontFamily: 'var(--font-mono)' }}
         >
           <span className="tracking-wider">TOTAL:</span>
-          <span className="text-emerald-400">
+          <span className="text-zinc-400">
             {(() => {
               let totalRaw = BigInt(0);
               denominations.forEach((d) => {

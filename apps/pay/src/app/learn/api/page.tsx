@@ -58,7 +58,7 @@ export default function APIReferencePage() {
         {/* Create Payment */}
         <div id="create-payment" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <span className="bg-[#FF2828] text-white px-2.5 py-0.5 text-[11px] font-medium">POST</span>
+            <span className="bg-[#FFFFFF] text-black px-2.5 py-0.5 text-[11px] font-medium">POST</span>
             <code className="text-[var(--color-text-primary)] font-mono">/api/payments/create</code>
           </div>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
@@ -120,7 +120,7 @@ export default function APIReferencePage() {
         {/* Check Status */}
         <div id="check-status" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <span className="bg-[#FF2828] text-white px-2.5 py-0.5 text-[11px] font-medium">POST</span>
+            <span className="bg-[#FFFFFF] text-black px-2.5 py-0.5 text-[11px] font-medium">POST</span>
             <code className="text-[var(--color-text-primary)] font-mono">/api/payments/status</code>
           </div>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">

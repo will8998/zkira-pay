@@ -196,7 +196,7 @@ export default function WeeklyDropsPage() {
         <div className={`p-3 rounded-none text-[13px] ${
           feedback.type === 'success' 
             ? 'bg-[rgba(156,220,106,0.15)] text-[#9CDC6A] border border-[#a7f3d0]' 
-            : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828] border border-[#fecaca]'
+            : 'bg-[rgba(255,40,40,0.15)] text-[#FFFFFF] border border-[#fecaca]'
         }`}>
           {feedback.message}
         </div>

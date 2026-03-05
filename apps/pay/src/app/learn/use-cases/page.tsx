@@ -13,7 +13,7 @@ export default function UseCasesPage() {
 
       {/* Use Case 1: Private Payroll */}
       <div id="payroll" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '100ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">ENTERPRISE</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">ENTERPRISE</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Private Payroll</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -23,23 +23,23 @@ export default function UseCasesPage() {
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Company registers meta-addresses for each employee during onboarding</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">HR initiates batch payment with individual amounts for each employee</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Each payment creates a unique stealth escrow with recipient-specific keys</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Employees scan and claim using their view keys from wallet or mobile app</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">No on-chain link between payments and recipients preserves complete privacy</p>
           </div>
         </div>
@@ -75,7 +75,7 @@ console.log('Payroll distributed:', batchPayment.signature);`}
 
       {/* Use Case 2: Anonymous Donations */}
       <div id="donations" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '200ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">SOCIAL IMPACT</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">SOCIAL IMPACT</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Anonymous Donations</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -85,23 +85,23 @@ console.log('Payroll distributed:', batchPayment.signature);`}
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Organization publishes their meta-address on website and donation pages</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Donor creates stealth payment to the meta-address with chosen amount</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Organization scans for incoming payments using their view key</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Donor receives claim receipt and proof for tax deduction purposes</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">No public ledger link between donor and organization preserves anonymity</p>
           </div>
         </div>
@@ -135,7 +135,7 @@ console.log('Tax receipt proof:', proof.receiptHash);`}
 
       {/* Use Case 3: Escrow Services */}
       <div id="escrow" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '300ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">FREELANCE</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">FREELANCE</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Escrow Services</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -145,23 +145,23 @@ console.log('Tax receipt proof:', proof.receiptHash);`}
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Client creates milestone escrow with defined deliverables and payment amounts</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Contractor completes first milestone and submits deliverables</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Client reviews work and approves milestone release through the platform</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Funds for that milestone automatically transfer to contractor's stealth address</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Process repeats for each milestone until project completion</p>
           </div>
         </div>
@@ -200,7 +200,7 @@ console.log('Milestone escrow created:', escrow.address);`}
 
       {/* Use Case 4: Multi-sig Treasury */}
       <div id="treasury" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '400ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">DAO / TEAM</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">DAO / TEAM</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Multi-sig Treasury</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -210,23 +210,23 @@ console.log('Milestone escrow created:', escrow.address);`}
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Create multi-sig escrow with authorized signers and approval threshold</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Any authorized signer proposes a payment with justification</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Required number of signers review and approve the proposed payment</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Once approval threshold is met, payment executes automatically</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">All approvals recorded on-chain for internal auditability</p>
           </div>
         </div>
@@ -273,7 +273,7 @@ await client.approvePayment({
 
       {/* Use Case 5: Payment Links */}
       <div id="payment-links" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '500ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">INVOICING</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">INVOICING</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Payment Links</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -283,23 +283,23 @@ await client.approvePayment({
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Create payment link with amount, token, description, and expiry date</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Share the generated claim URL via email, message, or embed in invoice</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Payer opens link, connects wallet, and reviews payment details</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Payment transaction executes and escrow locks funds</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Recipient claims funds to their stealth address using claim secret</p>
           </div>
         </div>
@@ -340,7 +340,7 @@ if (status === 'completed') {
 
       {/* Use Case 6: E-commerce Integration */}
       <div id="ecommerce" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '600ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">COMMERCE</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">COMMERCE</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">E-commerce Integration</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -350,23 +350,23 @@ if (status === 'completed') {
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Install widget script tag or React component in your checkout flow</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Configure payment amount, accepted tokens, and completion callback</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Customer clicks pay button and widget handles wallet connection</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Payment processes through stealth escrow for privacy</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Merchant receives webhook confirmation and can fulfill order</p>
           </div>
         </div>
@@ -420,7 +420,7 @@ function CheckoutButton({ amount, description }: {
     <button 
       onClick={handlePayment}
       disabled={status === 'pending'}
-      className="bg-[#FF2828] text-white px-6 py-3 rounded-none font-semibold"
+      className="bg-[#FFFFFF] text-black px-6 py-3 rounded-none font-semibold"
     >
       {status === 'pending' ? 'Processing...' : \`Pay $\${amount}\`}
     </button>
@@ -432,7 +432,7 @@ function CheckoutButton({ amount, description }: {
 
       {/* Use Case 7: Anonymous Large Transfers */}
       <div id="anonymous-transfers" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '700ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">PRIVACY</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">PRIVACY</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Anonymous Large Transfers</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -442,23 +442,23 @@ function CheckoutButton({ amount, description }: {
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Connect wallet and initialize the shielded pool client</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Split transfer into fixed 10 USDC deposits, each creating an encrypted note</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Wait for 6-hour soak time — protocol generates decoy deposits automatically</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Generate ZK proof and submit private withdrawal to a fresh recipient address</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Funds arrive within ~1 hour via batched processing — no on-chain link to original deposits</p>
           </div>
         </div>
@@ -495,7 +495,7 @@ for (const note of notes) {
 
       {/* Use Case 8: DAO Treasury Privacy */}
       <div id="dao-treasury" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '800ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FF2828] font-[family-name:var(--font-mono)]">GOVERNANCE</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">GOVERNANCE</span>
         <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">DAO Treasury Privacy</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
@@ -505,23 +505,23 @@ for (const note of notes) {
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How it works</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
             <p className="text-sm text-[var(--color-text-secondary)]">DAO initializes shielded pool with multi-sig authority</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Treasury deposits are split into fixed denominations through the shielded pool</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Grant recipients receive encrypted notes via secure channels</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
             <p className="text-sm text-[var(--color-text-secondary)]">Recipients generate ZK proofs and withdraw to their stealth addresses</p>
           </div>
           <div className="flex gap-3 mb-3">
-            <span className="text-[#FF2828] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
+            <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
             <p className="text-sm text-[var(--color-text-secondary)]">No on-chain link between DAO treasury and grant recipients — competitors cannot track fund flows</p>
           </div>
         </div>

@@ -282,7 +282,7 @@ export function MoreSheet({ isOpen, onClose }: MoreSheetProps) {
                     onClick={onClose}
                     className={`flex items-center gap-3 px-4 py-3.5 text-[14px] font-medium transition-colors ${
                       active
-                        ? 'text-[#FF2828] bg-[rgba(255,40,40,0.12)]'
+                        ? 'text-[#FFFFFF] bg-[rgba(255,40,40,0.12)]'
                         : 'text-[rgba(255,255,255,0.6)] hover:bg-[#1A1A1A] hover:text-white'
                     }`}
                   >

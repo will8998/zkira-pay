@@ -227,7 +227,7 @@ export default function PointsPage() {
                     </td>
                     <td className="p-3 text-center">
                       {earner.flagged ? (
-                        <span className="bg-[rgba(255,40,40,0.15)] text-[#FF2828] px-2 py-1 rounded-none text-[11px] font-medium">
+                        <span className="bg-[rgba(255,40,40,0.15)] text-[#FFFFFF] px-2 py-1 rounded-none text-[11px] font-medium">
                           FLAGGED
                         </span>
                       ) : (

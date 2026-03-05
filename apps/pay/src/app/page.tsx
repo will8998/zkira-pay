@@ -70,7 +70,7 @@ export default function HomePage() {
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-[-0.02em] leading-[1.05]">
             Private Payments
             <br />
-            <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#FFFFFF] to-[#FF6B6B] bg-clip-text text-transparent">
               Made Simple
             </span>
           </h1>
@@ -91,12 +91,12 @@ export default function HomePage() {
               style={{ animationDelay: `${index * 80}ms` }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-lg flex items-center justify-center text-[rgba(255,255,255,0.6)] group-hover:text-[#FF2828] transition-colors">
+                <div className="w-12 h-12 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-lg flex items-center justify-center text-[rgba(255,255,255,0.6)] group-hover:text-[#FFFFFF] transition-colors">
                   {action.icon}
                 </div>
                 <div>
                   <div
-                    className="text-sm font-semibold text-white group-hover:text-[#FF2828] transition-colors"
+                    className="text-sm font-semibold text-white group-hover:text-[#FFFFFF] transition-colors"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     {action.title}
