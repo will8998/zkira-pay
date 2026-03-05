@@ -4,18 +4,20 @@ import { db } from '../db/index.js';
 import { distributors, merchants, distributorCommissions, distributorPayouts } from '../db/schema.js';
 import { eq, and, desc, sql, isNull, count, sum, gte, lte } from 'drizzle-orm';
 import { loadConfig } from '../config.js';
+import { verifyAdminToken } from '../middleware/jwt-auth.js';
 
 const gatewayDistributorRoutes = new Hono();
 
-// Admin auth middleware
+// Admin auth middleware — JWT Bearer + legacy password
 const adminAuth = async (c: any, next: any) => {
-  const adminPassword = c.req.header('X-Admin-Password');
   const config = loadConfig();
-
-  if (!adminPassword) {
-    return c.json({ error: 'Unauthorized' }, 401);
+  const authHeader = c.req.header('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const payload = await verifyAdminToken(authHeader.slice(7), config.jwtSecret);
+    if (payload) { await next(); return; }
   }
-
+  const adminPassword = c.req.header('X-Admin-Password');
+  if (!adminPassword) return c.json({ error: 'Unauthorized' }, 401);
   try {
     const provided = Buffer.from(adminPassword);
     const expected = Buffer.from(config.adminPassword);
@@ -25,7 +27,6 @@ const adminAuth = async (c: any, next: any) => {
   } catch {
     return c.json({ error: 'Unauthorized' }, 401);
   }
-
   await next();
 };
 

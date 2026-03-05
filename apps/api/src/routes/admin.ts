@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
-import { timingSafeEqual } from 'node:crypto';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { sha256 } from '@noble/hashes/sha256';
 import { db } from '../db/index.js';
 import { merchants, gatewaySessions, ephemeralWallets, apiKeys, users, distributors } from '../db/schema.js';
 import { eq, count, sum, desc, gte, lte, sql, and, like, or } from 'drizzle-orm';
 import { loadConfig } from '../config.js';
-
+import { signAdminToken, verifyAdminToken } from '../middleware/jwt-auth.js';
 const adminRoutes = new Hono<{
   Variables: {
     adminRole: 'master' | 'merchant';
@@ -14,13 +14,26 @@ const adminRoutes = new Hono<{
   }
 }>();
 
-// Dual admin authentication middleware
+// Dual admin authentication middleware (JWT → password → API key)
 const dualAdminAuth = async (c: any, next: any) => {
-  const adminPassword = c.req.header('X-Admin-Password');
-  const apiKey = c.req.header('X-API-Key');
   const config = loadConfig();
 
-  // First try admin password (master role)
+  // 1. Try JWT Bearer token first
+  const authHeader = c.req.header('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    const payload = await verifyAdminToken(token, config.jwtSecret);
+    if (payload) {
+      c.set('adminRole', payload.role);
+      c.set('merchantId', payload.merchantId);
+      if (payload.merchantName) c.set('merchantName', payload.merchantName);
+      await next();
+      return;
+    }
+  }
+
+  // 2. Try admin password header (legacy — backward compat)
+  const adminPassword = c.req.header('X-Admin-Password');
   if (adminPassword) {
     try {
       const provided = Buffer.from(adminPassword);
@@ -36,13 +49,11 @@ const dualAdminAuth = async (c: any, next: any) => {
     }
   }
 
-  // Then try API key (merchant role)
+  // 3. Try API key header (merchant role)
+  const apiKey = c.req.header('X-API-Key');
   if (apiKey) {
     try {
-      // Hash the provided API key
       const keyHash = Array.from(sha256(apiKey), byte => byte.toString(16).padStart(2, '0')).join('');
-
-      // Look up the API key in the database
       const apiKeyResult = await db.select().from(apiKeys).where(
         and(
           eq(apiKeys.keyHash, keyHash),
@@ -52,8 +63,6 @@ const dualAdminAuth = async (c: any, next: any) => {
 
       if (apiKeyResult.length > 0) {
         const apiKeyRow = apiKeyResult[0];
-
-        // Look up the merchant by wallet address
         const merchantResult = await db.select().from(merchants).where(
           and(
             eq(merchants.walletAddress, apiKeyRow.walletAddress),
@@ -96,16 +105,16 @@ adminRoutes.post('/api/admin/login', async (c) => {
 
     const config = loadConfig();
 
-    // First try to match against admin password
+    // Try admin password first
     try {
       const provided = Buffer.from(credential);
       const expected = Buffer.from(config.adminPassword);
       if (provided.length === expected.length && timingSafeEqual(provided, expected)) {
-        return c.json({
-          role: 'master',
-          merchantId: null,
-          merchantName: null
-        });
+        const token = await signAdminToken(
+          { role: 'master', merchantId: null, merchantName: null },
+          config.jwtSecret,
+        );
+        return c.json({ role: 'master', merchantId: null, merchantName: null, token });
       }
     } catch {
       // Continue to API key check
@@ -114,7 +123,6 @@ adminRoutes.post('/api/admin/login', async (c) => {
     // Then try as API key
     try {
       const keyHash = Array.from(sha256(credential), byte => byte.toString(16).padStart(2, '0')).join('');
-
       const apiKeyResult = await db.select().from(apiKeys).where(
         and(
           eq(apiKeys.keyHash, keyHash),
@@ -124,7 +132,6 @@ adminRoutes.post('/api/admin/login', async (c) => {
 
       if (apiKeyResult.length > 0) {
         const apiKeyRow = apiKeyResult[0];
-
         const merchantResult = await db.select().from(merchants).where(
           and(
             eq(merchants.walletAddress, apiKeyRow.walletAddress),
@@ -134,10 +141,15 @@ adminRoutes.post('/api/admin/login', async (c) => {
 
         if (merchantResult.length > 0) {
           const merchantRow = merchantResult[0];
+          const token = await signAdminToken(
+            { role: 'merchant', merchantId: merchantRow.id, merchantName: merchantRow.name },
+            config.jwtSecret,
+          );
           return c.json({
             role: 'merchant',
             merchantId: merchantRow.id,
-            merchantName: merchantRow.name
+            merchantName: merchantRow.name,
+            token,
           });
         }
       }
@@ -737,6 +749,95 @@ adminRoutes.delete('/api/admin/api-keys/:id', async (c) => {
   } catch (error) {
     console.error('Failed to revoke API key:', error);
     return c.json({ error: 'Failed to revoke API key' }, 500);
+  }
+});
+
+// POST /api/admin/api-keys/generate - Generate API key for a merchant (master only)
+adminRoutes.post('/api/admin/api-keys/generate', async (c) => {
+  try {
+    const adminRole = c.get('adminRole');
+    if (adminRole !== 'master') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    const body = await c.req.json();
+    const { walletAddress, name } = body;
+
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return c.json({ error: 'walletAddress is required' }, 400);
+    }
+
+    // Verify merchant exists
+    const merchantResult = await db.select().from(merchants).where(
+      and(eq(merchants.walletAddress, walletAddress), eq(merchants.status, 'active'))
+    ).limit(1);
+    if (merchantResult.length === 0) {
+      return c.json({ error: 'Active merchant not found for this wallet' }, 404);
+    }
+
+    // Generate raw API key: zkira_sk_ + 32 random bytes hex
+    const rawKey = 'zkira_sk_' + randomBytes(32).toString('hex');
+    const keyHash = Array.from(sha256(rawKey), byte => byte.toString(16).padStart(2, '0')).join('');
+    const keyPrefix = rawKey.slice(0, 14) + '...' + rawKey.slice(-4);
+
+    const [inserted] = await db.insert(apiKeys).values({
+      walletAddress,
+      keyHash,
+      keyPrefix,
+      name: name || 'Default',
+    }).returning();
+
+    // Return raw key ONCE — caller must store it
+    return c.json({ apiKey: rawKey, id: inserted.id, keyPrefix }, 201);
+  } catch (error) {
+    console.error('Failed to generate API key:', error);
+    return c.json({ error: 'Failed to generate API key' }, 500);
+  }
+});
+
+// PATCH /api/admin/merchants/:id - Update merchant (master only)
+adminRoutes.patch('/api/admin/merchants/:id', async (c) => {
+  try {
+    const adminRole = c.get('adminRole');
+    if (adminRole !== 'master') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { name, webhookUrl, feePercent, status, allowedOrigins } = body;
+
+    // Build update set dynamically
+    const updateSet: Record<string, any> = { updatedAt: new Date() };
+    if (name !== undefined) updateSet.name = name;
+    if (webhookUrl !== undefined) updateSet.webhookUrl = webhookUrl || null;
+    if (feePercent !== undefined) updateSet.feePercent = feePercent.toString();
+    if (status !== undefined) {
+      if (!['active', 'inactive'].includes(status)) {
+        return c.json({ error: 'Status must be active or inactive' }, 400);
+      }
+      updateSet.status = status;
+    }
+    if (allowedOrigins !== undefined) {
+      if (!Array.isArray(allowedOrigins)) {
+        return c.json({ error: 'allowedOrigins must be an array of URLs' }, 400);
+      }
+      updateSet.allowedOrigins = allowedOrigins;
+    }
+
+    const result = await db.update(merchants)
+      .set(updateSet)
+      .where(eq(merchants.id, id))
+      .returning();
+
+    if (result.length === 0) {
+      return c.json({ error: 'Merchant not found' }, 404);
+    }
+
+    return c.json({ merchant: result[0] });
+  } catch (error) {
+    console.error('Failed to update merchant:', error);
+    return c.json({ error: 'Failed to update merchant' }, 500);
   }
 });
 
