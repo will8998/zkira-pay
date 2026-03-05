@@ -1,397 +1,125 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
-import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import Link from 'next/link';
-import { EmptyState } from '@/components/EmptyState';
-import { useWallet, useUnifiedWalletContext } from '@/components/WalletProvider';
 
-interface Transaction {
-  id?: string;
-  type: 'sent' | 'received';
-  amount: string | number;
-  recipientAddress?: string;
-  senderAddress?: string;
-  status: 'completed' | 'pending' | 'failed' | 'claimed';
-  timestamp: string;
-  description?: string;
-  txSignature?: string;
-  escrowAddress?: string;
-}
+export default function HomePage() {
+  const quickActions = [
+    {
+      title: 'Send Payment',
+      description: 'Send funds privately via shielded pool',
+      href: '/create',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Request Payment',
+      description: 'Create an invoice for someone to pay you',
+      href: '/request',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 4.5l-15 15m0 0h11.25m-11.25 0V8.25" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Claim Payment',
+      description: 'Enter a claim code to receive funds',
+      href: '/claim',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Shielded Pool',
+      description: 'Deposit or withdraw directly from the pool',
+      href: '/pool',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+        </svg>
+      ),
+    },
+  ];
 
-interface Invoice {
-  invoiceId?: string;
-  id?: string;
-  amount: string | number;
-  description?: string;
-  status: 'active' | 'claimed' | 'expired' | 'pending';
-  createdAt: string;
-  claimedAt?: string;
-  stealthAddressHex?: string;
-  metaAddress?: string;
-  tokenMint?: string;
-  expiry?: string;
-}
-
-export default function Dashboard() {
-  const tHero = useTranslations('hero');
-  const tDashboard = useTranslations('dashboard');
-  const tCommon = useTranslations('common');
-  const tStatus = useTranslations('status');
-  const tTable = useTranslations('table');
-  const { connected, publicKey } = useWallet();
-  const { setShowModal } = useUnifiedWalletContext();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [userPoints, setUserPoints] = useState<string>('0');
-  
-  // Fetch points balance
-  useEffect(() => {
-    if (!connected || !publicKey) return;
-    const wallet = publicKey.toBase58();
-    const API_URL = '';
-    fetch(`${API_URL}/api/points/${wallet}`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data?.totalPoints) setUserPoints(data.totalPoints);
-      })
-      .catch(() => {});
-  }, [connected, publicKey]);
-  // Helper function to convert amount string to number
-  const convertAmount = (amount: string | number): number => {
-    if (typeof amount === 'number') return amount;
-    try {
-      // Try to parse as BigInt (raw u64 format)
-      return Number(BigInt(amount)) / 1_000_000;
-    } catch {
-      // Fallback to regular number parsing
-      return parseFloat(amount) || 0;
-    }
-  };
-
-  // ─── Pull to refresh ───
-  const handleRefresh = useCallback(() => {
-    // Reload data from localStorage
-    const storedTransactions = localStorage.getItem('zkira_transactions');
-    const storedInvoices = localStorage.getItem('zkira_invoices');
-
-    if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions));
-    } else {
-      setTransactions([]);
-    }
-
-    if (storedInvoices) {
-      setInvoices(JSON.parse(storedInvoices));
-    } else {
-      setInvoices([]);
-    }
-  }, []);
-  
-  const { containerRef: pullRefreshRef } = usePullToRefresh({
-    onRefresh: handleRefresh,
-  });
-
-  useEffect(() => {
-    // Load data from localStorage
-    const storedTransactions = localStorage.getItem('zkira_transactions');
-    const storedInvoices = localStorage.getItem('zkira_invoices');
-
-    if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions));
-    }
-
-    if (storedInvoices) {
-      setInvoices(JSON.parse(storedInvoices));
-    }
-  }, []);
-
-  // Calculate metrics
-  const totalSent = transactions
-    .filter(tx => tx.type === 'sent' && tx.status === 'completed')
-    .reduce((sum, tx) => sum + convertAmount(tx.amount), 0);
-
-  const totalReceived = transactions
-    .filter(tx => tx.type === 'received' && tx.status === 'completed')
-    .reduce((sum, tx) => sum + convertAmount(tx.amount), 0) +
-    invoices
-      .filter(invoice => invoice.status === 'claimed')
-      .reduce((sum, invoice) => sum + convertAmount(invoice.amount), 0);
-
-  const activeEscrows = invoices.filter(invoice => invoice.status !== 'claimed').length;
-
-  const sentCount = transactions.filter(tx => tx.type === 'sent' && tx.status === 'completed').length;
-  const receivedCount = transactions.filter(tx => tx.type === 'received' && tx.status === 'completed').length +
-    invoices.filter(invoice => invoice.status === 'claimed').length;
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  // Recent activity (combine transactions and invoices, sort by date)
-  const recentActivity = [
-    ...transactions.map(tx => ({
-      id: tx.id || `tx-${tx.timestamp}`,
-      type: tx.type === 'sent' ? tDashboard('paymentSent') : tDashboard('paymentReceived'),
-      amount: convertAmount(tx.amount),
-      status: tx.status,
-      date: new Date(tx.timestamp)
-    })),
-    ...invoices.map(invoice => ({
-      id: invoice.id || invoice.invoiceId || `inv-${invoice.createdAt}`,
-      type: tDashboard('invoice'),
-      amount: convertAmount(invoice.amount),
-      status: invoice.status === 'claimed' ? 'completed' : invoice.status === 'expired' ? 'expired' : 'pending',
-      date: new Date(invoice.createdAt)
-    }))
-  ]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 5);
-
-  if (!connected) {
-    return (
-      <div className="h-[calc(100dvh-3.5rem-4rem)] md:h-[calc(100dvh-3.5rem)] bg-[#000000] relative overflow-hidden">
-        {/* Video Background — fills viewport */}
+  return (
+    <div className="min-h-[calc(100dvh-3.5rem-4rem)] md:min-h-[calc(100dvh-3.5rem)] bg-[#000000] relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
           style={{ filter: 'brightness(0.8) contrast(1.1)' }}
         >
           <source src="/hero-animation.mp4" type="video/mp4" />
         </video>
-
-        {/* Dark gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-
-        {/* Content — centered on top of video */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
-          {/* Hero Text */}
-          <div className="text-center mb-10 max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 font-[family-name:var(--font-sans)] tracking-[-0.02em] leading-[1.05]">
-              {tHero('title')}
-              <br />
-              <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">{tHero('titleHighlight')}</span>
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg text-[rgba(255,255,255,0.6)] max-w-lg mx-auto leading-relaxed">
-              {tHero('subtitle')}
-              <br className="hidden sm:block" />
-              {tHero('subtitleLine2')}
-            </p>
-          </div>
-
-          {/* CTA Button — frosted glass */}
-          <button
-            onClick={() => setShowModal(true)}
-            className="w-full sm:w-auto bg-[#FF2828] text-white px-8 py-3 text-[15px] font-medium rounded-full hover:bg-[#E02020] transition-all duration-200 font-[family-name:var(--font-sans)] mb-12"
-          >
-            {tCommon('connectWallet')}
-          </button>
-
-          {/* Feature Labels — minimal and clean */}
-          <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[rgba(255,255,255,0.7)]">
-            <span className="text-[13px] font-light tracking-wide">{tHero('featureStealth')}</span>
-            <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">{tHero('featureInvoices')}</span>
-            <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">{tHero('featureEscrow')}</span>
-            <span className="text-[rgba(255,255,255,0.3)]">•</span>
-            <span className="text-[13px] font-light tracking-wide">{tHero('featureMultiSig')}</span>
-        </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={pullRefreshRef} className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '0ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('totalSent')}</div>
-          <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-            {totalSent > 0 ? formatCurrency(totalSent) : '$0.00'}
-          </div>
-          <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {sentCount > 0 ? tDashboard('payment', { count: sentCount }) : tCommon('noActivityYet')}
-          </div>
-        </div>
-
-        <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '60ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('totalReceived')}</div>
-          <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-            {totalReceived > 0 ? formatCurrency(totalReceived) : '$0.00'}
-          </div>
-          <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {receivedCount > 0 ? tDashboard('payment', { count: receivedCount }) : tCommon('noActivityYet')}
-          </div>
-        </div>
-
-        <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4" style={{ animationDelay: '120ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('activeEscrows')}</div>
-          <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-            {activeEscrows}
-          </div>
-          <div className="text-xs text-[var(--color-muted)] mt-0.5">
-            {activeEscrows > 0 ? tDashboard('pendingEscrow', { count: activeEscrows }) : tCommon('noActivityYet')}
-          </div>
-        </div>
-
-        <Link href="/points" className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-4 hover:border-[var(--border-subtle-hover)] transition-colors" style={{ animationDelay: '180ms' }}>
-          <div className="text-[13px] font-medium text-[var(--color-muted)] mb-0.5">{tDashboard('points')}</div>
-          <div className="text-lg font-semibold text-[var(--color-text)] font-[family-name:var(--font-mono)] tabular-nums">
-            {parseFloat(userPoints).toLocaleString()}
-          </div>
-          <div className="text-xs text-[#FF2828] mt-0.5">
-            {tDashboard('viewRewards')}
-          </div>
-        </Link>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40" />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <Link href="/create" className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all duration-200 p-4 group flex items-center gap-4 min-h-[60px]" style={{ animationDelay: '180ms' }}>
-          <div className="w-8 h-8 bg-[var(--color-hover)] flex items-center justify-center">
-            <svg className="w-4 h-4 text-[var(--color-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('sendPayment')}</div>
-            <div className="text-xs text-[var(--color-muted)]">{tDashboard('sendPaymentDesc')}</div>
-          </div>
-        </Link>
-
-        <Link href="/request" className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all duration-200 p-4 group flex items-center gap-4 min-h-[60px]" style={{ animationDelay: '240ms' }}>
-          <div className="w-8 h-8 bg-[var(--color-hover)] flex items-center justify-center">
-            <svg className="w-4 h-4 text-[var(--color-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('requestPayment')}</div>
-            <div className="text-xs text-[var(--color-muted)]">{tDashboard('requestPaymentDesc')}</div>
-          </div>
-        </Link>
-
-        <Link href="/escrow/create" className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none hover:border-[var(--border-subtle-hover)] transition-all duration-200 p-4 group flex items-center gap-4 min-h-[60px]" style={{ animationDelay: '300ms' }}>
-          <div className="w-8 h-8 bg-[var(--color-hover)] flex items-center justify-center">
-            <svg className="w-4 h-4 text-[var(--color-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-[var(--color-text)]">{tDashboard('createEscrow')}</div>
-            <div className="text-xs text-[var(--color-muted)]">{tDashboard('createEscrowDesc')}</div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="animate-entrance bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none overflow-hidden" style={{ animationDelay: '360ms' }}>
-        <div className="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold text-[var(--color-text)]">{tDashboard('recentActivity')}</h2>
-          <Link href="/history" className="text-xs font-medium text-[#FF2828] hover:text-[#E02020]">{tCommon('viewAll')}</Link>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center px-6 py-12 md:py-20">
+        {/* Hero */}
+        <div className="text-center mb-12 max-w-3xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-[-0.02em] leading-[1.05]">
+            Private Payments
+            <br />
+            <span className="bg-gradient-to-r from-[#FF2828] to-[#FF6B6B] bg-clip-text text-transparent">
+              Made Simple
+            </span>
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-[rgba(255,255,255,0.6)] max-w-lg mx-auto leading-relaxed">
+            Send, request, and receive payments through zero-knowledge shielded pools.
+            <br className="hidden sm:block" />
+            No wallet connection needed. Just a browser.
+          </p>
         </div>
 
-        {recentActivity.length > 0 ? (
-          <>
-          <div className="hidden md:block">
-            <table className="w-full">
-              <thead className="bg-[var(--color-hover)]">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('type')}</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('amount')}</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('status')}</th>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{tTable('date')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivity.map((item, index) => (
-                  <tr key={item.id} className={`border-b border-[var(--color-border)] hover:bg-[var(--color-hover)] ${index === recentActivity.length - 1 ? 'border-b-0' : ''}`}>
-                    <td className="px-4 py-2.5 text-[13px] text-[var(--color-text)]">{item.type}</td>
-                    <td className="px-4 py-2.5 text-[13px] font-[family-name:var(--font-mono)] tabular-nums text-[var(--color-text)]">
-                      {formatCurrency(item.amount)}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className={`px-2 py-0.5 text-[11px] font-medium rounded-full ${
-                        item.status === 'completed' 
-                          ? 'bg-[rgba(156,220,106,0.15)] text-[#9CDC6A]'
-                          : item.status === 'pending' || item.status === 'active'
-                          ? 'bg-[rgba(255,209,70,0.15)] text-[#FFD146]'
-                          : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828]'
-                      }`}>
-                        {item.status === 'completed' ? tStatus('completed') : 
-                         item.status === 'pending' ? tStatus('pending') :
-                         item.status === 'active' ? tStatus('active') : 
-                         item.status === 'expired' ? tStatus('expired') : tStatus('failed')}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-[13px] text-[var(--color-muted)]">
-                      {item.date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: item.date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="md:hidden divide-y divide-[var(--color-border)]">
-            {recentActivity.map((item) => (
-              <div key={item.id} className="p-4 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[13px] text-[var(--color-text)] font-medium">{item.type}</span>
-                  <span className="text-[13px] font-[family-name:var(--font-mono)] tabular-nums text-[var(--color-text)]">
-                    {formatCurrency(item.amount)}
-                  </span>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl w-full mb-12">
+          {quickActions.map((action, index) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="group bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,40,40,0.3)] hover:bg-[rgba(255,40,40,0.05)] rounded-xl p-6 transition-all duration-300"
+              style={{ animationDelay: `${index * 80}ms` }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-lg flex items-center justify-center text-[rgba(255,255,255,0.6)] group-hover:text-[#FF2828] transition-colors">
+                  {action.icon}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className={`px-2 py-0.5 text-[11px] font-medium rounded-full ${
-                    item.status === 'completed' 
-                      ? 'bg-[rgba(156,220,106,0.15)] text-[#9CDC6A]'
-                      : item.status === 'pending' || item.status === 'active'
-                      ? 'bg-[rgba(255,209,70,0.15)] text-[#FFD146]'
-                      : 'bg-[rgba(255,40,40,0.15)] text-[#FF2828]'
-                  }`}>
-                    {item.status === 'completed' ? tStatus('completed') : 
-                     item.status === 'pending' ? tStatus('pending') :
-                     item.status === 'active' ? tStatus('active') : 
-                     item.status === 'expired' ? tStatus('expired') : tStatus('failed')}
-                  </span>
-                  <span className="text-[13px] text-[var(--color-muted)]">
-                    {item.date.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric',
-                      year: item.date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                    })}
-                  </span>
+                <div>
+                  <div
+                    className="text-sm font-semibold text-white group-hover:text-[#FF2828] transition-colors"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {action.title}
+                  </div>
+                  <div className="text-xs text-[rgba(255,255,255,0.4)]">
+                    {action.description}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-          </>
-        ) : (
-          <div className="p-4">
-            <EmptyState
-              title={tDashboard('noTransactions')}
-              description={tDashboard('noTransactionsDesc')}
-              actionLabel={tDashboard('createPayment')}
-              actionHref="/create"
-              compact
-            />
-          </div>
-        )}
+            </Link>
+          ))}
+        </div>
+
+        {/* Feature pills */}
+        <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[rgba(255,255,255,0.5)]">
+          <span className="text-[13px] font-light tracking-wide">Zero-Knowledge Proofs</span>
+          <span className="text-[rgba(255,255,255,0.2)]">•</span>
+          <span className="text-[13px] font-light tracking-wide">Multi-Chain (Arbitrum + Tron)</span>
+          <span className="text-[rgba(255,255,255,0.2)]">•</span>
+          <span className="text-[13px] font-light tracking-wide">No Wallet Required</span>
+          <span className="text-[rgba(255,255,255,0.2)]">•</span>
+          <span className="text-[13px] font-light tracking-wide">Tor Compatible</span>
+        </div>
       </div>
     </div>
   );

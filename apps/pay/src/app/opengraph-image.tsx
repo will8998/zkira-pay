@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'ZKIRA Pay — Stealth Payments on Solana';
+export const alt = 'ZKIRA Pay — Private Payments on Arbitrum & Tron';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -58,7 +58,7 @@ export default async function Image() {
             letterSpacing: '-0.01em',
           }}
         >
-          Confidential Payments on Solana
+          Private Multi-Chain Mixer
         </div>
 
         {/* Feature pills */}
@@ -69,7 +69,7 @@ export default async function Image() {
             marginTop: 40,
           }}
         >
-          {['Stealth Addresses', 'Invoice Links', 'Milestone Escrow', 'Multi-sig'].map(
+          {['ZK Proofs', 'Multi-Chain', 'Walletless Mode', 'Partner System'].map(
             (feature) => (
               <div
                 key={feature}

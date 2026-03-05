@@ -1,44 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { MoreSheet } from './MoreSheet';
-export function BottomTabBar() {
-  const t = useTranslations('nav');
-  const pathname = usePathname();
-  const [moreOpen, setMoreOpen] = useState(false);
 
-  // Don't show on admin routes
+export function BottomTabBar() {
+  const pathname = usePathname();
+
   if (pathname?.startsWith('/admin')) return null;
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return pathname === '/';
-    }
-    if (path === '/create') {
-      return pathname === '/create';
-    }
+    if (path === '/') return pathname === '/';
+    if (path === '/create') return pathname === '/create';
     return pathname.startsWith(path);
-  };
-
-  const isMoreActive = () => {
-    return pathname?.startsWith('/batch') || 
-           pathname?.startsWith('/multisig') || 
-           pathname?.startsWith('/history') ||
-           pathname?.startsWith('/contacts') || 
-           pathname?.startsWith('/developers') ||
-           pathname?.startsWith('/points') ||
-           pathname?.startsWith('/leaderboard') ||
-           pathname?.startsWith('/referral') ||
-           pathname?.startsWith('/analytics') ||
-           pathname?.startsWith('/learn');
   };
 
   const tabs = [
     {
-      name: t('home'),
+      name: 'Home',
       href: '/',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -47,7 +25,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: t('send'),
+      name: 'Send',
       href: '/create',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -56,7 +34,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: t('pool'),
+      name: 'Pool',
       href: '/pool',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -65,55 +43,46 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: t('escrow'),
-      href: '/escrow',
+      name: 'Claim',
+      href: '/claim',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      name: 'History',
+      href: '/history',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },
   ];
 
   return (
-    <>
-      <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#0A0A0A] border-t border-[#282828] pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-around h-16">
-          {tabs.map((tab) => {
-            const active = isActive(tab.href);
-            return (
-              <Link
-                key={tab.name}
-                href={tab.href}
-                className="flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] transition-colors"
-              >
-                <div className={active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}>
-                  {tab.icon}
-                </div>
-                <span className={`text-[10px] font-medium ${active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}`}>
-                  {tab.name}
-                </span>
-              </Link>
-            );
-          })}
-          
-          <button
-            onClick={() => setMoreOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] transition-colors"
-          >
-            <div className={isMoreActive() ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-              </svg>
-            </div>
-            <span className={`text-[10px] font-medium ${isMoreActive() ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}`}>
-              {t('more')}
-            </span>
-          </button>
-        </div>
-      </nav>
-
-      <MoreSheet isOpen={moreOpen} onClose={() => setMoreOpen(false)} />
-    </>
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#0A0A0A] border-t border-[#282828] pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around h-16">
+        {tabs.map((tab) => {
+          const active = isActive(tab.href);
+          return (
+            <Link
+              key={tab.name}
+              href={tab.href}
+              className="flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] transition-colors"
+            >
+              <div className={active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}>
+                {tab.icon}
+              </div>
+              <span className={`text-[10px] font-medium ${active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}`}>
+                {tab.name}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

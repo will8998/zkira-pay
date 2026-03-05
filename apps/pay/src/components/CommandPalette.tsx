@@ -3,8 +3,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Command } from 'cmdk';
 import { useRouter } from 'next/navigation';
-import { useWallet } from './WalletProvider';
-import { toast } from 'sonner';
 
 const CommandPaletteContext = createContext<{ 
   open: boolean; 
@@ -30,7 +28,6 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
 export function CommandPalette() {
   const { open, setOpen } = useCommandPalette();
   const router = useRouter();
-  const { connected, publicKey, connect, disconnect } = useWallet();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,7 +46,7 @@ export function CommandPalette() {
 
   const navItems = [
     {
-      name: 'Dashboard',
+      name: 'Home',
       href: '/',
       keywords: ['home', 'dashboard', 'overview'],
       icon: (
@@ -79,19 +76,9 @@ export function CommandPalette() {
       )
     },
     {
-      name: 'Batch Payments',
-      href: '/batch',
-      keywords: ['bulk', 'multiple', 'batch'],
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Escrow',
-      href: '/escrow',
-      keywords: ['secure', 'protected', 'escrow'],
+      name: 'Claim Payment',
+      href: '/claim',
+      keywords: ['claim', 'redeem', 'receive', 'code'],
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
@@ -99,12 +86,12 @@ export function CommandPalette() {
       )
     },
     {
-      name: 'Multi-sig',
-      href: '/multisig',
-      keywords: ['multisig', 'multi-signature', 'group'],
+      name: 'Pool',
+      href: '/pool',
+      keywords: ['deposit', 'withdraw', 'pool', 'mixer'],
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
         </svg>
       )
     },
@@ -118,63 +105,7 @@ export function CommandPalette() {
         </svg>
       )
     },
-    {
-      name: 'Contacts',
-      href: '/contacts',
-      keywords: ['address book', 'contacts', 'people', 'recipients'],
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-        </svg>
-      )
-    },
-    {
-      name: 'API Keys',
-      href: '/developers',
-      keywords: ['api', 'keys', 'developers', 'integration'],
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Documentation',
-      href: '/developers/docs',
-      keywords: ['docs', 'guide', 'help', 'documentation'],
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-        </svg>
-      )
-    }
   ];
-
-  const copyAddress = async () => {
-    if (publicKey) {
-      await navigator.clipboard.writeText(publicKey.toBase58());
-      toast.success('Address copied');
-      setOpen(false);
-    }
-  };
-
-  const viewExplorer = () => {
-    if (publicKey) {
-      window.open(`https://solscan.io/account/${publicKey.toBase58()}?cluster=devnet`, '_blank');
-      setOpen(false);
-    }
-  };
-
-  const handleDisconnect = () => {
-    disconnect();
-    toast('Wallet disconnected');
-    setOpen(false);
-  };
-
-  const handleConnect = () => {
-    connect();
-    setOpen(false);
-  };
 
   if (!open) return null;
 
@@ -234,57 +165,6 @@ export function CommandPalette() {
                   {item.name}
                 </Command.Item>
               ))}
-            </Command.Group>
-
-            <Command.Group>
-              <div className="text-[10px] font-medium tracking-[0.1em] text-[var(--color-text-secondary)] uppercase px-4 py-1.5">
-                Actions
-              </div>
-              {connected ? (
-                <>
-                  <Command.Item 
-                    onSelect={copyAddress}
-                    keywords={['copy', 'clipboard', 'address']}
-                    className="min-h-[44px] px-3 py-3 md:py-2.5 mx-2 rounded-md text-[13px] flex items-center gap-3 cursor-pointer transition-colors text-[var(--color-text-secondary)] data-[selected=true]:bg-[rgba(255,40,40,0.12)] data-[selected=true]:text-white"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                    </svg>
-                    Copy Wallet Address
-                  </Command.Item>
-                  <Command.Item 
-                    onSelect={viewExplorer}
-                    keywords={['explorer', 'solscan', 'blockchain']}
-                    className="min-h-[44px] px-3 py-3 md:py-2.5 mx-2 rounded-md text-[13px] flex items-center gap-3 cursor-pointer transition-colors text-[var(--color-text-secondary)] data-[selected=true]:bg-[rgba(255,40,40,0.12)] data-[selected=true]:text-white"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                    View on Solscan
-                  </Command.Item>
-                  <Command.Item 
-                    onSelect={handleDisconnect}
-                    keywords={['logout', 'sign out', 'disconnect']}
-                    className="min-h-[44px] px-3 py-3 md:py-2.5 mx-2 rounded-md text-[13px] flex items-center gap-3 cursor-pointer transition-colors text-[var(--color-text-secondary)] data-[selected=true]:bg-[rgba(255,40,40,0.12)] data-[selected=true]:text-white"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                    </svg>
-                    Disconnect Wallet
-                  </Command.Item>
-                </>
-              ) : (
-                <Command.Item 
-                  onSelect={handleConnect}
-                  keywords={['login', 'sign in', 'connect', 'wallet']}
-                  className="min-h-[44px] px-3 py-3 md:py-2.5 mx-2 rounded-md text-[13px] flex items-center gap-3 cursor-pointer transition-colors text-[var(--color-text-secondary)] data-[selected=true]:bg-[rgba(255,40,40,0.12)] data-[selected=true]:text-white"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9v3m18 0a2.25 2.25 0 01-2.25 2.25H15a3 3 0 11-6 0H5.25a2.25 2.25 0 01-2.25-2.25m18 0V9a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9v3m18 0a2.25 2.25 0 01-2.25 2.25H15a3 3 0 11-6 0H5.25a2.25 2.25 0 01-2.25-2.25"   />
-                  </svg>
-                  Connect Wallet
-                </Command.Item>
-              )}
             </Command.Group>
           </Command.List>
         </Command>

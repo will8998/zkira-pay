@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Chakra_Petch, Share_Tech_Mono } from 'next/font/google';
-import { WalletContextProvider } from '@/components/WalletProvider';
-import { NetworkProvider } from '@/lib/network-config';
+import { BrowserWalletProvider } from '@/components/BrowserWalletProvider';
+import { getWhitelabelConfig } from '@/config/whitelabel';
 import { TopBar } from '@/components/TopBar';
 import { CommandPaletteProvider, CommandPalette } from '@/components/CommandPalette';
 import { Toaster } from 'sonner';
@@ -27,21 +27,21 @@ const shareTechMono = Share_Tech_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ZKIRA Pay — Stealth Payments',
-  description: 'Send and receive confidential payments on Solana with stealth addresses. Zero traceability, instant settlement.',
-  metadataBase: new URL('https://app.zkira.xyz'),
+  title: 'ZKIRA Pay — Private Payments',
+  description: 'Anonymous multi-chain privacy mixer. Deposit and withdraw USDC, USDT, and DAI on Arbitrum and Tron with zero-knowledge proofs.',
+  metadataBase: new URL('https://app.zkirapay.xyz'),
   openGraph: {
-    title: 'ZKIRA Pay — Stealth Payments',
-    description: 'Send and receive confidential payments on Solana with stealth addresses. Zero traceability, instant settlement.',
-    url: 'https://app.zkira.xyz',
+    title: 'ZKIRA Pay — Private Payments',
+    description: 'Anonymous multi-chain privacy mixer powered by zero-knowledge proofs. Break the on-chain link between sender and receiver.',
+    url: 'https://app.zkirapay.xyz',
     siteName: 'ZKIRA Pay',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZKIRA Pay — Stealth Payments',
-    description: 'Send and receive confidential payments on Solana with stealth addresses.',
+    title: 'ZKIRA Pay — Private Payments',
+    description: 'Anonymous multi-chain privacy mixer. Zero-knowledge proofs for complete transaction privacy.',
   },
   icons: {
     icon: [
@@ -74,8 +74,7 @@ export default async function RootLayout({
           <source src="/huly_laser_remix.mp4" type="video/mp4" />
         </video>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <NetworkProvider>
-            <WalletContextProvider>
+              <BrowserWalletProvider>
               <CommandPaletteProvider>
                 <div className="relative z-10 flex flex-col h-dvh overflow-hidden">
                   <TopBar />
@@ -94,8 +93,7 @@ export default async function RootLayout({
                 <CommandPalette />
               </CommandPaletteProvider>
               <BottomTabBar />
-            </WalletContextProvider>
-          </NetworkProvider>
+              </BrowserWalletProvider>
         </NextIntlClientProvider>
       </body>
     </html>

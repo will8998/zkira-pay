@@ -24,6 +24,7 @@ import referralRoutes from './routes/referrals.js';
 import contentRoutes from './routes/content.js';
 import paymentLinkRoutes from './routes/payment-links.js';
 import analyticsRoutes from './routes/analytics.js';
+import deadDropRoutes from './routes/dead-drop.js';
 import { createPathBasedAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { createPathBasedRateLimit } from './middleware/rate-limit.js';
@@ -75,6 +76,7 @@ app.route('/', referralRoutes);
 app.route('/', contentRoutes);
 app.route('/', paymentLinkRoutes);
 app.route('/', analyticsRoutes);
+app.route('/', deadDropRoutes);
 
 // Start server
 async function startServer() {
