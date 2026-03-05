@@ -63,6 +63,7 @@ app.get('/', (c) => c.json({ name: 'zkira-relayer', version: '0.1.0' }));
 serve({
   fetch: app.fetch,
   port: config.port,
+  hostname: config.host,
 });
 
 export default app;

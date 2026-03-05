@@ -4,6 +4,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { logger } from 'hono/logger';
 import { serve } from '@hono/node-server';
 import { Connection } from '@solana/web3.js';
+import { dynamicOrigin } from './middleware/dynamic-cors.js';
 
 import { loadConfig } from './config.js';
 import { AccountIndexer } from './services/indexer.js';
@@ -45,10 +46,7 @@ const app = new Hono();
 // Middleware
 app.use('*', logger());
 app.use('*', cors({
-  origin: [
-    'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', // Local development
-    'https://app.zkira.xyz', 'https://zkira.xyz', 'https://admin.zkira.xyz' // Production
-  ],
+  origin: dynamicOrigin,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Admin-Password'],
 }));
@@ -157,6 +155,7 @@ async function startServer() {
   serve({
     fetch: app.fetch,
     port: config.port,
+    hostname: config.host,
   });
 }
 

@@ -3,6 +3,7 @@ export interface RelayerConfig {
   rpcUrl: string;                    // Arbitrum RPC (e.g., https://arb1.arbitrum.io/rpc)
   relayerPrivateKey: string;         // Hex private key
   port: number;
+  host: string;                      // Bind address (default: 127.0.0.1)
   maxRelaysPerMinute: number;
   allowedOrigins: string[];
   poolAddresses: string[];           // ERC20Pool contract addresses (0x...)
@@ -60,8 +61,9 @@ export function loadConfig(): RelayerConfig {
     rpcUrl: getEnvVar('ARB_RPC_URL', 'https://arb1.arbitrum.io/rpc'),
     relayerPrivateKey: getEnvVar('RELAYER_PRIVATE_KEY', ''),
     port: getEnvNumber('PORT', 3013),
+    host: getEnvVar('HOST', '127.0.0.1'),
     maxRelaysPerMinute: getEnvNumber('RATE_LIMIT', 10),
-    allowedOrigins: getEnvArray('CORS_ORIGINS', ['*']),
+    allowedOrigins: getEnvArray('CORS_ORIGINS', ['https://omnipay.club']),
     poolAddresses: getEnvArray('POOL_ADDRESSES', []),
     usdcAddress: getEnvVar('USDC_ADDRESS', '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'),
     sanctionsOracleAddress: getEnvVar('SANCTIONS_ORACLE', '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'),
