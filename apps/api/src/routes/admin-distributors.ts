@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { timingSafeEqual } from 'node:crypto';
-import { sha256 } from 'hono/utils/crypto';
+import { sha256 } from '@noble/hashes/sha256';
 import { db } from '../db/index.js';
 import { distributors, distributorCommissions, distributorPayouts, merchants, apiKeys } from '../db/schema.js';
 import { eq, and, desc, sql, count, sum, gte, lte } from 'drizzle-orm';
