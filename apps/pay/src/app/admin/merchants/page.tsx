@@ -53,6 +53,28 @@ export default function MerchantsPage() {
     status: '',
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isMaster) return;
+    fetchMerchants();
+    fetchApiKeys();
+  }, [isMaster, pagination.page, pagination.limit, filters.search, filters.status]);
+
+  // Auto-dismiss success and error messages
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // Access denied for non-master users
   if (!isMaster) {
     return (
@@ -202,25 +224,6 @@ export default function MerchantsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchMerchants();
-    fetchApiKeys();
-  }, [pagination.page, pagination.limit, filters.search, filters.status]);
-
-  // Auto-dismiss success and error messages
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(null), 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, page }));
@@ -384,6 +387,8 @@ export default function MerchantsPage() {
       setShowCreate(false);
       fetchMerchants();
       fetchApiKeys();
+      setSuccessMessage('Merchant created successfully.');
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create merchant');
     } finally {
       setCreating(false);

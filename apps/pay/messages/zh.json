@@ -14,7 +14,17 @@
     "documentation": "文档",
     "apiReference": "API 参考",
     "useCases": "使用案例",
-    "blog": "博客"
+    "blog": "博客",
+    "batch": "批量支付",
+    "escrow": "托管",
+    "multiSig": "多重签名",
+    "contacts": "联系人",
+    "apiKeys": "API 密钥",
+    "points": "积分",
+    "leaderboard": "排行榜",
+    "referral": "推荐",
+    "analytics": "分析",
+    "roadmap": "路线图"
   },
   "navSections": {
     "payments": "支付",
@@ -584,8 +594,17 @@
   },
   "learnSidebar": {
     "overview": "概述",
+    "learnHub": "学习中心",
     "resources": "资源",
+    "documentation": "文档",
+    "useCases": "使用案例",
+    "apiReference": "API 参考",
+    "blog": "博客",
     "gateway": "网关",
-    "developers": "开发者"
-  }
+    "gatewayDocs": "网关文档",
+    "merchantGuide": "商户指南",
+    "openApiSpec": "OpenAPI 规范",
+    "developers": "开发者",
+    "apiKeys": "API 密钥"
+}
 }

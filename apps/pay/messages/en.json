@@ -14,7 +14,17 @@
     "documentation": "Documentation",
     "apiReference": "API Reference",
     "useCases": "Use Cases",
-    "blog": "Blog"
+    "blog": "Blog",
+    "batch": "Batch",
+    "escrow": "Escrow",
+    "multiSig": "Multi-Sig",
+    "contacts": "Contacts",
+    "apiKeys": "API Keys",
+    "points": "Points",
+    "leaderboard": "Leaderboard",
+    "referral": "Referral",
+    "analytics": "Analytics",
+    "roadmap": "Roadmap"
   },
   "navSections": {
     "payments": "PAYMENTS",

@@ -80,6 +80,27 @@ export default function DistributorsPage() {
     status: '',
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isMaster) return;
+    fetchDistributors();
+  }, [isMaster, pagination.page, pagination.limit, filters.search, filters.status]);
+
+  // Auto-dismiss success and error messages
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // Access denied for non-master users
   if (!isMaster) {
     return (
@@ -245,24 +266,6 @@ export default function DistributorsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchDistributors();
-  }, [pagination.page, pagination.limit, filters.search, filters.status]);
-
-  // Auto-dismiss success and error messages
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(null), 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, page }));
