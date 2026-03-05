@@ -24,9 +24,8 @@ interface DepositQueueItem {
   total: number;
 }
 
-// Calculate optimal denomination split for maximum privacy.
-// Strategy: use the LARGEST denomination that fits, max 2 denomination types.
-// This prevents denomination-fingerprinting attacks.
+// Calculate optimal denomination split using greedy algorithm.
+// Uses ALL available denominations to cover the exact amount.
 function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId): DenominationSet | null {
   const pools = getPoolsForChainAndToken(chain, token);
   if (pools.length === 0) return null;
@@ -48,31 +47,26 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
     value: Number(BigInt(pool.denomination)) / Math.pow(10, tokenInfo.decimals),
   }));
 
-  // Find the largest denomination that fits into the amount
-  const primary = poolValues.find(p => p.value <= roundedAmount);
-  if (!primary) return null; // amount too small for any pool
-
+  // Greedy: go through each denomination largest-to-smallest
   const selections: DenominationSelection[] = [];
-  const primaryCount = Math.floor(roundedAmount / primary.value);
-  selections.push({ pool: primary.pool, count: primaryCount });
-  let covered = primaryCount * primary.value;
-  let remainder = roundedAmount - covered;
+  let remaining = roundedAmount;
 
-  // If there's a remainder, try ONE smaller denomination (max 2 types total)
-  if (remainder > 0) {
-    const secondary = poolValues.find(p => p.value <= remainder && p.pool.address !== primary.pool.address);
-    if (secondary) {
-      const secondaryCount = Math.floor(remainder / secondary.value);
-      if (secondaryCount > 0) {
-        selections.push({ pool: secondary.pool, count: secondaryCount });
-        covered += secondaryCount * secondary.value;
-        remainder = roundedAmount - covered;
-      }
+  for (const pv of poolValues) {
+    if (remaining <= 0) break;
+    if (pv.value > remaining) continue;
+
+    const count = Math.floor(remaining / pv.value);
+    if (count > 0) {
+      selections.push({ pool: pv.pool, count });
+      remaining -= count * pv.value;
     }
   }
 
+  if (selections.length === 0) return null;
+
   // Round remainder to avoid floating point artifacts
-  remainder = Math.round(remainder * 100) / 100;
+  const remainder = Math.round(remaining * 100) / 100;
+  const covered = roundedAmount - remainder;
 
   const totalRaw = BigInt(Math.round(covered * Math.pow(10, tokenInfo.decimals)));
   const totalLabel = `${covered.toLocaleString()} ${tokenInfo.symbol}`;
