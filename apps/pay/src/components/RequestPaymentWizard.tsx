@@ -15,11 +15,13 @@ import { getChainConfig, getPoolsForChainAndToken, getAvailableChains, getAvaila
 import PrivacyCallout from '@/components/PrivacyCallout';
 import InfoTooltip from '@/components/InfoTooltip';
 import { logRequest } from '@/lib/history-store';
+import { executeBatchWithdrawal, type BatchWithdrawProgress, type WithdrawResult } from '@/lib/withdraw-engine';
+import { getExplorerTxUrl } from '@/config/pool-registry';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const POLL_INTERVAL_MS = 8000;
 
-type WizardStep = 'select' | 'created' | 'waiting' | 'withdrawing' | 'complete';
+type WizardStep = 'select' | 'created' | 'waiting' | 'address' | 'withdrawing' | 'complete';
 
 // Calculate optimal denomination split using greedy algorithm.
 // Uses ALL available denominations to cover the exact amount.
@@ -98,10 +100,15 @@ export function RequestPaymentWizard() {
   const [invoiceUrl, setInvoiceUrl] = useState('');
   const [copiedUrl, setCopiedUrl] = useState(false);
 
-  // Waiting state
+  // Waiting + withdrawal state
   const [receivedNotes, setReceivedNotes] = useState<DepositNoteRecord[]>([]);
   const [withdrawnCount, setWithdrawnCount] = useState(0);
   const [txHashes, setTxHashes] = useState<string[]>([]);
+  const [destinationAddress, setDestinationAddress] = useState('');
+  const [isValidAddress, setIsValidAddress] = useState(false);
+  const [withdrawProgress, setWithdrawProgress] = useState<BatchWithdrawProgress | null>(null);
+  const [withdrawResults, setWithdrawResults] = useState<WithdrawResult[]>([]);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -261,7 +268,7 @@ export function RequestPaymentWizard() {
               }
 
               setReceivedNotes(decryptedNotes);
-              setStep('withdrawing');
+              setStep('address');
               toast.success(`${decryptedNotes.length} deposit notes received!`);
               return;
             }
@@ -285,21 +292,43 @@ export function RequestPaymentWizard() {
     });
   }, [invoice, secretKey]);
 
-  // Withdraw all notes via relayer
-  const withdrawAll = useCallback(async () => {
-    // TODO: Implement sequential withdrawal via relayer
-    // For now, mark as complete — the actual withdrawal will use the same
-    // logic as WithdrawWizard but automated with pre-loaded notes
-    setStep('complete');
-    toast.success('Funds received! Withdraw from the Pool page using your downloaded receipts.');
-  }, [receivedNotes]);
+  // Address validation
+  const handleAddressChange = (value: string) => {
+    setDestinationAddress(value);
+    setIsValidAddress(/^0x[a-fA-F0-9]{40}$/.test(value));
+  };
 
-  // Auto-start withdrawal when notes received
-  useEffect(() => {
-    if (step === 'withdrawing' && receivedNotes.length > 0) {
-      withdrawAll();
+  // Withdraw all notes via relayer using withdraw engine
+  const withdrawAll = useCallback(async () => {
+    if (receivedNotes.length === 0 || !isValidAddress) return;
+
+    setStep('withdrawing');
+    setWithdrawError(null);
+    setWithdrawResults([]);
+
+    try {
+      const results = await executeBatchWithdrawal(
+        receivedNotes,
+        destinationAddress,
+        (progress) => setWithdrawProgress(progress),
+      );
+
+      setWithdrawResults(results);
+      setTxHashes(results.map((r) => r.txHash));
+      setStep('complete');
+      toast.success('All withdrawals complete! Funds are on the way.');
+    } catch (error) {
+      setWithdrawError(error instanceof Error ? error.message : 'Withdrawal failed');
+      toast.error(error instanceof Error ? error.message : 'Withdrawal failed');
     }
-  }, [step, receivedNotes, withdrawAll]);
+  }, [receivedNotes, destinationAddress, isValidAddress]);
+
+  // Get denomination label from a note
+  const getDenomLabel = (note: DepositNoteRecord): string => {
+    const decimals = note.token === 'dai' ? 18 : 6;
+    const value = Number(BigInt(note.denomination)) / Math.pow(10, decimals);
+    return `${value.toLocaleString()} ${note.token.toUpperCase()}`;
+  };
 
   const copyToClipboard = useCallback(async (text: string, setCopied: (v: boolean) => void) => {
     try {
@@ -707,36 +736,165 @@ export function RequestPaymentWizard() {
         </div>
       )}
 
-      {/* Step: Complete */}
-      {(step === 'withdrawing' || step === 'complete') && (
+      {/* Step: Enter Address (after payer deposits received) */}
+      {step === 'address' && receivedNotes.length > 0 && (
         <div className="space-y-6 animate-entrance">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
-            <div className="text-6xl mb-4">✅</div>
-            <h2
-              className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              Payment Received!
-            </h2>
-            <p className="text-[var(--color-text-secondary)] text-sm mb-4">
-              {receivedNotes.length} deposit note{receivedNotes.length !== 1 ? 's' : ''} decrypted.
-              Use the Pool withdraw page with these receipts.
-            </p>
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
+            <div className="text-center mb-6">
+              <div className="text-5xl mb-4">🔓</div>
+              <h2
+                className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Payment Received!
+              </h2>
+              <p className="text-[var(--color-text-secondary)] text-sm">
+                {receivedNotes.length} deposit{receivedNotes.length !== 1 ? 's' : ''} decrypted.
+                Enter your wallet address to withdraw.
+              </p>
+            </div>
 
-            {/* Download receipts */}
-            <div className="space-y-2">
+            <div className="space-y-2 mb-6">
               {receivedNotes.map((note, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded"
-                >
+                <div key={i} className="flex items-center justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded">
                   <span className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
-                    Note #{i + 1} — Pool {note.pool.slice(0, 8)}...
+                    #{i + 1} — {getDenomLabel(note)}
                   </span>
-                  <span className="text-sm text-[var(--color-green)]">✓</span>
+                  <span className="text-sm text-[var(--color-green)]">✓ Ready</span>
                 </div>
               ))}
             </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
+                Withdraw To
+              </label>
+              <input
+                type="text"
+                value={destinationAddress}
+                onChange={(e) => handleAddressChange(e.target.value)}
+                placeholder="0x... your Ethereum / Arbitrum address"
+                className={`w-full px-4 py-3 bg-[var(--color-bg)] border text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none transition-colors ${
+                  isValidAddress ? 'border-[var(--color-green)]' : destinationAddress && !isValidAddress ? 'border-red-500' : 'border-[var(--color-border)] focus:border-[var(--color-button)]'
+                }`}
+                style={{ fontFamily: 'var(--font-mono)' }}
+                autoFocus
+              />
+              {destinationAddress && !isValidAddress && (
+                <p className="text-sm text-red-500">Invalid Ethereum address</p>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={withdrawAll}
+            disabled={!isValidAddress}
+            className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            WITHDRAW ALL {receivedNotes.length} NOTE{receivedNotes.length !== 1 ? 'S' : ''} →
+          </button>
+        </div>
+      )}
+
+      {/* Step: Withdrawing */}
+      {step === 'withdrawing' && (
+        <div className="space-y-6 animate-entrance">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                {withdrawError ? 'Withdrawal Error' : `Withdrawing ${(withdrawProgress?.noteIndex ?? 0) + 1} of ${receivedNotes.length}`}
+              </h2>
+              <p className="text-[var(--color-text-secondary)] text-sm">
+                {withdrawError ?? withdrawProgress?.message ?? 'Preparing...'}
+              </p>
+            </div>
+
+            {!withdrawError && (
+              <div className="w-full bg-[var(--color-border)] rounded-full h-2 mb-6">
+                <div
+                  className="bg-[var(--color-button)] h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${(((withdrawProgress?.noteIndex ?? 0) + (withdrawProgress?.stage === 'submit' ? 0.8 : withdrawProgress?.stage === 'proof' ? 0.5 : 0.2)) / receivedNotes.length) * 100}%` }}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {receivedNotes.map((note, i) => {
+                const completed = withdrawResults.some((r) => r.noteIndex === i);
+                const isActive = !withdrawError && (withdrawProgress?.noteIndex ?? -1) === i;
+                return (
+                  <div key={i} className="flex items-center justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded">
+                    <span className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      #{i + 1} — {getDenomLabel(note)}
+                    </span>
+                    <span className="text-sm">
+                      {completed && <span className="text-[var(--color-green)]">✓ Done</span>}
+                      {isActive && (
+                        <span className="text-[var(--color-button)] flex items-center gap-1">
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                          {withdrawProgress?.stage === 'tree' ? 'Tree...' : withdrawProgress?.stage === 'proof' ? 'ZK Proof...' : 'Submitting...'}
+                        </span>
+                      )}
+                      {!completed && !isActive && <span className="text-[var(--color-text-secondary)]">Pending</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {withdrawError && (
+              <button onClick={withdrawAll} className="w-full mt-6 px-6 py-4 bg-[var(--color-button)] text-[var(--color-bg)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded" style={{ fontFamily: 'var(--font-mono)' }}>
+                RETRY WITHDRAWAL
+              </button>
+            )}
+          </div>
+
+          {!withdrawError && (
+            <div className="bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)] p-4 rounded-xl">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div className="text-sm text-[var(--color-warning-text)]"><strong>DO NOT CLOSE THIS TAB</strong> — withdrawals are in progress.</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Step: Complete */}
+      {step === 'complete' && (
+        <div className="space-y-6 animate-entrance">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
+            <div className="text-6xl mb-4">✅</div>
+            <h2 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              Funds Withdrawn!
+            </h2>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-4">
+              {withdrawResults.length} withdrawal{withdrawResults.length !== 1 ? 's' : ''} complete. Funds will arrive within ~1 minute.
+            </p>
+
+            {withdrawResults.length > 0 && (
+              <div className="space-y-2 text-left">
+                {withdrawResults.map((result, i) => {
+                  const note = receivedNotes[result.noteIndex];
+                  const chain = note?.chain ?? 'arbitrum';
+                  return (
+                    <div key={i} className="flex items-center justify-between bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded">
+                      <span className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                        {note ? getDenomLabel(note) : `Note #${result.noteIndex + 1}`}
+                      </span>
+                      {result.txHash ? (
+                        <a href={getExplorerTxUrl(chain, result.txHash)} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--color-button)] hover:text-[var(--color-button-hover)] underline">
+                          {result.txHash.slice(0, 10)}... →
+                        </a>
+                      ) : (
+                        <span className="text-sm text-[var(--color-green)]">✓</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <button
@@ -747,8 +905,11 @@ export function RequestPaymentWizard() {
               setDenomSet(null);
               setMemo('');
               setAmount('');
-              setExpiryDays(7);
               setAdvancedOpen(false);
+              setWithdrawResults([]);
+              setWithdrawProgress(null);
+              setWithdrawError(null);
+              setDestinationAddress('');
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
           >
