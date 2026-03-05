@@ -5,9 +5,9 @@ import "./interfaces/ISanctionsOracle.sol";
 
 /**
  * @title SanctionsOracle
- * @dev Owner-managed sanctions list for Tron deployment.
- * Since Chainalysis oracle is not available on Tron, this provides
- * an equivalent on-chain sanctions checking mechanism.
+ * @dev Owner-managed sanctions list for testnet/fallback deployment.
+ * On Arbitrum mainnet, use the Chainalysis oracle at 0x40C57923924B5c5c5455c48D93317139ADDaC8fb.
+ * This contract is deployed on testnets where Chainalysis is not available.
  *
  * The owner should maintain this list based on OFAC SDN list and
  * other relevant sanctions databases. Can be updated in batch.

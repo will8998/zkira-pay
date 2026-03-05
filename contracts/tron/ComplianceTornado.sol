@@ -7,9 +7,16 @@ import "./interfaces/ISanctionsOracle.sol";
 
 /**
  * @title ComplianceTornado
- * @dev Base mixer contract with built-in compliance checks (sanctions oracle + blocklist).
+ * @dev Base mixer contract with built-in compliance checks (sanctions oracle + blocklist),
+ * protocol fee system, and referral partner network.
  * Replaces the original Tornado.sol with added deposit-side compliance for regulatory requirements.
- * Withdrawal side remains unchanged — privacy is preserved for legitimate users.
+ * Withdrawal side preserves privacy for legitimate users, with on-chain fee deductions.
+ *
+ * Fee architecture:
+ * - Protocol fee (up to 5%): deducted on withdrawal, sent to treasury
+ * - Referral fee (up to 3% per referrer): deducted on withdrawal, sent directly to referrer
+ * - Relayer fee: standard Tornado Cash relayer fee (part of ZK proof)
+ * - The _referrer parameter is NOT part of the ZK proof — it's an extra withdrawal parameter
  */
 abstract contract ComplianceTornado is MerkleTreeWithHistory {
   // === Tornado Cash original state ===
@@ -142,6 +149,8 @@ abstract contract ComplianceTornado is MerkleTreeWithHistory {
     require(_fee <= denomination, "Fee exceeds transfer value");
     require(!nullifierHashes[_nullifierHash], "The note has been already spent");
     require(isKnownRoot(_root), "Cannot find your merkle root");
+
+    // Verify proof with original 6 public inputs (referrer is NOT in the proof)
     require(
       verifier.verifyProof(
         _proof,
