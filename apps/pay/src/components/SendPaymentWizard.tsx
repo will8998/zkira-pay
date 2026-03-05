@@ -17,7 +17,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
 const POLL_INTERVAL_MS = 5000;
 
-type WizardStep = 'select' | 'depositing' | 'complete';
+type WizardStep = 'select' | 'funding' | 'processing' | 'complete';
 
 interface DepositQueueItem {
   pool: PoolEntry;
@@ -100,7 +100,7 @@ export function SendPaymentWizard() {
   // Deposit progress
   const [currentDepositIndex, setCurrentDepositIndex] = useState(0);
   const [totalDeposits, setTotalDeposits] = useState(0);
-  const [depositStatus, setDepositStatus] = useState<'waiting' | 'funding' | 'approving' | 'depositing'>('waiting');
+  const [depositStatus, setDepositStatus] = useState<'approving' | 'depositing'>('approving');
   const [collectedNotes, setCollectedNotes] = useState<DepositNoteRecord[]>([]);
 
   // Result
@@ -185,8 +185,8 @@ export function SendPaymentWizard() {
     return 0;
   };
 
-  // Execute a single deposit into a pool
-  const executeDeposit = useCallback(async (
+  // Execute a single deposit into a pool (wallet already funded with total)
+  const executeSingleDeposit = useCallback(async (
     pool: PoolEntry,
     signal: AbortSignal,
     walletOverride?: { address: string; privateKey: string },
@@ -200,11 +200,7 @@ export function SendPaymentWizard() {
     const tokenAddress = chainConfig.tokens.find((t) => t.id === token)?.address ?? '';
     const denominationRaw = BigInt(pool.denomination);
 
-    // Wait for funds
-    setDepositStatus('funding');
-    await pollForFunds(signal, tokenAddress, rpcUrl, denominationRaw, walletAddress);
-
-    // Approve + deposit
+    // Approve
     setDepositStatus('approving');
     const { JsonRpcProvider, Contract, Wallet } = await import('ethers');
     const provider = new JsonRpcProvider(rpcUrl);
@@ -245,7 +241,7 @@ export function SendPaymentWizard() {
       chain,
       token,
     };
-  }, [privateKey, chain, token, pollForFunds]);
+  }, [address, privateKey, chain, token]);
 
   // Start the full send flow
   const startSendFlow = useCallback(async () => {
@@ -254,8 +250,7 @@ export function SendPaymentWizard() {
       return;
     }
 
-    // Ensure wallet exists — await creation and capture return value
-    // to avoid React stale closure issue
+    // Ensure wallet exists
     let walletData: { address: string; privateKey: string } | undefined;
     if (!isCreated) {
       walletData = await createWallet();
@@ -276,27 +271,36 @@ export function SendPaymentWizard() {
           amount,
           flow: 'send',
         }),
-      }).catch(() => {}); // Silent failure — recovery is best-effort
+      }).catch(() => {});
     }
 
     const queue = buildQueue(denomSet);
     setTotalDeposits(queue.length);
     setCurrentDepositIndex(0);
     setCollectedNotes([]);
-    setStep('depositing');
+
+    // Phase 1: Wait for TOTAL funds (single deposit from user)
+    setStep('funding');
 
     const controller = new AbortController();
     abortRef.current = controller;
     const notes: DepositNoteRecord[] = [];
 
     try {
-      // Sequential deposits — each one must complete before next starts
+      const chainConfig = getChainConfig(chain);
+      const tokenAddr = chainConfig.tokens.find(t => t.id === token)?.address ?? '';
+      const rpcUrl = chainConfig.rpcUrl;
+
+      await pollForFunds(controller.signal, tokenAddr, rpcUrl, denomSet.totalRaw, walletAddr!);
+
+      // Phase 2: Auto-process all deposits (no further user action needed)
+      setStep('processing');
+
       for (let i = 0; i < queue.length; i++) {
         if (controller.signal.aborted) break;
         setCurrentDepositIndex(i);
-        setDepositStatus('waiting');
 
-        const note = await executeDeposit(queue[i].pool, controller.signal, walletData);
+        const note = await executeSingleDeposit(queue[i].pool, controller.signal, walletData);
         notes.push(note);
         setCollectedNotes([...notes]);
       }
@@ -308,12 +312,10 @@ export function SendPaymentWizard() {
         totalRaw: denomSet.totalRaw.toString(),
       };
 
-      // Generate claim code and encrypt bundle
       const { code, encryptionKey } = generateClaimCode();
       const bundleJson = JSON.stringify(bundle);
       const { ciphertext, nonce } = await aesEncrypt(bundleJson, encryptionKey);
 
-      // Derive dead drop ID and upload
       const dropId = await deriveDeadDropId(code);
       const response = await fetch(`${API_URL}/api/dead-drop`, {
         method: 'POST',
@@ -333,7 +335,6 @@ export function SendPaymentWizard() {
       setStep('complete');
       toast.success('Payment sent! Share the claim code with the recipient.');
 
-      // Log to local history
       logSend({
         chain,
         token,
@@ -349,7 +350,7 @@ export function SendPaymentWizard() {
       toast.error(error instanceof Error ? error.message : 'Send flow failed');
       setStep('select');
     }
-  }, [denomSet, isCreated, createWallet, buildQueue, executeDeposit]);
+  }, [denomSet, isCreated, createWallet, buildQueue, executeSingleDeposit, pollForFunds]);
 
   // Copy helpers
   const copyToClipboard = useCallback(async (text: string, setCopied: (v: boolean) => void) => {
@@ -712,36 +713,24 @@ export function SendPaymentWizard() {
         </div>
       )}
 
-      {/* Step: Depositing - Keep existing UI with consistent styling */}
-      {step === 'depositing' && (
+      {/* Step: Funding — single deposit from user */}
+      {step === 'funding' && (
         <div className="space-y-6 animate-entrance">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
-            {/* Progress */}
             <div className="text-center mb-6">
               <h2
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Deposit {currentDepositIndex + 1} of {totalDeposits}
+                Send {denomSet?.totalLabel}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {depositStatus === 'waiting' && 'Waiting for funds to arrive...'}
-                {depositStatus === 'funding' && 'Checking wallet balance...'}
-                {depositStatus === 'approving' && 'Approving token spend...'}
-                {depositStatus === 'depositing' && 'Depositing into shielded pool...'}
+                Send the full amount to this address from your exchange or wallet
               </p>
             </div>
 
-            {/* Progress bar */}
-            <div className="w-full bg-[var(--color-border)] rounded-full h-2 mb-6">
-              <div
-                className="bg-[var(--color-button)] h-2 rounded-full transition-all duration-500"
-                style={{ width: `${((currentDepositIndex + (depositStatus === 'depositing' ? 0.8 : 0.3)) / totalDeposits) * 100}%` }}
-              />
-            </div>
-
-            {/* QR Code for funding */}
-            {(depositStatus === 'waiting' || depositStatus === 'funding') && address && (
+            {/* QR Code */}
+            {address && (
               <div className="text-center space-y-4">
                 <div className="inline-block p-4 bg-white rounded-xl">
                   <QRCodeSVG value={address} size={180} />
@@ -760,12 +749,77 @@ export function SendPaymentWizard() {
               </div>
             )}
 
-            {/* Spinner for approve/deposit */}
-            {(depositStatus === 'approving' || depositStatus === 'depositing') && (
-              <div className="flex justify-center">
-                <div className="w-16 h-16 border-4 border-[var(--color-border)] border-t-[var(--color-button)] rounded-full animate-spin" />
+            {/* Pulsing waiting indicator */}
+            <div className="flex justify-center space-x-2 mt-6">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-3 h-3 bg-[var(--color-button)] rounded-full animate-pulse"
+                  style={{ animationDelay: `${i * 200}ms` }}
+                />
+              ))}
+            </div>
+            <p className="text-center text-[var(--color-text-secondary)] text-xs mt-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              Checking wallet balance...
+            </p>
+          </div>
+
+          {/* Warning */}
+          <div className="bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)] p-4 rounded-xl">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div className="text-sm">
+                <div
+                  className="font-bold text-[var(--color-warning-text)] mb-1"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  DO NOT CLOSE THIS TAB
+                </div>
+                <div className="text-[var(--color-warning-text)] opacity-80">
+                  Keep this page open until the payment is complete.
+                </div>
               </div>
-            )}
+            </div>
+          </div>
+
+          <button
+            onClick={handleCancel}
+            className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded"
+          >
+            ← Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Step: Processing — auto-splitting into pools */}
+      {step === 'processing' && (
+        <div className="space-y-6 animate-entrance">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
+            <div className="text-center mb-6">
+              <h2
+                className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Processing {currentDepositIndex + 1} of {totalDeposits}
+              </h2>
+              <p className="text-[var(--color-text-secondary)] text-sm">
+                {depositStatus === 'approving' && 'Approving token spend...'}
+                {depositStatus === 'depositing' && 'Depositing into shielded pool...'}
+              </p>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full bg-[var(--color-border)] rounded-full h-2 mb-6">
+              <div
+                className="bg-[var(--color-button)] h-2 rounded-full transition-all duration-500"
+                style={{ width: `${((currentDepositIndex + (depositStatus === 'depositing' ? 0.8 : 0.3)) / totalDeposits) * 100}%` }}
+              />
+            </div>
+
+            {/* Spinner */}
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 border-4 border-[var(--color-border)] border-t-[var(--color-button)] rounded-full animate-spin" />
+            </div>
 
             {/* Completed deposits */}
             {collectedNotes.length > 0 && (
@@ -803,7 +857,7 @@ export function SendPaymentWizard() {
                   DO NOT CLOSE THIS TAB
                 </div>
                 <div className="text-[var(--color-warning-text)] opacity-80">
-                  Keep this page open until all deposits complete.
+                  Automatically splitting your deposit into privacy pools...
                 </div>
               </div>
             </div>
