@@ -1,42 +1,42 @@
 @import "tailwindcss";
 
-/* ─── Design System Tokens (Cyberpunk Dark) ─── */
+/* ─── Design System Tokens (Monochrome Dark) ─── */
 :root {
   --color-bg: #000000;
-  --color-text: rgba(255, 255, 255, 0.98);
-  --color-text-secondary: rgba(255, 255, 255, 0.6);
-  --color-text-tertiary: rgba(255, 255, 255, 0.4);
-  --color-muted: rgba(255, 255, 255, 0.35);
-  --color-border: #282828;
-  --color-border-strong: #3C3C3C;
-  --color-surface: #111111;
-  --color-surface-alt: #1E1E1E;
-  --color-skeleton: #1A1A1A;
+  --color-text: rgba(255, 255, 255, 0.95);
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-tertiary: rgba(255, 255, 255, 0.35);
+  --color-muted: rgba(255, 255, 255, 0.3);
+  --color-border: #222222;
+  --color-border-strong: #3A3A3A;
+  --color-surface: #0D0D0D;
+  --color-surface-alt: #181818;
+  --color-skeleton: #161616;
   --color-hover: #1A1A1A;
-  --color-green: #9CDC6A;
-  --color-green-hover: #B5E88A;
-  --color-red: #FF2828;
-  --color-warning-bg: #1A1500;
-  --color-warning-border: #3D3200;
-  --color-warning-text: #FFD146;
+  --color-green: #AAAAAA;
+  --color-green-hover: #CCCCCC;
+  --color-red: #FFFFFF;
+  --color-warning-bg: #141414;
+  --color-warning-border: #333333;
+  --color-warning-text: #CCCCCC;
   --color-active-text: #FFFFFF;
-  --color-button: #FF2828;
-  --color-button-hover: #E02020;
-  --color-button-text: #FFFFFF;
-  --color-section-label: rgba(255, 255, 255, 0.25);
+  --color-button: #FFFFFF;
+  --color-button-hover: #D4D4D4;
+  --color-button-text: #000000;
+  --color-section-label: rgba(255, 255, 255, 0.2);
 
   /* Navigation active state */
-  --color-nav-active-bg: rgba(255, 40, 40, 0.12);
-  --color-nav-active-text: #FF2828;
+  --color-nav-active-bg: rgba(255, 255, 255, 0.08);
+  --color-nav-active-text: #FFFFFF;
 
   /* Panel backgrounds */
-  --bg-panel: #0A0A0A;
+  --bg-panel: #080808;
   --bg-main: rgba(0, 0, 0, 0.6);
-  --bg-tab-bar: #0A0A0A;
-  
-  /* Cyberpunk Border Tokens */
+  --bg-tab-bar: #080808;
+
+  /* Border Tokens */
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-subtle-hover: rgba(255, 255, 255, 0.12);
+  --border-subtle-hover: rgba(255, 255, 255, 0.14);
   --ease-premium: cubic-bezier(0.05, 0.7, 0.1, 1.0);
   --ease-out-premium: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -46,29 +46,25 @@
   --tab-bar-height: 4rem;
 }
 
-/* ─── Cyberpunk Effects ─── */
+/* ─── Subtle Effects (Monochrome) ─── */
 .neon-glow {
-  box-shadow: 0 0 10px rgba(255, 40, 40, 0.3), 0 0 20px rgba(255, 40, 40, 0.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.06), 0 0 20px rgba(255, 255, 255, 0.03);
 }
 
 .neon-glow-strong {
-  box-shadow: 0 0 15px rgba(255, 40, 40, 0.5), 0 0 30px rgba(255, 40, 40, 0.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1), 0 0 30px rgba(255, 255, 255, 0.05);
 }
 .neon-glow-subtle {
-  box-shadow: 0 0 5px rgba(255, 40, 40, 0.2), 0 0 10px rgba(255, 40, 40, 0.1);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.04), 0 0 10px rgba(255, 255, 255, 0.02);
 }
 
 .cyberpunk-connect {
   position: relative;
-  background: #FF2828;
-  border: 2px solid #FF2828;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #000000;
   overflow: hidden;
-  box-shadow: 
-    0 0 10px rgba(255, 40, 40, 0.3),
-    0 0 20px rgba(255, 40, 40, 0.15);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  animation: cyber-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
 }
 
 .cyberpunk-connect::before {
@@ -88,46 +84,13 @@
 }
 
 .cyberpunk-connect:hover {
-  background: #E02020;
-  box-shadow: 
-    0 0 15px rgba(255, 40, 40, 0.4),
-    0 0 30px rgba(255, 40, 40, 0.2);
-  transform: scale(1.05);
+  background: #E0E0E0;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.12);
+  transform: scale(1.02);
 }
 
 .cyberpunk-connect::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #FF2828, #FF4444, #FF2828, #FF0000);
-  background-size: 300% 300%;
-  border-radius: inherit;
-  z-index: -1;
-  animation: cyber-border 3s ease infinite;
-}
-
-@keyframes cyber-pulse {
-  0%, 100% { 
-    box-shadow: 
-      0 0 20px rgba(255, 40, 40, 0.4),
-      0 0 40px rgba(255, 40, 40, 0.2),
-      inset 0 0 20px rgba(255, 255, 255, 0.1);
-  }
-  50% { 
-    box-shadow: 
-      0 0 30px rgba(255, 40, 40, 0.6),
-      0 0 60px rgba(255, 40, 40, 0.3),
-      inset 0 0 30px rgba(255, 255, 255, 0.15);
-  }
-}
-
-@keyframes cyber-border {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  display: none;
 }
 
 
@@ -166,7 +129,7 @@
   }
 }
 
-@keyframes pulseGreen {
+@keyframes pulseGrey {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
@@ -232,7 +195,7 @@
     animation: checkDraw 0.4s ease-out 0.2s forwards;
   }
   .animate-pulse-green {
-    animation: pulseGreen 2s ease-in-out infinite;
+    animation: pulseGrey 2s ease-in-out infinite;
   }
   .delay-100 { animation-delay: 0.1s; }
   .delay-200 { animation-delay: 0.2s; }
@@ -283,7 +246,7 @@
   /* Focus ring — applies on keyboard navigation only */
   .focus-ring:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-red);
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px rgba(255, 255, 255, 0.4);
   }
 
   /* Auto focus-visible for all interactive elements */
@@ -292,7 +255,7 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid var(--color-red);
+    outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
   }
 
@@ -386,8 +349,8 @@ body {
 }
 
 ::selection {
-  background-color: #FF2828;
-  color: #FFFFFF;
+  background-color: #FFFFFF;
+  color: #000000;
 }
 
 /* ─── Unified Wallet Kit Overrides (Cyberpunk Theme) ─── */

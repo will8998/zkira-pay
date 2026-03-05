@@ -3,6 +3,7 @@ import { Chakra_Petch, Share_Tech_Mono } from 'next/font/google';
 import { BrowserWalletProvider } from '@/components/BrowserWalletProvider';
 import { getWhitelabelConfig } from '@/config/whitelabel';
 import { TopBar } from '@/components/TopBar';
+import { Sidebar } from '@/components/Sidebar';
 import { CommandPaletteProvider, CommandPalette } from '@/components/CommandPalette';
 import { Toaster } from 'sonner';
 import './globals.css';
@@ -62,33 +63,27 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} data-theme="dark" className={`${chakraPetch.variable} ${shareTechMono.variable}`}>
       <body className="bg-[#000000] text-[var(--color-text)] font-[family-name:var(--font-sans)] antialiased">
-        <div className="scanlines" />
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="fixed inset-0 w-full h-full object-cover opacity-[0.4] z-0 pointer-events-none"
-        >
-          <source src="/huly_laser_remix.webm" type="video/webm" />
-          <source src="/huly_laser_remix.mp4" type="video/mp4" />
-        </video>
         <NextIntlClientProvider locale={locale} messages={messages}>
               <BrowserWalletProvider>
               <CommandPaletteProvider>
-                <div className="relative z-10 flex flex-col h-dvh overflow-hidden">
-                  <TopBar />
-                  <Toaster
-                    position="top-center"
-                    richColors
-                    theme="dark"
-                    toastOptions={{
-                      className: 'font-[family-name:var(--font-sans)]',
-                    }}
-                  />
-                  <main className="flex-1 overflow-y-auto bg-[var(--bg-main)] pb-20 md:pb-0">
-                    {children}
-                  </main>
+                <div className="relative z-10 flex h-dvh overflow-hidden">
+                  {/* Side navigation — desktop only */}
+                  <Sidebar />
+                  {/* Main content area */}
+                  <div className="flex-1 flex flex-col min-w-0">
+                    <TopBar />
+                    <Toaster
+                      position="top-center"
+                      richColors
+                      theme="dark"
+                      toastOptions={{
+                        className: 'font-[family-name:var(--font-sans)]',
+                      }}
+                    />
+                    <main className="flex-1 overflow-y-auto bg-[var(--bg-main)] pb-20 md:pb-0">
+                      {children}
+                    </main>
+                  </div>
                 </div>
                 <CommandPalette />
               </CommandPaletteProvider>

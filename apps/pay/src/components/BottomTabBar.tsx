@@ -63,7 +63,7 @@ export function BottomTabBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#0A0A0A] border-t border-[#282828] pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#080808] border-t border-[#222222] pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-16">
         {tabs.map((tab) => {
           const active = isActive(tab.href);
@@ -73,10 +73,10 @@ export function BottomTabBar() {
               href={tab.href}
               className="flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] transition-colors"
             >
-              <div className={active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}>
+              <div className={active ? 'text-white font-semibold' : 'text-[rgba(255,255,255,0.3)]'}>
                 {tab.icon}
               </div>
-              <span className={`text-[10px] font-medium ${active ? 'text-[#FF2828] font-semibold' : 'text-[rgba(255,255,255,0.35)]'}`}>
+              <span className={`text-[10px] font-medium ${active ? 'text-white font-semibold' : 'text-[rgba(255,255,255,0.3)]'}`}>
                 {tab.name}
               </span>
             </Link>
