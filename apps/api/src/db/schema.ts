@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, numeric, boolean, integer, jsonb, uuid, varchar, bigint, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, numeric, boolean, integer, jsonb, uuid, varchar, bigint, index, uniqueIndex, primaryKey } from 'drizzle-orm/pg-core';
 
 // Users table - tracks wallet addresses and basic stats
 export const users = pgTable('users', {
@@ -255,4 +255,149 @@ export const blogPosts = pgTable('blog_posts', {
 }, (table) => ({
   publishedIdx: index('blog_posts_published_idx').on(table.published),
   slugIdx: index('blog_posts_slug_idx').on(table.slug),
+}));
+
+// ═══════════════════════════════════════════════════════════
+// CASINO GATEWAY SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// Merchants table - casino operators using the gateway
+export const merchants = pgTable('merchants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  walletAddress: text('wallet_address').notNull().unique().references(() => users.walletAddress),
+  webhookUrl: text('webhook_url'),
+  webhookSecret: text('webhook_secret').notNull(),
+  feePercent: numeric('fee_percent', { precision: 5, scale: 2 }).default('1.00').notNull(),
+  referrerAddress: text('referrer_address'),
+  status: text('status').default('active').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  walletAddressIdx: index('merchants_wallet_address_idx').on(table.walletAddress),
+  statusIdx: index('merchants_status_idx').on(table.status),
+}));
+
+// Gateway sessions - deposit/withdraw sessions
+export const gatewaySessions = pgTable('gateway_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  sessionType: text('session_type').notNull(),
+  playerRef: text('player_ref').notNull(),
+  amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
+  token: text('token').notNull(),
+  chain: text('chain').notNull(),
+  poolAddress: text('pool_address'),
+  status: text('status').default('pending').notNull(),
+  ephemeralWallet: text('ephemeral_wallet'),
+  commitment: text('commitment'),
+  txHash: text('tx_hash'),
+  claimCode: text('claim_code'),
+  recipientAddress: text('recipient_address'),
+  metadata: jsonb('metadata'),
+  idempotencyKey: text('idempotency_key').unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+}, (table) => ({
+  merchantIdIdx: index('gateway_sessions_merchant_id_idx').on(table.merchantId),
+  playerRefIdx: index('gateway_sessions_player_ref_idx').on(table.playerRef),
+  statusIdx: index('gateway_sessions_status_idx').on(table.status),
+  commitmentIdx: index('gateway_sessions_commitment_idx').on(table.commitment),
+  idempotencyKeyIdx: index('gateway_sessions_idempotency_key_idx').on(table.idempotencyKey),
+}));
+
+// Gateway webhooks - webhook delivery tracking
+export const gatewayWebhooks = pgTable('gateway_webhooks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  sessionId: uuid('session_id').notNull().references(() => gatewaySessions.id),
+  event: text('event').notNull(),
+  payload: jsonb('payload').notNull(),
+  status: text('status').default('pending').notNull(),
+  attempts: integer('attempts').default(0).notNull(),
+  maxAttempts: integer('max_attempts').default(5).notNull(),
+  nextRetryAt: timestamp('next_retry_at'),
+  lastAttemptAt: timestamp('last_attempt_at'),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  merchantIdIdx: index('gateway_webhooks_merchant_id_idx').on(table.merchantId),
+  statusIdx: index('gateway_webhooks_status_idx').on(table.status),
+  nextRetryAtIdx: index('gateway_webhooks_next_retry_at_idx').on(table.nextRetryAt),
+}));
+
+// Gateway balances - player balances per merchant
+export const gatewayBalances = pgTable('gateway_balances', {
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  playerRef: text('player_ref').notNull(),
+  availableBalance: numeric('available_balance', { precision: 20, scale: 6 }).default('0').notNull(),
+  pendingBalance: numeric('pending_balance', { precision: 20, scale: 6 }).default('0').notNull(),
+  totalDeposited: numeric('total_deposited', { precision: 20, scale: 6 }).default('0').notNull(),
+  totalWithdrawn: numeric('total_withdrawn', { precision: 20, scale: 6 }).default('0').notNull(),
+  currency: text('currency').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.merchantId, table.playerRef, table.currency] }),
+  merchantIdIdx: index('gateway_balances_merchant_id_idx').on(table.merchantId),
+}));
+
+// Gateway ledger - immutable double-entry ledger
+export const gatewayLedger = pgTable('gateway_ledger', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  playerRef: text('player_ref').notNull(),
+  type: text('type').notNull(),
+  amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
+  currency: text('currency').notNull(),
+  sessionId: uuid('session_id').references(() => gatewaySessions.id),
+  disputeId: uuid('dispute_id'),
+  balanceBefore: numeric('balance_before', { precision: 20, scale: 6 }).notNull(),
+  balanceAfter: numeric('balance_after', { precision: 20, scale: 6 }).notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  merchantIdIdx: index('gateway_ledger_merchant_id_idx').on(table.merchantId),
+  playerRefIdx: index('gateway_ledger_player_ref_idx').on(table.playerRef),
+  sessionIdIdx: index('gateway_ledger_session_id_idx').on(table.sessionId),
+  createdAtIdx: index('gateway_ledger_created_at_idx').on(table.createdAt),
+  typeIdx: index('gateway_ledger_type_idx').on(table.type),
+}));
+
+// Gateway disputes - dispute management
+export const gatewayDisputes = pgTable('gateway_disputes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  sessionId: uuid('session_id').notNull().references(() => gatewaySessions.id),
+  playerRef: text('player_ref').notNull(),
+  reason: text('reason').notNull(),
+  evidence: jsonb('evidence').default('[]').notNull(),
+  status: text('status').default('open').notNull(),
+  resolution: text('resolution'),
+  holdAmount: numeric('hold_amount', { precision: 20, scale: 6 }),
+  holdCurrency: text('hold_currency'),
+  resolvedBy: text('resolved_by'),
+  resolvedAt: timestamp('resolved_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  merchantIdIdx: index('gateway_disputes_merchant_id_idx').on(table.merchantId),
+  sessionIdIdx: index('gateway_disputes_session_id_idx').on(table.sessionId),
+  statusIdx: index('gateway_disputes_status_idx').on(table.status),
+  playerRefIdx: index('gateway_disputes_player_ref_idx').on(table.playerRef),
+}));
+
+// Gateway pool assignments - pool contract assignments per merchant
+export const gatewayPoolAssignments = pgTable('gateway_pool_assignments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  chain: text('chain').notNull(),
+  token: text('token').notNull(),
+  poolAddresses: jsonb('pool_addresses').notNull(),
+  isPrimary: boolean('is_primary').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  merchantIdIdx: index('gateway_pool_assignments_merchant_id_idx').on(table.merchantId),
+  uniqueMerchantChainToken: uniqueIndex('gateway_pool_assignments_merchant_chain_token_uniq').on(table.merchantId, table.chain, table.token),
 }));
