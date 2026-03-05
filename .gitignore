@@ -58,3 +58,6 @@ yarn.lock
 temp_grammy/
 *.png
 *.md.bak
+
+# PM2 config (contains secrets)
+ecosystem.config.js
