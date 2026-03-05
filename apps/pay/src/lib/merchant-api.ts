@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function merchantFetch(path: string, options?: RequestInit) {
-  const apiKey = localStorage.getItem('zkira_merchant_api_key');
+  const apiKey = localStorage.getItem('omnipay_merchant_api_key');
   if (!apiKey) throw new Error('Not authenticated');
   
   try {
@@ -15,7 +15,7 @@ export async function merchantFetch(path: string, options?: RequestInit) {
     });
     
     if (res.status === 401) {
-      localStorage.removeItem('zkira_merchant_api_key');
+      localStorage.removeItem('omnipay_merchant_api_key');
       window.location.href = '/merchant';
       throw new Error('Unauthorized - Invalid API key');
     }
@@ -46,11 +46,11 @@ export async function merchantLogin(apiKey: string): Promise<{ success: boolean;
     
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem('zkira_merchant_api_key', apiKey);
+      localStorage.setItem('omnipay_merchant_api_key', apiKey);
       
       // Extract merchant name from API key or use a default
       const merchantName = `Merchant-${apiKey.slice(-8)}`;
-      localStorage.setItem('zkira_merchant_name', merchantName);
+      localStorage.setItem('omnipay_merchant_name', merchantName);
       
       return { success: true, merchantName };
     }
@@ -65,17 +65,17 @@ export async function merchantLogin(apiKey: string): Promise<{ success: boolean;
 }
 
 export function merchantLogout() {
-  localStorage.removeItem('zkira_merchant_api_key');
-  localStorage.removeItem('zkira_merchant_name');
+  localStorage.removeItem('omnipay_merchant_api_key');
+  localStorage.removeItem('omnipay_merchant_name');
   window.location.href = '/merchant';
 }
 
 export function isMerchantAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('zkira_merchant_api_key');
+  return !!localStorage.getItem('omnipay_merchant_api_key');
 }
 
 export function getMerchantName(): string {
   if (typeof window === 'undefined') return 'Merchant';
-  return localStorage.getItem('zkira_merchant_name') || 'Merchant';
+  return localStorage.getItem('omnipay_merchant_name') || 'Merchant';
 }

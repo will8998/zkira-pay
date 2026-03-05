@@ -1,5 +1,5 @@
 /**
- * Dead drop encryption utilities for ZKIRA Pay.
+ * Dead drop encryption utilities for OMNIPAY.
  *
  * Two encryption schemes:
  *

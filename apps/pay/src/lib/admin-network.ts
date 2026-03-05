@@ -32,7 +32,7 @@ export function AdminNetworkProvider({ children }: { children: React.ReactNode }
 
 export function getStoredNetwork(): SolanaCluster {
   if (typeof window === 'undefined') return 'devnet';
-  const stored = sessionStorage.getItem('zkira_admin_network');
+  const stored = sessionStorage.getItem('omnipay_admin_network');
   if (stored === 'devnet' || stored === 'testnet' || stored === 'mainnet-beta') {
     return stored;
   }
@@ -41,7 +41,7 @@ export function getStoredNetwork(): SolanaCluster {
 
 export function storeNetwork(network: SolanaCluster) {
   if (typeof window !== 'undefined') {
-    sessionStorage.setItem('zkira_admin_network', network);
+    sessionStorage.setItem('omnipay_admin_network', network);
   }
 }
 

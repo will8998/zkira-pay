@@ -1,5 +1,5 @@
 /**
- * LocalStorage-based transaction history manager for ZKIRA Pay.
+ * LocalStorage-based transaction history manager for OMNIPAY.
  *
  * All history is stored locally in the browser — nothing is sent to the server.
  * This ensures privacy: only the user's device knows their transaction history.
@@ -8,7 +8,7 @@
 import type { HistoryEntry, HistoryEntryType } from '@/types/payment';
 import type { Chain, TokenId } from '@/config/pool-registry';
 
-const STORAGE_KEY = 'zkira_history';
+const STORAGE_KEY = 'omnipay_history';
 const MAX_ENTRIES = 500;
 
 /** Read all history entries from localStorage. */

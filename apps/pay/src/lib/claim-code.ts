@@ -1,7 +1,7 @@
 /**
- * Claim code generation and derivation for ZKIRA Pay dead drops.
+ * Claim code generation and derivation for OMNIPAY dead drops.
  *
- * Claim codes look like: ZKIRA-A7X9-B3M2
+ * Claim codes look like: OMNIPAY-A7X9-B3M2
  *   - Human-friendly, easy to copy/paste
  *   - The code itself is NOT secret — the encryption key is separate
  *   - A deterministic dead-drop ID is derived from the code via SHA-256
@@ -27,7 +27,7 @@ function randomSegment(len: number): string {
  * @returns `{ code, encryptionKey }` where encryptionKey is hex-encoded.
  */
 export function generateClaimCode(): { code: string; encryptionKey: string } {
-  const code = `ZKIRA-${randomSegment(4)}-${randomSegment(4)}`;
+  const code = `OMNIPAY-${randomSegment(4)}-${randomSegment(4)}`;
 
   // 256-bit encryption key (independent of code)
   const keyBytes = new Uint8Array(32);

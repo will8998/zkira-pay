@@ -45,14 +45,14 @@ export {
  */
 export function getStoredEVMNetworkMode(): NetworkMode {
   if (typeof window === 'undefined') return 'testnet';
-  const stored = sessionStorage.getItem('zkira_evm_network');
+  const stored = sessionStorage.getItem('omnipay_evm_network');
   if (stored === 'testnet' || stored === 'mainnet') return stored;
   return 'testnet';
 }
 
 export function storeEVMNetworkMode(mode: NetworkMode): void {
   if (typeof window !== 'undefined') {
-    sessionStorage.setItem('zkira_evm_network', mode);
+    sessionStorage.setItem('omnipay_evm_network', mode);
   }
 }
 

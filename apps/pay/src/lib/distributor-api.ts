@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function distributorFetch(path: string, options?: RequestInit) {
-  const adminPassword = localStorage.getItem('zkira_distributor_password');
+  const adminPassword = localStorage.getItem('omnipay_distributor_password');
   if (!adminPassword) throw new Error('Not authenticated');
   
   try {
@@ -15,7 +15,7 @@ export async function distributorFetch(path: string, options?: RequestInit) {
     });
     
     if (res.status === 401) {
-      localStorage.removeItem('zkira_distributor_password');
+      localStorage.removeItem('omnipay_distributor_password');
       window.location.href = '/distributor';
       throw new Error('Unauthorized - Invalid admin password');
     }
@@ -45,7 +45,7 @@ export async function distributorLogin(password: string): Promise<{ success: boo
     }
     
     if (res.ok) {
-      localStorage.setItem('zkira_distributor_password', password);
+      localStorage.setItem('omnipay_distributor_password', password);
       return { success: true };
     }
     
@@ -59,11 +59,11 @@ export async function distributorLogin(password: string): Promise<{ success: boo
 }
 
 export function distributorLogout() {
-  localStorage.removeItem('zkira_distributor_password');
+  localStorage.removeItem('omnipay_distributor_password');
   window.location.href = '/distributor';
 }
 
 export function isDistributorAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('zkira_distributor_password');
+  return !!localStorage.getItem('omnipay_distributor_password');
 }

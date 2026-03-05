@@ -11,23 +11,23 @@ export interface AdminSession {
 
 function getSession(): AdminSession | null {
   if (typeof window === 'undefined') return null;
-  const raw = sessionStorage.getItem('zkira_admin_session');
+  const raw = sessionStorage.getItem('omnipay_admin_session');
   if (!raw) return null;
   try {
     return JSON.parse(raw) as AdminSession;
   } catch {
     // Legacy format: plain password string
-    sessionStorage.removeItem('zkira_admin_session');
+    sessionStorage.removeItem('omnipay_admin_session');
     return null;
   }
 }
 
 function setSession(session: AdminSession) {
-  sessionStorage.setItem('zkira_admin_session', JSON.stringify(session));
+  sessionStorage.setItem('omnipay_admin_session', JSON.stringify(session));
 }
 
 function clearSession() {
-  sessionStorage.removeItem('zkira_admin_session');
+  sessionStorage.removeItem('omnipay_admin_session');
 }
 
 export async function adminFetch(path: string, options?: RequestInit) {

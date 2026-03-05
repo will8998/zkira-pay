@@ -1,5 +1,5 @@
 /**
- * Payment flow types for ZKIRA Pay.
+ * Payment flow types for OMNIPAY.
  *
  * These types underpin the Send, Request, Claim, and Invoice flows
  * that sit on top of the Tornado Cash deposit/withdraw cycle.
@@ -72,7 +72,7 @@ export interface DepositBundle {
 
 /** A claim code that references a dead drop containing encrypted notes. */
 export interface ClaimCodeData {
-  /** Short code e.g. "ZKIRA-A7X9-B3M2". */
+  /** Short code e.g. "OMNIPAY-A7X9-B3M2". */
   code: string;
   /** Symmetric key used to encrypt the dead drop payload, hex-encoded. */
   encryptionKey: string;

@@ -41,7 +41,7 @@ export async function deriveEncryptionKey(
 ): Promise<CryptoKey> {
   try {
     // Create message to sign
-    const message = new TextEncoder().encode(`zkira:enc:v1:${walletAddress}`);
+    const message = new TextEncoder().encode(`omnipay:enc:v1:${walletAddress}`);
     
     // Get signature from wallet
     const signature = await signMessage(message);
@@ -56,7 +56,7 @@ export async function deriveEncryptionKey(
     );
     
     // Derive AES-256-GCM key using HKDF
-    const salt = new TextEncoder().encode('zkira-payment-links-v1');
+    const salt = new TextEncoder().encode('omnipay-payment-links-v1');
     const info = new TextEncoder().encode('aes-256-gcm-key');
     
     const derivedKey = await crypto.subtle.deriveKey(
@@ -270,7 +270,7 @@ export async function migrateLocalStorageToServer({
     }
     
     // Read existing links from localStorage
-    const storedData = localStorage.getItem('zkira_payment_links');
+    const storedData = localStorage.getItem('omnipay_payment_links');
     if (!storedData) {
       return; // No links to migrate
     }

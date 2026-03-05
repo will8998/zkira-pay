@@ -83,7 +83,7 @@ export function useNetwork() {
 
 function getStoredNetwork(): SolanaNetwork {
   if (typeof window === 'undefined') return 'devnet';
-  const stored = sessionStorage.getItem('zkira_network');
+  const stored = sessionStorage.getItem('omnipay_network');
   if (stored === 'devnet' || stored === 'testnet' || stored === 'mainnet-beta') {
     return stored;
   }
@@ -92,7 +92,7 @@ function getStoredNetwork(): SolanaNetwork {
 
 function storeNetwork(network: SolanaNetwork) {
   if (typeof window !== 'undefined') {
-    sessionStorage.setItem('zkira_network', network);
+    sessionStorage.setItem('omnipay_network', network);
   }
 }
 
