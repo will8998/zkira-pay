@@ -261,6 +261,23 @@ export const blogPosts = pgTable('blog_posts', {
 // CASINO GATEWAY SYSTEM
 // ═══════════════════════════════════════════════════════════
 
+// Distributors table - partners/agents who bring merchants to the platform
+export const distributors = pgTable('distributors', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  walletAddress: text('wallet_address').notNull().unique(),
+  parentId: uuid('parent_id'), // FK to distributors.id (self-referencing, managed via migration)
+  tier: text('tier').default('agent').notNull(), // master, sub, agent
+  commissionPercent: numeric('commission_percent', { precision: 5, scale: 2 }).default('0').notNull(),
+  status: text('status').default('active').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  walletAddressIdx: index('distributors_wallet_address_idx').on(table.walletAddress),
+  parentIdIdx: index('distributors_parent_id_idx').on(table.parentId),
+  statusIdx: index('distributors_status_idx').on(table.status),
+}));
+
 // Merchants table - casino operators using the gateway
 export const merchants = pgTable('merchants', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -270,11 +287,13 @@ export const merchants = pgTable('merchants', {
   webhookSecret: text('webhook_secret').notNull(),
   feePercent: numeric('fee_percent', { precision: 5, scale: 2 }).default('1.00').notNull(),
   referrerAddress: text('referrer_address'),
+  distributorId: uuid('distributor_id').references(() => distributors.id),
   status: text('status').default('active').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   walletAddressIdx: index('merchants_wallet_address_idx').on(table.walletAddress),
+  distributorIdIdx: index('merchants_distributor_id_idx').on(table.distributorId),
   statusIdx: index('merchants_status_idx').on(table.status),
 }));
 
@@ -294,6 +313,8 @@ export const gatewaySessions = pgTable('gateway_sessions', {
   txHash: text('tx_hash'),
   claimCode: text('claim_code'),
   recipientAddress: text('recipient_address'),
+  referrerAddress: text('referrer_address'),
+  platformFee: numeric('platform_fee', { precision: 20, scale: 6 }),
   metadata: jsonb('metadata'),
   idempotencyKey: text('idempotency_key').unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -400,4 +421,42 @@ export const gatewayPoolAssignments = pgTable('gateway_pool_assignments', {
 }, (table) => ({
   merchantIdIdx: index('gateway_pool_assignments_merchant_id_idx').on(table.merchantId),
   uniqueMerchantChainToken: uniqueIndex('gateway_pool_assignments_merchant_chain_token_uniq').on(table.merchantId, table.chain, table.token),
+}));
+
+// ═══════════════════════════════════════════════════════════
+// DISTRIBUTOR COMMISSION SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// Distributor commissions - tracks commissions earned per withdrawal
+export const distributorCommissions = pgTable('distributor_commissions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  distributorId: uuid('distributor_id').notNull().references(() => distributors.id),
+  merchantId: uuid('merchant_id').notNull().references(() => merchants.id),
+  sessionId: uuid('session_id').references(() => gatewaySessions.id),
+  amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
+  currency: text('currency').notNull(),
+  sourceAmount: numeric('source_amount', { precision: 20, scale: 6 }).notNull(),
+  tier: text('tier').notNull(),
+  status: text('status').default('pending').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  distributorIdIdx: index('distributor_commissions_distributor_id_idx').on(table.distributorId),
+  merchantIdIdx: index('distributor_commissions_merchant_id_idx').on(table.merchantId),
+  statusIdx: index('distributor_commissions_status_idx').on(table.status),
+  createdAtIdx: index('distributor_commissions_created_at_idx').on(table.createdAt),
+}));
+
+// Distributor payouts - settlement records for distributor payments
+export const distributorPayouts = pgTable('distributor_payouts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  distributorId: uuid('distributor_id').notNull().references(() => distributors.id),
+  amount: numeric('amount', { precision: 20, scale: 6 }).notNull(),
+  currency: text('currency').notNull(),
+  txHash: text('tx_hash'),
+  status: text('status').default('pending').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  processedAt: timestamp('processed_at'),
+}, (table) => ({
+  distributorIdIdx: index('distributor_payouts_distributor_id_idx').on(table.distributorId),
+  statusIdx: index('distributor_payouts_status_idx').on(table.status),
 }));
