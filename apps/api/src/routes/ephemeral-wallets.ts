@@ -182,11 +182,12 @@ function getChainId(chain: string | null): string {
   if (!chain) return '421614';
   switch (chain.toLowerCase()) {
     case 'arbitrum':
-    case 'arbitrum-mainnet':
-      return '42161';
     case 'arbitrum-sepolia':
     case 'arbitrum-testnet':
+      // DB stores 'arbitrum' for Sepolia testnet; RPC always points to Sepolia
       return '421614';
+    case 'arbitrum-mainnet':
+      return '42161';
     default:
       return '421614';
   }
