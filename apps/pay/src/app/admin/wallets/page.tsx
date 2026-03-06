@@ -70,15 +70,18 @@ export default function WalletsPage() {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  const truncateAddress = (address: string) => {
+  const truncateAddress = (address: string | null) => {
+    if (!address) return '—';
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
 
-  const formatAmount = (amount: number, token: string) => {
-    return `${amount.toLocaleString()} ${token}`;
+  const formatAmount = (amount: number | string | null, token: string) => {
+    if (amount == null) return `— ${token}`;
+    return `${Number(amount).toLocaleString()} ${token}`;
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -118,12 +121,12 @@ export default function WalletsPage() {
     {
       key: 'chain',
       label: 'Chain',
-      render: (wallet: EphemeralWallet) => wallet.chain.charAt(0).toUpperCase() + wallet.chain.slice(1),
+      render: (wallet: EphemeralWallet) => wallet.chain ? wallet.chain.charAt(0).toUpperCase() + wallet.chain.slice(1) : '—',
     },
     {
       key: 'token',
       label: 'Token',
-      render: (wallet: EphemeralWallet) => wallet.token.toUpperCase(),
+      render: (wallet: EphemeralWallet) => wallet.token ? wallet.token.toUpperCase() : '—',
     },
     {
       key: 'amount',
