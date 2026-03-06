@@ -65,7 +65,13 @@
     "subtitleLine2": "零可追溯性。即时结算。",
     "featureStealth": "隐私",
     "featureInvoices": "发票",
-    "featurePool": "屏蔽资金池"
+    "featurePool": "屏蔽资金池",
+    "claimPayment": "领取支付",
+    "claimPaymentDesc": "输入领取码接收资金",
+    "featureZK": "零知识证明",
+    "featureMultiChain": "多链 (Arbitrum + Tron)",
+    "featureNoWallet": "无需钱包",
+    "featureTor": "Tor 兼容"
   },
   "dashboard": {
     "totalSent": "总发送",
@@ -126,8 +132,21 @@
     "notes": "票据"
   },
   "historyPage": {
-    "title": "交易历史",
-    "description": "查看您的所有历史交易"
+    "title": "历史",
+    "description": "查看您的所有历史交易",
+    "localOnly": "本地交易记录（仅存储在您的浏览器中）",
+    "summary": "摘要",
+    "typeSent": "已发送",
+    "typeRequested": "已请求",
+    "typeClaimed": "已领取",
+    "typeInvoicePaid": "发票已付",
+    "typeDeposited": "已存入",
+    "typeWithdrawn": "已提取",
+    "tallySent": "发送",
+    "tallyReceived": "接收",
+    "tallyDeposited": "存入",
+    "tallyWithdrawn": "提取",
+    "emptyDesc": "您的交易记录将在您发送、接收或领取支付后显示在此处。"
   },
   "developersPage": {
     "title": "开发者仪表板",

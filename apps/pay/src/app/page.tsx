@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function HomePage() {
+  const t = useTranslations('hero');
+  const tDash = useTranslations('dashboard');
   const quickActions = [
     {
-      title: 'Send Payment',
-      description: 'Send funds privately via shielded pool',
+      title: tDash('sendPayment'),
+      description: tDash('sendPaymentDesc'),
       href: '/create',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -15,8 +18,8 @@ export default function HomePage() {
       ),
     },
     {
-      title: 'Request Payment',
-      description: 'Create an invoice for someone to pay you',
+      title: tDash('requestPayment'),
+      description: tDash('requestPaymentDesc'),
       href: '/request',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -25,8 +28,8 @@ export default function HomePage() {
       ),
     },
     {
-      title: 'Claim Payment',
-      description: 'Enter a claim code to receive funds',
+      title: t('claimPayment'),
+      description: t('claimPaymentDesc'),
       href: '/claim',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -58,16 +61,16 @@ export default function HomePage() {
         {/* Hero */}
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-[-0.02em] leading-[1.05]">
-            Private Payments
+            {t('title')}
             <br />
             <span className="bg-gradient-to-r from-[#FFFFFF] to-[#FF6B6B] bg-clip-text text-transparent">
-              Made Simple
+              {t('titleHighlight')}
             </span>
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-[rgba(255,255,255,0.6)] max-w-lg mx-auto leading-relaxed">
-            Send, request, and receive payments through zero-knowledge shielded pools.
+            {t('subtitle')}
             <br className="hidden sm:block" />
-            No wallet connection needed. Just a browser.
+            {t('subtitleLine2')}
           </p>
         </div>
 
@@ -102,13 +105,13 @@ export default function HomePage() {
 
         {/* Feature pills */}
         <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[rgba(255,255,255,0.5)]">
-          <span className="text-[13px] font-light tracking-wide">Zero-Knowledge Proofs</span>
+          <span className="text-[13px] font-light tracking-wide">{t('featureZK')}</span>
           <span className="text-[rgba(255,255,255,0.2)]">•</span>
-          <span className="text-[13px] font-light tracking-wide">Multi-Chain (Arbitrum + Tron)</span>
+          <span className="text-[13px] font-light tracking-wide">{t('featureMultiChain')}</span>
           <span className="text-[rgba(255,255,255,0.2)]">•</span>
-          <span className="text-[13px] font-light tracking-wide">No Wallet Required</span>
+          <span className="text-[13px] font-light tracking-wide">{t('featureNoWallet')}</span>
           <span className="text-[rgba(255,255,255,0.2)]">•</span>
-          <span className="text-[13px] font-light tracking-wide">Tor Compatible</span>
+          <span className="text-[13px] font-light tracking-wide">{t('featureTor')}</span>
         </div>
       </div>
     </div>

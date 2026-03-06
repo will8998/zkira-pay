@@ -2,11 +2,14 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { ThemeToggle } from './ThemeProvider';
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
+  const tSections = useTranslations('navSections');
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -19,7 +22,7 @@ export function Sidebar() {
       section: null,
       items: [
         {
-          name: 'Home',
+          name: t('home'),
           href: '/',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -30,10 +33,10 @@ export function Sidebar() {
       ],
     },
     {
-      section: 'PAYMENTS',
+      section: tSections('payments'),
       items: [
         {
-          name: 'Send',
+          name: t('send'),
           href: '/create',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -42,7 +45,7 @@ export function Sidebar() {
           ),
         },
         {
-          name: 'Request',
+          name: t('request'),
           href: '/request',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -51,7 +54,7 @@ export function Sidebar() {
           ),
         },
         {
-          name: 'Claim',
+          name: t('claim'),
           href: '/claim',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -62,10 +65,10 @@ export function Sidebar() {
       ],
     },
     {
-      section: 'ACTIVITY',
+      section: tSections('activity'),
       items: [
         {
-          name: 'History',
+          name: t('history'),
           href: '/history',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -76,10 +79,10 @@ export function Sidebar() {
       ],
     },
     {
-      section: 'LEARN',
+      section: tSections('learn'),
       items: [
         {
-          name: 'Learn Hub',
+          name: t('learnHub'),
           href: '/learn',
           icon: (
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">

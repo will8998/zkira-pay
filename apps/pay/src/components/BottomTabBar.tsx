@@ -2,9 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export function BottomTabBar() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
 
   if (pathname?.startsWith('/admin')) return null;
 
@@ -16,7 +18,7 @@ export function BottomTabBar() {
 
   const tabs = [
     {
-      name: 'Home',
+      name: t('home'),
       href: '/',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -25,7 +27,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: 'Send',
+      name: t('send'),
       href: '/create',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -34,7 +36,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: 'Claim',
+      name: t('claim'),
       href: '/claim',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -43,7 +45,7 @@ export function BottomTabBar() {
       ),
     },
     {
-      name: 'History',
+      name: t('history'),
       href: '/history',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">

@@ -1,12 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { getHistory, clearHistory } from '@/lib/history-store';
 import type { HistoryEntry } from '@/types/payment';
 import type { TokenId } from '@/config/pool-registry';
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const t = useTranslations('historyPage');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
 
   useEffect(() => {
     setEntries(getHistory());
@@ -18,12 +22,12 @@ export default function HistoryPage() {
   };
 
   const typeLabel: Record<string, string> = {
-    send: 'Sent',
-    request: 'Requested',
-    claim: 'Claimed',
-    invoice_pay: 'Invoice Paid',
-    deposit: 'Deposited',
-    withdraw: 'Withdrawn',
+    send: t('typeSent'),
+    request: t('typeRequested'),
+    claim: t('typeClaimed'),
+    invoice_pay: t('typeInvoicePaid'),
+    deposit: t('typeDeposited'),
+    withdraw: t('typeWithdrawn'),
   };
 
   const statusColor: Record<string, string> = {
@@ -126,10 +130,10 @@ export default function HistoryPage() {
             className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            History
+            {t('title')}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            Local transaction history (stored in your browser only)
+            {t('localOnly')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -145,7 +149,7 @@ export default function HistoryPage() {
                 onClick={handleClear}
                 className="px-4 py-2 text-sm bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
               >
-                Clear
+                {tCommon('delete')}
               </button>
             </>
           )}
@@ -159,7 +163,7 @@ export default function HistoryPage() {
             className="text-lg font-bold text-[var(--color-text)] uppercase tracking-wide mb-4"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            SUMMARY
+            {t('summary')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {(['usdc', 'usdt', 'dai'] as TokenId[]).map((token) => {
@@ -183,7 +187,7 @@ export default function HistoryPage() {
                     {tokenTally.sent > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">
-                          SENT
+                          {t('tallySent')}
                         </span>
                         <span
                           className="text-xs text-[var(--color-text)]"
@@ -196,7 +200,7 @@ export default function HistoryPage() {
                     {tokenTally.received > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">
-                          RECEIVED
+                          {t('tallyReceived')}
                         </span>
                         <span
                           className="text-xs text-[var(--color-text)]"
@@ -209,7 +213,7 @@ export default function HistoryPage() {
                     {tokenTally.deposited > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">
-                          DEPOSITED
+                          {t('tallyDeposited')}
                         </span>
                         <span
                           className="text-xs text-[var(--color-text)]"
@@ -222,7 +226,7 @@ export default function HistoryPage() {
                     {tokenTally.withdrawn > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">
-                          WITHDRAWN
+                          {t('tallyWithdrawn')}
                         </span>
                         <span
                           className="text-xs text-[var(--color-text)]"
@@ -247,10 +251,10 @@ export default function HistoryPage() {
             className="text-lg font-bold text-[var(--color-text)] mb-2"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            No Activity Yet
+            {tCommon('noActivityYet')}
           </h2>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            Your transaction history will appear here after you send, receive, or claim payments.
+            {t('emptyDesc')}
           </p>
         </div>
       ) : (

@@ -65,7 +65,13 @@
     "subtitleLine2": "Zero traceability. Instant settlement.",
     "featureStealth": "Privacy",
     "featureInvoices": "Invoices",
-    "featurePool": "Shielded Pool"
+    "featurePool": "Shielded Pool",
+    "claimPayment": "Claim Payment",
+    "claimPaymentDesc": "Enter a claim code to receive funds",
+    "featureZK": "Zero-Knowledge Proofs",
+    "featureMultiChain": "Multi-Chain (Arbitrum + Tron)",
+    "featureNoWallet": "No Wallet Required",
+    "featureTor": "Tor Compatible"
   },
   "dashboard": {
     "totalSent": "Total Sent",
@@ -126,8 +132,21 @@
     "notes": "Notes"
   },
   "historyPage": {
-    "title": "Transaction History",
-    "description": "View all your past transactions"
+    "title": "History",
+    "description": "View all your past transactions",
+    "localOnly": "Local transaction history (stored in your browser only)",
+    "summary": "SUMMARY",
+    "typeSent": "Sent",
+    "typeRequested": "Requested",
+    "typeClaimed": "Claimed",
+    "typeInvoicePaid": "Invoice Paid",
+    "typeDeposited": "Deposited",
+    "typeWithdrawn": "Withdrawn",
+    "tallySent": "SENT",
+    "tallyReceived": "RECEIVED",
+    "tallyDeposited": "DEPOSITED",
+    "tallyWithdrawn": "WITHDRAWN",
+    "emptyDesc": "Your transaction history will appear here after you send, receive, or claim payments."
   },
   "developersPage": {
     "title": "Developer Dashboard",
