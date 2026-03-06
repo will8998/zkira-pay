@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { usePathname } from 'next/navigation';
 import { distributorFetch, distributorLogin, distributorLogout, isDistributorAuthenticated } from '@/lib/distributor-api';
 
@@ -54,7 +54,7 @@ function DistributorAuthGate({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 z-50 bg-[var(--color-hover)] flex items-center justify-center p-4">
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 md:p-8 w-full max-w-md">
           <div className="text-center mb-6">
-            <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[32px] w-auto mx-auto mb-4" priority />
+            <span className="text-[24px] font-bold tracking-[0.08em] text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
             <h1 className="text-xl font-bold text-[var(--color-text)]">Distributor Panel</h1>
             <p className="text-[var(--color-muted)] text-sm mt-2">Enter admin password to continue</p>
           </div>
@@ -155,7 +155,7 @@ function DistributorSidebar({ mobileOpen = false, onClose }: { mobileOpen?: bool
       {/* Header */}
       <Link href="/distributor" className="p-4 lg:p-6 border-b border-[var(--color-bg)]/10 hover:opacity-80 transition-opacity">
         <div className="flex items-center gap-3">
-          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[28px] w-auto brightness-0 invert" priority />
+          <span className="text-[18px] font-bold tracking-[0.08em] text-[var(--color-bg)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
           <span className="px-2 py-1 bg-[var(--color-surface)]/10 text-[var(--color-bg)] text-xs rounded font-medium">
             Distributor
           </span>
@@ -250,7 +250,7 @@ function DistributorTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
           </svg>
         </button>
         <Link href="/distributor" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[24px] w-auto" priority />
+          <span className="text-[16px] font-bold tracking-[0.08em] text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
           <span className="text-sm font-semibold text-[var(--color-text)]">Distributor Panel</span>
         </Link>
       </div>

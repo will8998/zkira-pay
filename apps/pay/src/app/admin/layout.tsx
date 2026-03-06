@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { usePathname } from 'next/navigation';
 import { AdminAuthGate, useAdminAuth } from '@/components/admin/AdminAuthGate';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -24,7 +24,7 @@ function AdminTopBar({ onMenuToggle }: { onMenuToggle?: () => void }) {
           </svg>
         </button>
         <Link href="/admin" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[24px] w-auto" priority />
+          <span className="text-[16px] font-bold tracking-[0.08em] text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
           <span className="text-sm font-semibold text-[var(--color-text)]">Admin</span>
         </Link>
       </div>

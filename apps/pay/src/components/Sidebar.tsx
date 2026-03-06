@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { ThemeToggle } from './ThemeProvider';
 
 export function Sidebar() {
@@ -96,7 +96,7 @@ export function Sidebar() {
       <div className="w-full bg-[var(--bg-panel)] backdrop-blur-xl glass-panel border-r border-[var(--border-subtle)] h-screen flex flex-col sticky top-0 overflow-y-auto">
         {/* Logo */}
         <Link href="/" className="px-4 py-4 flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3 mb-1 hover:opacity-80 transition-opacity">
-          <Image src="/logo-new.png" alt="OMNIPAY" width={101} height={40} className="h-[28px] w-auto logo-image" priority />
+          <span className="text-[18px] font-bold tracking-[0.08em] text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
         </Link>
 
         <nav className="flex-1">

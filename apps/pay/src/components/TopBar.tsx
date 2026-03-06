@@ -9,7 +9,7 @@ export function TopBar() {
     <div className="relative z-20 h-12 bg-[rgba(8,8,8,0.8)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] px-4 flex items-center justify-between shrink-0">
       {/* Left — Logo (visible only on mobile, sidebar has it on desktop) */}
       <Link href="/" className="flex items-center hover:opacity-80 transition-opacity md:hidden">
-        <img src="/logo-new.png" alt="OMNIPAY" className="h-6 w-auto" />
+        <span className="text-[16px] font-bold tracking-[0.08em] text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>OMNIPAY</span>
       </Link>
 
       {/* Spacer on desktop (logo is in sidebar) */}
