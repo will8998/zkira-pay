@@ -15,6 +15,7 @@ const POOL_ABI = [
   'function denomination() external view returns (uint256)',
   'function nextIndex() external view returns (uint32)',
   'function isSpent(bytes32 _nullifierHash) external view returns (bool)',
+  'function isKnownRoot(bytes32 _root) external view returns (bool)',
   'function paused() external view returns (bool)',
   'event Deposit(bytes32 indexed commitment, uint32 leafIndex, uint256 timestamp)',
 ];
