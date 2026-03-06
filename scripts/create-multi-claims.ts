@@ -125,7 +125,7 @@ async function main() {
   const mimcSponge = await buildMimcSponge();
 
   // 3. Load ERC20Pool artifact for deployment
-  const artifactPath = path.join(__dirname, '..', 'contracts', 'arbitrum', 'artifacts', 'src', 'ERC20Pool.sol', 'ERC20Pool.json');
+  const artifactPath = path.join(__dirname, '..', 'contracts', 'arbitrum', 'ERC20Pool-bytecode.json');
   const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf-8'));
   console.log('ERC20Pool artifact loaded');
 
