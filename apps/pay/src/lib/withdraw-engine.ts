@@ -218,6 +218,21 @@ export async function executeBatchWithdrawal(
   const mimcSponge = await buildMimcSponge();
   const snarkjs = await import('snarkjs');
 
+  // ── MiMC sanity check ─────────────────────────────────────
+  // Verify that browser circomlibjs MiMC matches the contract's zeros.
+  // CONTRACT_ZEROS[1] = MiMC(CONTRACT_ZEROS[0], CONTRACT_ZEROS[0]).
+  const sanityHash = mimcSponge.F.toObject(
+    mimcSponge.multiHash([CONTRACT_ZEROS[0], CONTRACT_ZEROS[0]], 0n, 1),
+  );
+  if (sanityHash !== CONTRACT_ZEROS[1]) {
+    console.error('[withdraw-engine] MiMC SANITY CHECK FAILED!');
+    console.error('  Expected:', CONTRACT_ZEROS[1].toString(16));
+    console.error('  Got:     ', sanityHash.toString(16));
+    throw new Error(
+      'MiMC hash mismatch: browser circomlibjs produces different results than the on-chain contract. Cannot generate valid proofs.',
+    );
+  }
+  console.log('[withdraw-engine] MiMC sanity check passed');
 
   // ── 2. Validate & recover pool addresses ───────────────────
   //    Bundles created by older code may be missing the pool field.
@@ -262,6 +277,25 @@ export async function executeBatchWithdrawal(
 
     const tree = await buildSparseMerkleTree(poolAddr, chain, mimcSponge);
 
+    // ── Verify root on-chain before generating proof ──────
+    const { JsonRpcProvider: RpcProvider, Contract: RpcContract } = await import('ethers');
+    const verifyProvider = new RpcProvider(CHAIN_CONFIGS[chain].rpcUrl);
+    const verifyPoolContract = new RpcContract(poolAddr, [
+      'function isKnownRoot(bytes32 _root) external view returns (bool)',
+      'function getLastRoot() external view returns (bytes32)',
+    ], verifyProvider);
+    const computedRootHex = '0x' + BigInt(tree.root).toString(16).padStart(64, '0');
+    const isKnown = await verifyPoolContract.isKnownRoot(computedRootHex);
+    const onChainRoot = await verifyPoolContract.getLastRoot();
+    console.log('[withdraw-engine] Computed root:', computedRootHex);
+    console.log('[withdraw-engine] On-chain root:', onChainRoot);
+    console.log('[withdraw-engine] isKnownRoot:', isKnown);
+    if (!isKnown) {
+      throw new Error(
+        `Computed Merkle root is not known on-chain. Computed: ${computedRootHex}, On-chain: ${onChainRoot}. Tree has ${tree.depositCount} deposits.`,
+      );
+    }
+
     // Process each note in this pool
     for (const note of group.notes) {
       // ── Generate ZK proof ──────────────────────────────────
@@ -279,6 +313,19 @@ export async function executeBatchWithdrawal(
 
       const nullifier = BigInt(note.nullifier);
       const secret = BigInt(note.secret);
+
+      // Verify commitment matches nullifier+secret
+      const recomputedCommitment = mimcSponge.F.toObject(
+        mimcSponge.multiHash([nullifier, secret], 0n, 1),
+      );
+      const storedCommitment = note.commitment ? BigInt(note.commitment) : undefined;
+      console.log('[withdraw-engine] Note leafIndex:', note.leafIndex);
+      console.log('[withdraw-engine] Recomputed commitment:', '0x' + BigInt(recomputedCommitment).toString(16).padStart(64, '0'));
+      if (storedCommitment !== undefined && storedCommitment !== recomputedCommitment) {
+        console.error('[withdraw-engine] COMMITMENT MISMATCH!');
+        console.error('  Stored:     ', '0x' + storedCommitment.toString(16).padStart(64, '0'));
+        console.error('  Recomputed: ', '0x' + BigInt(recomputedCommitment).toString(16).padStart(64, '0'));
+      }
 
       const nullifierHash = mimcSponge.F.toObject(
         mimcSponge.multiHash([nullifier], 0n, 1),
@@ -299,11 +346,27 @@ export async function executeBatchWithdrawal(
         refund: '0',
       };
 
+      console.log('[withdraw-engine] Circuit inputs:', {
+        nullifier: circuitInputs.nullifier.substring(0, 20) + '...',
+        secret: circuitInputs.secret.substring(0, 20) + '...',
+        root: circuitInputs.root.substring(0, 20) + '...',
+        pathIndices: circuitInputs.pathIndices.slice(0, 5),
+        pathElements0: circuitInputs.pathElements[0]?.substring(0, 20) + '...',
+      });
+
       const { proof, publicSignals } = await snarkjs.groth16.fullProve(
         circuitInputs,
         '/circuits/withdraw.wasm',
         '/circuits/withdraw_final.zkey',
       );
+
+      // ── Local proof verification (safety check) ────────────
+      const vkey = await fetch('/circuits/verification_key.json').then((r) => r.json());
+      const proofValid = await snarkjs.groth16.verify(vkey, publicSignals, proof);
+      if (!proofValid) {
+        throw new Error('ZK proof failed local verification — aborting to avoid wasting gas');
+      }
+      console.log('[withdraw-engine] Proof verified locally ✅');
 
       // ── Submit to relayer ──────────────────────────────────
       onProgress({
