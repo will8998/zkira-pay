@@ -1,9 +1,12 @@
 import { Hono } from 'hono';
 import { timingSafeEqual } from 'node:crypto';
+import { JsonRpcProvider, Wallet, Contract, formatUnits } from 'ethers';
 import { db } from '../db/index.js';
 import { ephemeralWallets } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import { encryptPrivateKey, decryptPrivateKey } from '../services/crypto.js';
+import { loadConfig } from '../config.js';
+import { verifyAdminToken } from '../middleware/jwt-auth.js';
 import { loadConfig } from '../config.js';
 import { verifyAdminToken } from '../middleware/jwt-auth.js';
 
@@ -148,6 +151,171 @@ ephemeralWalletRoutes.patch('/api/admin/ephemeral-wallets/:id/status', adminAuth
   } catch (error) {
     console.error('Failed to update ephemeral wallet status:', error);
     return c.json({ error: 'Failed to update status' }, 500);
+  }
+});
+
+// --- Shared constants for on-chain interactions ---
+
+const ERC20_ABI = [
+  'function balanceOf(address) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)',
+];
+
+const TOKEN_ADDRESSES: Record<string, Record<string, string>> = {
+  '42161': {
+    'USDC': '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    'USDT': '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+    'DAI': '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+  },
+  '421614': {
+    'USDC': '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
+    'USDT': '0x3870546cfd600ba87e4726f43a3f53e4f245e23b',
+    'DAI': '0xc5Fa5669E326DA8B2C35540257cD48811F40a36B',
+  },
+};
+
+const TOKEN_DECIMALS: Record<string, number> = {
+  'USDC': 6,
+  'USDT': 6,
+  'DAI': 18,
+};
+
+function getChainId(chain: string | null): string {
+  if (!chain) return '421614';
+  switch (chain.toLowerCase()) {
+    case 'arbitrum':
+    case 'arbitrum-mainnet':
+      return '42161';
+    case 'arbitrum-sepolia':
+    case 'arbitrum-testnet':
+      return '421614';
+    default:
+      return '421614';
+  }
+}
+
+function getTokenAddress(chain: string | null, token: string | null): string | null {
+  if (!token) return null;
+  const chainId = getChainId(chain);
+  const chainTokens = TOKEN_ADDRESSES[chainId];
+  if (!chainTokens) return null;
+  return chainTokens[token.toUpperCase()] || null;
+}
+
+function getProvider(): JsonRpcProvider {
+  const rpcUrl = process.env.ARB_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc';
+  return new JsonRpcProvider(rpcUrl);
+}
+
+// GET /api/admin/ephemeral-wallets/:id/balance — Check on-chain balance (admin only)
+ephemeralWalletRoutes.get('/api/admin/ephemeral-wallets/:id/balance', adminAuth, async (c) => {
+  try {
+    const id = c.req.param('id');
+
+    const [wallet] = await db.select().from(ephemeralWallets).where(eq(ephemeralWallets.id, id)).limit(1);
+    if (!wallet) {
+      return c.json({ error: 'Wallet not found' }, 404);
+    }
+
+    // Tron not supported yet
+    if (wallet.chain?.toLowerCase() === 'tron') {
+      return c.json({ address: wallet.address, balance: null, error: 'Tron balance check not yet supported' });
+    }
+
+    const tokenAddress = getTokenAddress(wallet.chain, wallet.token);
+    if (!tokenAddress) {
+      return c.json({ address: wallet.address, balance: null, error: `Unknown token ${wallet.token} on chain ${wallet.chain}` });
+    }
+
+    const provider = getProvider();
+    const erc20 = new Contract(tokenAddress, ERC20_ABI, provider);
+    const rawBalance: bigint = await erc20.balanceOf(wallet.address);
+    const decimals = TOKEN_DECIMALS[wallet.token?.toUpperCase() || ''] || 18;
+    const balance = formatUnits(rawBalance, decimals);
+
+    return c.json({
+      address: wallet.address,
+      chain: wallet.chain,
+      token: wallet.token,
+      balance,
+      rawBalance: rawBalance.toString(),
+      decimals,
+    });
+  } catch (error) {
+    console.error('Failed to check wallet balance:', error);
+    return c.json({ error: 'Failed to check balance' }, 500);
+  }
+});
+
+// POST /api/admin/ephemeral-wallets/:id/sweep — Manual sweep to treasury (admin only)
+ephemeralWalletRoutes.post('/api/admin/ephemeral-wallets/:id/sweep', adminAuth, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const treasuryAddress = process.env.TREASURY_ADDRESS;
+    if (!treasuryAddress) {
+      return c.json({ error: 'Treasury address not configured' }, 500);
+    }
+
+    const [wallet] = await db.select().from(ephemeralWallets).where(eq(ephemeralWallets.id, id)).limit(1);
+    if (!wallet) {
+      return c.json({ error: 'Wallet not found' }, 404);
+    }
+
+    if (wallet.status === 'swept') {
+      return c.json({ error: 'Wallet has already been swept' }, 400);
+    }
+
+    // Tron not supported yet
+    if (wallet.chain?.toLowerCase() === 'tron') {
+      return c.json({ error: 'Tron sweep not yet supported' }, 400);
+    }
+
+    const tokenAddress = getTokenAddress(wallet.chain, wallet.token);
+    if (!tokenAddress) {
+      return c.json({ error: `Unknown token ${wallet.token} on chain ${wallet.chain}` }, 400);
+    }
+
+    // Decrypt private key and create signer
+    const privateKey = decryptPrivateKey(wallet.encryptedKey, wallet.iv, wallet.authTag, wallet.salt);
+    const provider = getProvider();
+    const signer = new Wallet(privateKey, provider);
+    const erc20 = new Contract(tokenAddress, ERC20_ABI, signer);
+
+    // Check balance
+    const balance: bigint = await erc20.balanceOf(wallet.address);
+    if (balance === 0n) {
+      await db.update(ephemeralWallets)
+        .set({ status: 'empty', updatedAt: new Date() })
+        .where(eq(ephemeralWallets.id, id));
+      return c.json({ error: 'Wallet has zero balance', status: 'empty' }, 400);
+    }
+
+    // Transfer all tokens to treasury
+    const tx = await erc20.transfer(treasuryAddress, balance);
+    const receipt = await tx.wait(1);
+
+    if (receipt) {
+      await db.update(ephemeralWallets)
+        .set({ status: 'swept', txHash: receipt.hash, updatedAt: new Date() })
+        .where(eq(ephemeralWallets.id, id));
+
+      const decimals = TOKEN_DECIMALS[wallet.token?.toUpperCase() || ''] || 18;
+      return c.json({
+        success: true,
+        txHash: receipt.hash,
+        amount: formatUnits(balance, decimals),
+        token: wallet.token,
+      });
+    }
+
+    return c.json({ error: 'Transaction failed — no receipt' }, 500);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    if (message.includes('insufficient funds') || message.includes('gas')) {
+      return c.json({ error: 'Wallet needs ETH for gas to sweep. Fund the wallet with ETH first.' }, 400);
+    }
+    console.error('Failed to sweep wallet:', error);
+    return c.json({ error: 'Failed to sweep wallet' }, 500);
   }
 });
 
