@@ -7,8 +7,6 @@ import { eq, desc } from 'drizzle-orm';
 import { encryptPrivateKey, decryptPrivateKey } from '../services/crypto.js';
 import { loadConfig } from '../config.js';
 import { verifyAdminToken } from '../middleware/jwt-auth.js';
-import { loadConfig } from '../config.js';
-import { verifyAdminToken } from '../middleware/jwt-auth.js';
 
 const ephemeralWalletRoutes = new Hono();
 
