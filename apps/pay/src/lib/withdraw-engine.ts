@@ -279,7 +279,7 @@ export async function executeBatchWithdrawal(
 
     // ── Verify root on-chain before generating proof ──────
     const { JsonRpcProvider: RpcProvider, Contract: RpcContract } = await import('ethers');
-    const verifyProvider = new RpcProvider(CHAIN_CONFIGS[chain].rpcUrl);
+    const verifyProvider = new RpcProvider(getChainConfig(chain).rpcUrl);
     const verifyPoolContract = new RpcContract(poolAddr, [
       'function isKnownRoot(bytes32 _root) external view returns (bool)',
       'function getLastRoot() external view returns (bytes32)',
