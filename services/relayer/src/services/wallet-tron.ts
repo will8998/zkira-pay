@@ -49,10 +49,7 @@ export class TronRelayerWallet {
 
     // Dynamic import for ESM compatibility
     const TronWebModule = await import('tronweb');
-    const TronWeb = TronWebModule.default || TronWebModule;
-
-    // Create TronWeb instance — cast via unknown to bypass module type narrowing
-    const TronWebConstructor = TronWeb as unknown as new (opts: { fullHost: string; privateKey: string }) => TronWebInstance;
+    const TronWebConstructor = TronWebModule.TronWeb as unknown as new (opts: { fullHost: string; privateKey: string }) => TronWebInstance;
     const tronWeb = new TronWebConstructor({
       fullHost,
       privateKey,
