@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { getExplorerTxUrl, CHAIN_CONFIGS, type Chain } from '@/config/pool-registry';
 
 interface PaymentSuccessProps {
@@ -28,6 +29,7 @@ export function PaymentSuccess({
   chain = 'arbitrum',
   amount,
 }: PaymentSuccessProps) {
+  const t = useTranslations('paymentSuccess');
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -66,7 +68,7 @@ export function PaymentSuccess({
               OMNIPAY
             </div>
             <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium">
-              PRIVATE PAYMENT
+              {t('privatePayment')}
             </div>
           </div>
 
@@ -90,7 +92,7 @@ export function PaymentSuccess({
               <label
                 className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-3"
               >
-                CLAIM CODE
+                {t('claimCode')}
               </label>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
@@ -103,7 +105,7 @@ export function PaymentSuccess({
                   onClick={() => copyToClipboard(claimCode, setCopiedCode)}
                   className="px-6 py-3 bg-[var(--color-button)] hover:bg-[var(--color-button-hover)] text-[var(--color-bg)] font-medium transition-colors btn-press min-h-[48px]"
                 >
-                  {copiedCode ? '✓ COPIED' : 'COPY'}
+                  {copiedCode ? t('copied') : t('copy')}
                 </button>
               </div>
             </div>
@@ -115,7 +117,7 @@ export function PaymentSuccess({
               <label
                 className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-3"
               >
-                ENCRYPTION PASSWORD
+                {t('encryptionPassword')}
               </label>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
@@ -128,7 +130,7 @@ export function PaymentSuccess({
                   onClick={() => copyToClipboard(encryptionKey, setCopiedKey)}
                   className="px-6 py-3 bg-[var(--color-button)] hover:bg-[var(--color-button-hover)] text-[var(--color-bg)] font-medium transition-colors btn-press min-h-[48px]"
                 >
-                  {copiedKey ? '✓ COPIED' : 'COPY'}
+                  {copiedKey ? t('copied') : t('copy')}
                 </button>
               </div>
             </div>
@@ -137,13 +139,13 @@ export function PaymentSuccess({
           {/* What Happens Next */}
           <div className="border-t border-[var(--color-border)] pt-6">
             <h3 className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-4">
-              WHAT HAPPENS NEXT
+              {t('whatHappensNext')}
             </h3>
             <div className="space-y-3">
               {[
-                { step: '1', text: 'Share the claim code and password with the recipient' },
-                { step: '2', text: 'Recipient enters both on the Claim page' },
-                { step: '3', text: 'Funds are withdrawn from the shielded pool — fully private' },
+                { step: '1', text: t('step1Send') },
+                { step: '2', text: t('step2Send') },
+                { step: '3', text: t('step3Send') },
               ].map(({ step, text }) => (
                 <div key={step} className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-[var(--color-hover)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
@@ -173,7 +175,7 @@ export function PaymentSuccess({
               OMNIPAY
             </div>
             <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium">
-              INVOICE
+              {t('invoice')}
             </div>
           </div>
 
@@ -193,7 +195,7 @@ export function PaymentSuccess({
           {invoiceUrl && (
             <div className="mb-6">
               <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-3">
-                INVOICE LINK
+                {t('invoiceLink')}
               </label>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
@@ -206,7 +208,7 @@ export function PaymentSuccess({
                   onClick={() => copyToClipboard(invoiceUrl, setCopiedUrl)}
                   className="px-6 py-3 bg-[var(--color-green)] hover:bg-[var(--color-green-hover)] text-[var(--color-bg)] font-medium transition-colors btn-press min-h-[48px]"
                 >
-                  {copiedUrl ? '✓ COPIED' : 'COPY'}
+                  {copiedUrl ? t('copied') : t('copy')}
                 </button>
               </div>
             </div>
@@ -214,13 +216,13 @@ export function PaymentSuccess({
 
           <div className="border-t border-[var(--color-border)] pt-6">
             <h3 className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-4">
-              WHAT HAPPENS NEXT
+              {t('whatHappensNext')}
             </h3>
             <div className="space-y-3">
               {[
-                { step: '1', text: 'Share the invoice link with the payer' },
-                { step: '2', text: 'Payer deposits into the shielded pool' },
-                { step: '3', text: 'Claim funds once payment is confirmed' },
+                { step: '1', text: t('step1Invoice') },
+                { step: '2', text: t('step2Invoice') },
+                { step: '3', text: t('step3Invoice') },
               ].map(({ step, text }) => (
                 <div key={step} className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-[var(--color-hover)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
@@ -255,11 +257,13 @@ export function PaymentSuccess({
             className="text-2xl md:text-4xl font-bold mb-4 text-[var(--color-text)]"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            {type === 'claim_complete' ? 'Payment Claimed!' : 'Invoice Paid!'}
+            {type === 'claim_complete' ? t('paymentClaimed') : t('invoicePaid')}
           </h2>
 
           <p className="text-[var(--color-text-secondary)] mb-8 text-base md:text-lg">
             {type === 'claim_complete'
+              ? t('fundsWithdrawnDesc')
+              : t('depositsSubmittedDesc')}
               ? 'Funds have been withdrawn from the shielded pool to your address.'
               : 'Deposits have been submitted to the shielded pool.'}
           </p>
@@ -267,7 +271,7 @@ export function PaymentSuccess({
           {amount && (
             <div className="mb-8">
               <span className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium">
-                AMOUNT
+                {t('amountLabel')}
               </span>
               <p
                 className="text-3xl font-bold text-[var(--color-text)] mt-2"
@@ -282,7 +286,7 @@ export function PaymentSuccess({
           {txHashes && txHashes.length > 0 && (
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 mb-8 max-w-lg mx-auto rounded-xl text-left">
               <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-secondary)] font-medium mb-3">
-                TRANSACTIONS
+                {t('transactionsLabel')}
               </label>
               <div className="space-y-2">
                 {txHashes.map((hash, i) => (
@@ -299,7 +303,7 @@ export function PaymentSuccess({
                       rel="noopener noreferrer"
                       className="text-sm text-[var(--color-button)] hover:text-[var(--color-button-hover)] underline shrink-0"
                     >
-                      View on {chainName} →
+                      {t('viewOnExplorer', { chain: chainName })}
                     </a>
                   </div>
                 ))}
@@ -318,7 +322,7 @@ export function PaymentSuccess({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to Home
+          {t('backToHome')}
         </a>
       </div>
     </div>

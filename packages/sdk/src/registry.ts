@@ -156,7 +156,7 @@ export const CHAIN_CONFIGS_TESTNET: Record<Chain, ChainConfig> = {
         name: 'Tether USD (Test)',
         symbol: 'USDT',
         decimals: 6,
-        address: 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj', // Nile USDT
+        address: 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf', // Nile USDT (TetherToken with isBlackListed)
         hasBlacklistCheck: false,
       },
     ],
@@ -250,7 +250,10 @@ export const POOL_REGISTRY_TESTNET: Record<Chain, Record<TokenId, PoolEntry[]>> 
   },
   tron: {
     usdc: [],
-    usdt: [],
+    usdt: [
+      { address: 'TSTVYJEyhWQvqYa5i4A7aje9Yq9KYWgS5S', token: 'usdt', denomination: '10000000', label: '10 USDT', chain: 'tron' },
+      { address: 'TN1jEvUsFDtFJx9iAscaDQYU6UoVXgX3Tt', token: 'usdt', denomination: '100000000', label: '100 USDT', chain: 'tron' },
+    ],
     dai: [],
   },
 };

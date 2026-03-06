@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { generateX25519Keypair, boxDecrypt } from '@/lib/dead-drop-crypto';
 import type {
@@ -83,6 +84,8 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
 }
 
 export function RequestPaymentWizard() {
+  const t = useTranslations('requestWizard');
+
   // Selection
   const [chain, setChain] = useState<Chain>('arbitrum');
   const [token, setToken] = useState<TokenId>('usdc');
@@ -163,7 +166,7 @@ export function RequestPaymentWizard() {
   // Create invoice
   const createInvoice = useCallback(async () => {
     if (!denomSet || denomSet.selections.length === 0) {
-      toast.error('Select at least one denomination');
+      toast.error(t('selectDenomination'));
       return;
     }
 
@@ -216,7 +219,7 @@ export function RequestPaymentWizard() {
       const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/pay?invoice=${invoiceId}`;
       setInvoiceUrl(url);
       setStep('created');
-      toast.success('Invoice created!');
+      toast.success(t('invoiceCreated'));
 
       // Log to local history
       logRequest({
@@ -227,7 +230,7 @@ export function RequestPaymentWizard() {
         invoiceId,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
+      toast.error(error instanceof Error ? error.message : t('failedToCreateInvoice'));
     }
   }, [denomSet, chain, token, memo]);
 
@@ -270,7 +273,7 @@ export function RequestPaymentWizard() {
 
               setReceivedNotes(decryptedNotes);
               setStep('address');
-              toast.success(`${decryptedNotes.length} deposit notes received!`);
+              toast.success(t('depositNotesReceived', { count: decryptedNotes.length }));
               return;
             }
           }
@@ -317,10 +320,10 @@ export function RequestPaymentWizard() {
       setWithdrawResults(results);
       setTxHashes(results.map((r) => r.txHash));
       setStep('complete');
-      toast.success('All withdrawals complete! Funds are on the way.');
+      toast.success(t('allWithdrawalsComplete'));
     } catch (error) {
-      setWithdrawError(error instanceof Error ? error.message : 'Withdrawal failed');
-      toast.error(error instanceof Error ? error.message : 'Withdrawal failed');
+      setWithdrawError(error instanceof Error ? error.message : t('withdrawalFailed'));
+      toast.error(error instanceof Error ? error.message : t('withdrawalFailed'));
     }
   }, [receivedNotes, destinationAddress, isValidAddress]);
 
@@ -335,10 +338,10 @@ export function RequestPaymentWizard() {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      toast.success('Copied!');
+      toast.success(t('copied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('failedToCopy'));
     }
   }, []);
 
@@ -356,13 +359,13 @@ export function RequestPaymentWizard() {
           className="text-2xl md:text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-1"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          REQUEST PAYMENT
+          {t('title')}
         </h1>
         <p 
           className="text-xs md:text-sm uppercase tracking-wider text-[var(--color-muted)] mb-4"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          GENERATE A CONFIDENTIAL INVOICE LINK
+          {t('subtitle')}
         </p>
         {/* Accent line */}
         <div className="w-full h-0.5 bg-[var(--color-button)]"></div>
@@ -380,7 +383,7 @@ export function RequestPaymentWizard() {
                 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-4"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                AMOUNT
+                {t('amount')}
               </div>
               
               <div className="flex items-center justify-between">
@@ -427,7 +430,7 @@ export function RequestPaymentWizard() {
 
             {/* Helper text */}
             <p className="text-xs md:text-sm text-[var(--color-text-secondary)] mb-6">
-              Enter the amount you want to receive in {getCurrentTokenInfo()?.symbol || 'USDC'}.
+              {t('enterReceiveAmount', { symbol: getCurrentTokenInfo()?.symbol || 'USDC' })}
             </p>
 
             {/* Denomination Split Preview - collapsible */}
@@ -439,7 +442,7 @@ export function RequestPaymentWizard() {
                   className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits</span>
+                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} {t('deposits')}</span>
                   <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
                 </button>
 
@@ -478,13 +481,13 @@ export function RequestPaymentWizard() {
                       className="text-[var(--color-text)] font-bold"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Total: {denomSet.totalLabel}
+                      {t('total')}: {denomSet.totalLabel}
                     </span>
                     <span
                       className="text-[var(--color-text-secondary)]"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
+                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} {t('deposits')}
                     </span>
                   </div>
 
@@ -495,12 +498,16 @@ export function RequestPaymentWizard() {
                       <div>
                         <span className="font-bold text-[var(--color-warning-text)]">{denomSet.remainderLabel}</span>
                         <span className="text-[var(--color-text-secondary)] ml-1">
-                          cannot be covered by pool denominations. Consider rounding to ${(parseFloat(amount) - denomSet.remainder).toLocaleString()} or adding ${((() => {
-                            const nextUp = denomSet.selections[denomSet.selections.length - 1];
-                            const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
-                            const denomValue = Number(BigInt(nextUp.pool.denomination)) / Math.pow(10, tokenInfo?.decimals || 6);
-                            return denomValue.toLocaleString();
-                          })())} to reach the next clean amount.
+                          {t('remainderWarning', { 
+                            remainderLabel: denomSet.remainderLabel,
+                            roundedAmount: (parseFloat(amount) - denomSet.remainder).toLocaleString(),
+                            nextDenomValue: (() => {
+                              const nextUp = denomSet.selections[denomSet.selections.length - 1];
+                              const tokenInfo = getChainConfig(chain).tokens.find(t => t.id === token);
+                              const denomValue = Number(BigInt(nextUp.pool.denomination)) / Math.pow(10, tokenInfo?.decimals || 6);
+                              return denomValue.toLocaleString();
+                            })()
+                          })}
                         </span>
                       </div>
                     </div>
@@ -512,17 +519,17 @@ export function RequestPaymentWizard() {
                     const uniqueDenoms = denomSet.selections.length;
                     let icon: string, label: string, color: string, tip: string;
                     if (depositCount === 1) {
-                      icon = '🟢'; label = 'Maximum Privacy'; color = 'var(--color-green)';
-                      tip = 'Single pool deposit — blends with the largest anonymity set.';
+                      icon = '🟢'; label = t('maximumPrivacy'); color = 'var(--color-green)';
+                      tip = t('maximumPrivacyTip');
                     } else if (uniqueDenoms === 1) {
-                      icon = '🟢'; label = 'Strong Privacy'; color = 'var(--color-green)';
-                      tip = `${depositCount} deposits of the same denomination — each blends into its own anonymity set.`;
+                      icon = '🟢'; label = t('strongPrivacy'); color = 'var(--color-green)';
+                      tip = t('strongPrivacyTip', { count: depositCount });
                     } else if (uniqueDenoms <= 2) {
-                      icon = '🟡'; label = 'Good Privacy'; color = 'var(--color-warning-text)';
-                      tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
+                      icon = '🟡'; label = t('goodPrivacy'); color = 'var(--color-warning-text)';
+                      tip = t('goodPrivacyTip');
                     } else {
-                      icon = '🟠'; label = 'Moderate Privacy'; color = 'var(--color-warning-text)';
-                      tip = `${uniqueDenoms} different denominations create a unique fingerprint.`;
+                      icon = '🟠'; label = t('moderatePrivacy'); color = 'var(--color-warning-text)';
+                      tip = t('moderatePrivacyTip', { count: uniqueDenoms });
                     }
                     return (
                       <div className="flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
@@ -547,7 +554,7 @@ export function RequestPaymentWizard() {
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 <span className={`transform transition-transform ${advancedOpen ? 'rotate-90' : ''}`}>›</span>
-                Advanced options
+                {t('advancedOptions')}
               </button>
               
               <div 
@@ -562,7 +569,7 @@ export function RequestPaymentWizard() {
                       className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Network:
+                      {t('network')}:
                     </h4>
                     <div className="grid grid-cols-2 gap-2">
                       {getAvailableChains().map((chainOption) => {
@@ -600,7 +607,7 @@ export function RequestPaymentWizard() {
                       className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Token:
+                      {t('token')}:
                     </h4>
                     <div className="grid grid-cols-3 gap-2">
                       {getAvailableTokensForChain(chain).map((tokenInfo) => (
@@ -630,13 +637,13 @@ export function RequestPaymentWizard() {
                       className="block text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Memo:
+                      {t('memo')}:
                     </label>
                     <input
                       type="text"
                       value={memo}
                       onChange={(e) => setMemo(e.target.value)}
-                      placeholder="What is this payment for?"
+                      placeholder={t('memoPlaceholder')}
                       className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors rounded-lg"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     />
@@ -652,9 +659,9 @@ export function RequestPaymentWizard() {
 
             {/* Fee Info Line */}
             <div className="flex items-center justify-center gap-1 text-xs text-[var(--color-text-secondary)] mb-6">
-              <span>0.25% fee</span>
-              <InfoTooltip text="A small fee is charged when the payer claims their funds back from expired invoices. This covers gas costs for processing withdrawals." />
-              <span>charged on claim</span>
+              <span>{t('feeRate')}</span>
+              <InfoTooltip text={t('feeTooltip')} />
+              <span>{t('chargedOnClaim')}</span>
             </div>
 
             {/* Action Button */}
@@ -664,7 +671,7 @@ export function RequestPaymentWizard() {
               className="w-full py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              <span className="uppercase tracking-wide">Generate Invoice Link</span>
+              <span className="uppercase tracking-wide">{t('generateInvoice')}</span>
             </button>
           </div>
         </div>
@@ -679,10 +686,10 @@ export function RequestPaymentWizard() {
               className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Invoice Created
+              {t('invoiceCreated')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm mb-6">
-              Share this link with the payer. Amount: {invoice.totalLabel}
+              {t('shareLink', { amount: invoice.totalLabel })}
             </p>
 
             <div className="bg-[var(--color-bg)] border border-[var(--color-border)] p-4 rounded-xl mb-4">
@@ -698,7 +705,7 @@ export function RequestPaymentWizard() {
               className="px-6 py-3 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              {copiedUrl ? '✓ Copied' : '📋 Copy Invoice Link'}
+              {copiedUrl ? t('copied') : t('copyInvoiceLink')}
             </button>
           </div>
 
@@ -707,7 +714,7 @@ export function RequestPaymentWizard() {
             className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            WAIT FOR PAYMENT →
+            {t('waitForPayment')}
           </button>
         </div>
       )}
@@ -723,10 +730,10 @@ export function RequestPaymentWizard() {
               className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Waiting for Payment
+              {t('waitingForPayment')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm">
-              Polling for deposits from the payer... Keep this tab open.
+              {t('pollingDeposits')}
             </p>
           </div>
 
@@ -737,7 +744,7 @@ export function RequestPaymentWizard() {
             }}
             className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            ← Back to Invoice
+            {t('backToInvoice')}
           </button>
         </div>
       )}
@@ -752,10 +759,10 @@ export function RequestPaymentWizard() {
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Payment Received!
+                {t('paymentReceived')}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {receivedNotes.length} deposit{receivedNotes.length !== 1 ? 's' : ''} decrypted.
+                {t('depositsDecrypted', { count: receivedNotes.length })}
                 Enter your wallet address to withdraw.
               </p>
             </div>
@@ -766,20 +773,20 @@ export function RequestPaymentWizard() {
                   <span className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
                     #{i + 1} — {getDenomLabel(note)}
                   </span>
-                  <span className="text-sm text-[var(--color-green)]">✓ Ready</span>
+                  <span className="text-sm text-[var(--color-green)]">{t('ready')}</span>
                 </div>
               ))}
             </div>
 
             <div className="space-y-3">
               <label className="block text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wide" style={{ fontFamily: 'var(--font-mono)' }}>
-                Withdraw To
+                {t('withdrawTo')}
               </label>
               <input
                 type="text"
                 value={destinationAddress}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                placeholder="0x... your Ethereum / Arbitrum address"
+                placeholder={t('addressPlaceholder')}
                 className={`w-full px-4 py-3 bg-[var(--color-bg)] border text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none transition-colors ${
                   isValidAddress ? 'border-[var(--color-green)]' : destinationAddress && !isValidAddress ? 'border-red-500' : 'border-[var(--color-border)] focus:border-[var(--color-button)]'
                 }`}
@@ -787,7 +794,7 @@ export function RequestPaymentWizard() {
                 autoFocus
               />
               {destinationAddress && !isValidAddress && (
-                <p className="text-sm text-red-500">Invalid Ethereum address</p>
+                <p className="text-sm text-red-500">{t('invalidAddress')}</p>
               )}
             </div>
           </div>
@@ -798,7 +805,7 @@ export function RequestPaymentWizard() {
             className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            WITHDRAW ALL {receivedNotes.length} NOTE{receivedNotes.length !== 1 ? 'S' : ''} →
+            {t('withdrawAll', { count: receivedNotes.length })}
           </button>
         </div>
       )}
@@ -809,10 +816,10 @@ export function RequestPaymentWizard() {
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
-                {withdrawError ? 'Withdrawal Error' : `Withdrawing ${(withdrawProgress?.noteIndex ?? 0) + 1} of ${receivedNotes.length}`}
+                {withdrawError ? t('withdrawalError') : t('withdrawing', { current: (withdrawProgress?.noteIndex ?? 0) + 1, total: receivedNotes.length })}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {withdrawError ?? withdrawProgress?.message ?? 'Preparing...'}
+                {withdrawError ?? withdrawProgress?.message ?? t('preparing')}
               </p>
             </div>
 
@@ -835,14 +842,14 @@ export function RequestPaymentWizard() {
                       #{i + 1} — {getDenomLabel(note)}
                     </span>
                     <span className="text-sm">
-                      {completed && <span className="text-[var(--color-green)]">✓ Done</span>}
+                      {completed && <span className="text-[var(--color-green)]">{t('done')}</span>}
                       {isActive && (
                         <span className="text-[var(--color-button)] flex items-center gap-1">
                           <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
-                          {withdrawProgress?.stage === 'tree' ? 'Tree...' : withdrawProgress?.stage === 'proof' ? 'ZK Proof...' : 'Submitting...'}
+                          {withdrawProgress?.stage === 'tree' ? t('treeStage') : withdrawProgress?.stage === 'proof' ? t('zkProofStage') : t('submittingStage')}
                         </span>
                       )}
-                      {!completed && !isActive && <span className="text-[var(--color-text-secondary)]">Pending</span>}
+                      {!completed && !isActive && <span className="text-[var(--color-text-secondary)]">{t('pending')}</span>}
                     </span>
                   </div>
                 );
@@ -851,7 +858,7 @@ export function RequestPaymentWizard() {
 
             {withdrawError && (
               <button onClick={withdrawAll} className="w-full mt-6 px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg" style={{ fontFamily: 'var(--font-mono)' }}>
-                RETRY WITHDRAWAL
+                {t('retryWithdrawal')}
               </button>
             )}
           </div>
@@ -860,7 +867,7 @@ export function RequestPaymentWizard() {
             <div className="bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)] p-4 rounded-xl">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">⚠️</span>
-                <div className="text-sm text-[var(--color-warning-text)]"><strong>DO NOT CLOSE THIS TAB</strong> — withdrawals are in progress.</div>
+                <div className="text-sm text-[var(--color-warning-text)]"><strong>{t('doNotClose')}</strong> — {t('withdrawalsInProgress')}</div>
               </div>
             </div>
           )}
@@ -873,10 +880,10 @@ export function RequestPaymentWizard() {
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
             <div className="text-6xl mb-4">✅</div>
             <h2 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
-              Funds Withdrawn!
+              {t('fundsWithdrawn')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm mb-4">
-              {withdrawResults.length} withdrawal{withdrawResults.length !== 1 ? 's' : ''} complete. Funds will arrive within ~1 minute.
+              {t('withdrawalsComplete', { count: withdrawResults.length })}
             </p>
 
             {withdrawResults.length > 0 && (
@@ -919,7 +926,7 @@ export function RequestPaymentWizard() {
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            Create Another Invoice
+            {t('createAnother')}
           </button>
         </div>
       )}

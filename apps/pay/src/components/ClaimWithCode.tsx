@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { deriveDeadDropId } from '@/lib/claim-code';
 import { aesDecrypt } from '@/lib/dead-drop-crypto';
@@ -18,6 +19,7 @@ interface ClaimWithCodeProps {
 }
 
 export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
+  const t = useTranslations('claimFlow');
   const [step, setStep] = useState<ClaimStep>('enter-code');
   const [claimCode, setClaimCode] = useState(initialCode ?? '');
   const [encryptionKey, setEncryptionKey] = useState('');
@@ -34,7 +36,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
   // Fetch, decrypt the dead drop, then move to address step
   const handleClaim = useCallback(async () => {
     if (!claimCode.trim() || !encryptionKey.trim()) {
-      toast.error('Please enter both the claim code and password');
+      toast.error(t('enterBothFields'));
       return;
     }
 
@@ -44,9 +46,9 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
 
       const response = await fetch(`${API_URL}/api/dead-drop/${dropId}`);
       if (!response.ok) {
-        if (response.status === 404) throw new Error('Claim code not found');
-        if (response.status === 410) throw new Error('Claim code expired');
-        throw new Error('Failed to retrieve payment');
+        if (response.status === 404) throw new Error(t('claimCodeNotFound'));
+        if (response.status === 410) throw new Error(t('claimCodeExpired'));
+        throw new Error(t('failedToRetrieve'));
       }
 
       const data = await response.json();
@@ -61,7 +63,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
       // Mark as claimed
       await fetch(`${API_URL}/api/dead-drop/${dropId}/claim`, { method: 'PATCH' });
 
-      toast.success(`${decryptedBundle.notes.length} deposit note${decryptedBundle.notes.length !== 1 ? 's' : ''} decrypted!`);
+      toast.success(t('depositNotesDecrypted', { count: decryptedBundle.notes.length }));
 
       // Log to local history
       logClaim({
@@ -72,7 +74,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
         claimCode: claimCode.trim(),
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to claim payment');
+      toast.error(error instanceof Error ? error.message : t('failedToClaim'));
     } finally {
       setIsLoading(false);
     }
@@ -101,10 +103,10 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
 
       setWithdrawResults(results);
       setStep('complete');
-      toast.success('All withdrawals complete! Funds are on the way.');
+      toast.success(t('allWithdrawalsComplete'));
     } catch (error) {
-      setWithdrawError(error instanceof Error ? error.message : 'Withdrawal failed');
-      toast.error(error instanceof Error ? error.message : 'Withdrawal failed');
+      setWithdrawError(error instanceof Error ? error.message : t('withdrawalFailed'));
+      toast.error(error instanceof Error ? error.message : t('withdrawalFailed'));
     }
   }, [bundle, destinationAddress, isValidAddress]);
 
@@ -123,10 +125,10 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
           className="text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          Claim Payment
+          {t('title')}
         </h1>
         <p className="text-[var(--color-text-secondary)] text-sm">
-          Enter the claim code and password to withdraw funds to your wallet.
+          {t('description')}
         </p>
       </div>
 
@@ -139,13 +141,13 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2 uppercase tracking-wide"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Claim Code
+                {t('claimCodeLabel')}
               </label>
               <input
                 type="text"
                 value={claimCode}
                 onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
-                placeholder="OMNIPAY-XXXX-XXXX"
+                placeholder={t('claimCodePlaceholder')}
                 className="w-full px-4 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-center text-xl tracking-widest placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors"
                 style={{ fontFamily: 'var(--font-mono)' }}
               />
@@ -156,13 +158,13 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2 uppercase tracking-wide"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Encryption Password
+                {t('encryptionPasswordLabel')}
               </label>
               <input
                 type="password"
                 value={encryptionKey}
                 onChange={(e) => setEncryptionKey(e.target.value)}
-                placeholder="Paste the encryption password"
+                placeholder={t('encryptionPasswordPlaceholder')}
                 className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:border-[var(--color-button)] focus:outline-none transition-colors"
                 style={{ fontFamily: 'var(--font-mono)' }}
               />
@@ -181,10 +183,10 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span>DECRYPTING...</span>
+                <span>{t('decrypting')}</span>
               </>
             ) : (
-              'CLAIM PAYMENT →'
+              {t('claimButton')}
             )}
           </button>
         </div>
@@ -201,10 +203,10 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Payment Decrypted
+                {t('paymentDecrypted')}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {bundle.notes.length} deposit{bundle.notes.length !== 1 ? 's' : ''} found.
+                {t('depositsFound', { count: bundle.notes.length })}
                 Enter your wallet address to withdraw all at once.
               </p>
             </div>
@@ -222,7 +224,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                   >
                     #{i + 1} — {getDenomLabel(note)}
                   </span>
-                  <span className="text-sm text-[var(--color-green)]">✓ Ready</span>
+                  <span className="text-sm text-[var(--color-green)]">{t('ready')}</span>
                 </div>
               ))}
             </div>
@@ -233,13 +235,13 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 className="block text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wide"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Withdraw To
+                {t('withdrawTo')}
               </label>
               <input
                 type="text"
                 value={destinationAddress}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                placeholder="0x... your Ethereum / Arbitrum address"
+                placeholder={t('addressPlaceholder')}
                 className={`w-full px-4 py-3 bg-[var(--color-bg)] border text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none transition-colors ${
                   isValidAddress
                     ? 'border-[var(--color-green)]'
@@ -251,7 +253,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 autoFocus
               />
               {destinationAddress && !isValidAddress && (
-                <p className="text-sm text-red-500">Invalid Ethereum address</p>
+                <p className="text-sm text-red-500">{t('invalidAddress')}</p>
               )}
             </div>
           </div>
@@ -262,7 +264,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
             className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            WITHDRAW ALL {bundle.notes.length} NOTE{bundle.notes.length !== 1 ? 'S' : ''} →
+            {t('withdrawAll', { count: bundle.notes.length })}
           </button>
 
           <button
@@ -275,7 +277,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
             }}
             className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            ← Back
+            {t('back')}
           </button>
         </div>
       )}
@@ -290,13 +292,13 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 {withdrawError
-                  ? 'Withdrawal Error'
-                  : `Withdrawing ${(withdrawProgress?.noteIndex ?? 0) + 1} of ${bundle.notes.length}`}
+                  ? t('withdrawalError')
+                  : t('withdrawing', { current: (withdrawProgress?.noteIndex ?? 0) + 1, total: bundle.notes.length })}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
                 {withdrawError
                   ? withdrawError
-                  : withdrawProgress?.message ?? 'Preparing...'}
+                  : withdrawProgress?.message ?? t('preparing')
               </p>
             </div>
 
@@ -335,7 +337,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                       #{i + 1} — {getDenomLabel(note)}
                     </span>
                     <span className="text-sm">
-                      {completed && <span className="text-[var(--color-green)]">✓ Done</span>}
+                      {completed && <span className="text-[var(--color-green)]">{t('done')}</span>}
                       {isActive && (
                         <span className="text-[var(--color-button)] flex items-center gap-1">
                           <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -343,13 +345,13 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
                           {withdrawProgress?.stage === 'tree'
-                            ? 'Tree...'
+                            ? t('treeStage')
                             : withdrawProgress?.stage === 'proof'
-                            ? 'ZK Proof...'
-                            : 'Submitting...'}
+                            ? t('zkProofStage')
+                            : t('submittingStage')}
                         </span>
                       )}
-                      {isPending && <span className="text-[var(--color-text-secondary)]">Pending</span>}
+                      {isPending && <span className="text-[var(--color-text-secondary)]">{t('pending')}</span>}
                     </span>
                   </div>
                 );
@@ -364,7 +366,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                   className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  RETRY WITHDRAWAL
+                  {t('retryWithdrawal')}
                 </button>
               </div>
             )}
@@ -375,7 +377,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">⚠️</span>
                 <div className="text-sm text-[var(--color-warning-text)]">
-                  <strong>DO NOT CLOSE THIS TAB</strong> — withdrawals are in progress.
+                  <strong>{t('doNotClose')}</strong> — {t('withdrawalsInProgress')}
                   Each withdrawal requires a zero-knowledge proof which takes a moment.
                 </div>
               </div>
@@ -393,10 +395,10 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Funds Withdrawn!
+              {t('fundsWithdrawn')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm">
-              {withdrawResults.length} withdrawal{withdrawResults.length !== 1 ? 's' : ''} complete.
+              {t('withdrawalsComplete', { count: withdrawResults.length })}
               Funds will arrive in your wallet within ~1 minute.
             </p>
           </div>
@@ -408,7 +410,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Transactions
+                {t('transactions')}
               </h3>
               {withdrawResults.map((result, i) => {
                 const note = bundle.notes[result.noteIndex];
@@ -452,7 +454,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            Claim Another Payment
+            {t('claimAnother')}
           </button>
         </div>
       )}

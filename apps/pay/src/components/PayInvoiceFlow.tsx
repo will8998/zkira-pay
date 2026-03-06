@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 import { boxEncrypt } from '@/lib/dead-drop-crypto';
@@ -25,6 +26,7 @@ interface DenominationEntry {
 }
 
 export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
+  const t = useTranslations('payInvoice');
   const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   const [step, setStep] = useState<FlowStep>('loading');
@@ -56,13 +58,13 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
       try {
         const res = await fetch(`${API_URL}/api/invoices/v2/${invoiceId}`);
         if (!res.ok) {
-          throw new Error(res.status === 404 ? 'Invoice not found' : 'Failed to load invoice');
+          throw new Error(res.status === 404 ? t('notFound') : t('failedToLoad'));
         }
         const data = await res.json();
         setInvoice(data);
         setStep('review');
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'Failed to load invoice');
+        setErrorMessage(error instanceof Error ? error.message : t('failedToLoad'));
         setStep('error');
       }
     };
@@ -260,11 +262,11 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
       });
 
       setStep('complete');
-      toast.success('Invoice paid!');
+      toast.success(t('invoicePaid'));
       clearWallet();
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
-      toast.error(error instanceof Error ? error.message : 'Payment failed');
+      toast.error(error instanceof Error ? error.message : t('paymentFailed'));
       setStep('review');
     }
   }, [invoice, isCreated, createWallet, buildQueue, executeDeposit]);
@@ -277,10 +279,10 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
           className="text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          Pay Invoice
+          {t('title')}
         </h1>
         <p className="text-[var(--color-text-secondary)] text-sm">
-          Fund this invoice via shielded pool deposits.
+          {t('description')}
         </p>
       </div>
 
@@ -288,7 +290,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
       {step === 'loading' && (
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-xl text-center">
           <div className="w-12 h-12 border-4 border-[var(--color-border)] border-t-[var(--color-button)] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[var(--color-text-secondary)]">Loading invoice...</p>
+          <p className="text-[var(--color-text-secondary)]">{t('loadingInvoice')}</p>
         </div>
       )}
 
@@ -334,7 +336,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
               </div>
             </div>
             <p className="text-xs text-[var(--color-text-secondary)] text-center mb-4">
-              Scan to open this invoice
+              {t('scanToOpen')}
             </p>
 
             {/* Denomination toggle */}
@@ -343,7 +345,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
               className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              <span>{invoice.totalLabel} — {invoice.denominations.reduce((sum, d) => sum + d.count, 0)} deposits</span>
+              <span>{invoice.totalLabel} — {invoice.denominations.reduce((sum, d) => sum + d.count, 0)} {t('deposits')}</span>
               <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
             </button>
 
@@ -364,7 +366,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
             </div>
 
             <div className="text-center text-xs text-[var(--color-text-secondary)]">
-              Network: {invoice.chain.toUpperCase()} · Token: {invoice.token.toUpperCase()}
+              {t('networkToken', { chain: invoice.chain.toUpperCase(), token: invoice.token.toUpperCase() })}
             </div>
 
           </div>
@@ -374,7 +376,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
             className="w-full px-6 py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors btn-press rounded-lg"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            PAY {invoice.totalLabel} →
+            {t('payButton', { amount: invoice.totalLabel })}
           </button>
         </div>
       )}
@@ -388,13 +390,13 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Deposit {currentDepositIndex + 1} of {totalDeposits}
+                {t('depositProgress', { current: currentDepositIndex + 1, total: totalDeposits })}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {depositStatus === 'waiting' && 'Preparing...'}
-                {depositStatus === 'funding' && 'Send funds to the address below'}
-                {depositStatus === 'approving' && 'Approving token spend...'}
-                {depositStatus === 'depositing' && 'Depositing into shielded pool...'}
+                {depositStatus === 'waiting' && t('preparing')}
+                {depositStatus === 'funding' && t('sendFundsBelow')}
+                {depositStatus === 'approving' && t('approvingToken')}
+                {depositStatus === 'depositing' && t('depositingPool')}
               </p>
             </div>
 
@@ -429,7 +431,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
             <div className="flex items-center gap-3">
               <span className="text-2xl">⚠️</span>
               <div className="text-sm text-[var(--color-warning-text)]">
-                <strong>DO NOT CLOSE THIS TAB</strong> — deposits are in progress.
+                <strong>{t('doNotClose')}</strong> — {t('depositsInProgress')}
               </div>
             </div>
           </div>
@@ -445,10 +447,10 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
               className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Invoice Paid!
+              {t('invoicePaid')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm">
-              {collectedNotes.length} deposit{collectedNotes.length !== 1 ? 's' : ''} completed.
+              {t('depositsCompleted', { count: collectedNotes.length })}
               The requester will be notified.
             </p>
           </div>

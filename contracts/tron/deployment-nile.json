@@ -1,0 +1,19 @@
+{
+  "network": "nile",
+  "chainId": "3",
+  "deployer": "TGa7EfpbeeoBv7oTWNGRDotHorBAS8S1W9",
+  "deployedAt": "2026-03-06T08:23:25.469Z",
+  "sanctionsOracle": "TKKDJ7DsMauhU2KJB3PcwdRox1yZZFFpNN",
+  "verifier": "TXtLrbYdAVrUjohYQ1vpKPaAfvGV32QX7N",
+  "hasherFactory": "TNAtD1sYBwNPALEUeyHZxVWxoQPCHWN4c3",
+  "hasher": "TQVbjEkeKrQVjtPW8K3GhcEx2couaDm7Zx",
+  "usdtToken": "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf",
+  "pools": {
+    "10_USDT": "TSTVYJEyhWQvqYa5i4A7aje9Yq9KYWgS5S",
+    "100_USDT": "TN1jEvUsFDtFJx9iAscaDQYU6UoVXgX3Tt"
+  },
+  "summary": {
+    "success": 2,
+    "failed": 4
+  }
+}

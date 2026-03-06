@@ -3,6 +3,7 @@ pragma solidity ^0.7.0;
 
 import "./ComplianceTornado.sol";
 import "./interfaces/ISanctionsOracle.sol";
+import "./interfaces/IUSDT.sol";
 
 /**
  * @title USDTPool

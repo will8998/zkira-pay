@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { generateClaimCode, deriveDeadDropId } from '@/lib/claim-code';
 import { aesEncrypt } from '@/lib/dead-drop-crypto';
 import type { DenominationSet, DenominationSelection, DepositNoteRecord, DepositBundle, ClaimCodeData } from '@/types/payment';
@@ -85,6 +86,8 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
 }
 
 export function SendPaymentWizard() {
+  const t = useTranslations('sendWizard');
+  const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
   const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   // Wizard state
@@ -247,7 +250,7 @@ export function SendPaymentWizard() {
   // Start the full send flow
   const startSendFlow = useCallback(async () => {
     if (!denomSet || denomSet.selections.length === 0) {
-      toast.error('Select at least one denomination');
+      toast.error(t('selectAtLeastOne'));
       return;
     }
 
@@ -334,7 +337,7 @@ export function SendPaymentWizard() {
 
       setClaimCode({ code, encryptionKey });
       setStep('complete');
-      toast.success('Payment sent! Share the claim code with the recipient.');
+      toast.success(t('paymentSentToast'));
 
       logSend({
         chain,
@@ -360,7 +363,7 @@ export function SendPaymentWizard() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('failedToCopy'));
     }
   }, []);
 
@@ -431,13 +434,13 @@ export function SendPaymentWizard() {
           className="text-2xl md:text-3xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-1"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          SEND PAYMENT
+          {t('title')}
         </h1>
         <p 
           className="text-xs md:text-sm uppercase tracking-wider text-[var(--color-muted)] mb-4"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          GENERATE A CONFIDENTIAL PAYMENT LINK
+          {t('subtitle')}
         </p>
         {/* Accent line */}
         <div className="w-full h-0.5 bg-[var(--color-button)]"></div>
@@ -455,7 +458,7 @@ export function SendPaymentWizard() {
                 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-4"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                AMOUNT
+                {t('amount')}
               </div>
               
               <div className="flex items-center justify-between">
@@ -502,7 +505,7 @@ export function SendPaymentWizard() {
 
             {/* Helper text */}
             <p className="text-xs md:text-sm text-[var(--color-text-secondary)] mb-6">
-              Enter the amount in {getCurrentTokenInfo()?.symbol || 'USDC'}. Minimum 10.
+              {t('enterAmount', { symbol: getCurrentTokenInfo()?.symbol || 'USDC' })}
             </p>
 
             {/* Denomination Split Preview - collapsible */}
@@ -514,7 +517,7 @@ export function SendPaymentWizard() {
                   className="w-full flex items-center justify-between text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors py-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits</span>
+                  <span>{denomSet.totalLabel} — {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} {t('deposits')}</span>
                   <span className={`transform transition-transform ${denomOpen ? 'rotate-180' : ''}`}>▾</span>
                 </button>
 
@@ -553,13 +556,13 @@ export function SendPaymentWizard() {
                       className="text-[var(--color-text)] font-bold"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Total: {denomSet.totalLabel}
+                      {t('total')}: {denomSet.totalLabel}
                     </span>
                     <span
                       className="text-[var(--color-text-secondary)]"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} deposits
+                      {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} {t('deposits')}
                     </span>
                   </div>
                 </div>
@@ -568,15 +571,15 @@ export function SendPaymentWizard() {
                 <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4 mt-4 mb-4">
                   <div className="mb-3">
                     <div className="text-lg font-bold text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
-                      You will send: {denomSet.totalLabel}
+                      {t('youWillSend')}: {denomSet.totalLabel}
                     </div>
                   </div>
                   <div className="text-sm text-[var(--color-text)]" style={{ fontFamily: 'var(--font-mono)' }}>
-                    Recipient gets {denomSet.selections.reduce((sum, sel) => sum + sel.count, 0)} private transfer(s)
+                    {t('privateTransfers', { count: denomSet.selections.reduce((sum, sel) => sum + sel.count, 0) })}
                   </div>
                   {denomSet.remainder > 0 && (
                     <div className="text-xs text-[var(--color-text-secondary)] mt-2" style={{ fontFamily: 'var(--font-mono)' }}>
-                      {denomSet.remainderLabel} not covered (below minimum pool size)
+                      {denomSet.remainderLabel} {t('notCovered')}
                     </div>
                   )}
                 </div>
@@ -587,17 +590,17 @@ export function SendPaymentWizard() {
                   const uniqueDenoms = denomSet.selections.length;
                   let icon: string, label: string, color: string, tip: string;
                   if (depositCount === 1) {
-                    icon = '🟢'; label = 'Maximum Privacy'; color = 'var(--color-green)';
-                    tip = 'Single pool deposit — blends with the largest anonymity set.';
+                    icon = '🟢'; label = t('maxPrivacy'); color = 'var(--color-green)';
+                    tip = t('maxPrivacyTip');
                   } else if (uniqueDenoms === 1) {
-                    icon = '🟢'; label = 'Strong Privacy'; color = 'var(--color-green)';
-                    tip = `${depositCount} deposits of the same denomination — each blends into its own anonymity set.`;
+                    icon = '🟢'; label = t('strongPrivacy'); color = 'var(--color-green)';
+                    tip = t('strongPrivacyTip', { count: depositCount });
                   } else if (uniqueDenoms <= 2) {
-                    icon = '🟡'; label = 'Good Privacy'; color = 'var(--color-warning-text)';
-                    tip = 'Mixed denominations slightly reduce privacy. Consider rounding to a cleaner amount.';
+                    icon = '🟡'; label = t('goodPrivacy'); color = 'var(--color-warning-text)';
+                    tip = t('goodPrivacyTip');
                   } else {
-                    icon = '🟠'; label = 'Moderate Privacy'; color = 'var(--color-warning-text)';
-                    tip = `${uniqueDenoms} different denominations create a unique fingerprint.`;
+                    icon = '🟠'; label = t('moderatePrivacy'); color = 'var(--color-warning-text)';
+                    tip = t('moderatePrivacyTip', { count: uniqueDenoms });
                   }
                   return (
                     <div className="flex items-start gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
@@ -621,7 +624,7 @@ export function SendPaymentWizard() {
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 <span className={`transform transition-transform ${advancedOpen ? 'rotate-90' : ''}`}>›</span>
-                Advanced options
+                {t('advancedOptions')}
               </button>
               
               <div 
@@ -636,7 +639,7 @@ export function SendPaymentWizard() {
                       className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Network:
+                      {t('network')}:
                     </h4>
                     <div className="grid grid-cols-2 gap-2">
                       {getAvailableChains().map((chainOption) => {
@@ -674,7 +677,7 @@ export function SendPaymentWizard() {
                       className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-3"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      Token:
+                      {t('token')}:
                     </h4>
                     <div className="grid grid-cols-3 gap-2">
                       {getAvailableTokensForChain(chain).map((tokenInfo) => (
@@ -713,7 +716,7 @@ export function SendPaymentWizard() {
               className="w-full py-4 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-press rounded-lg"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              <span className="uppercase tracking-wide">Generate Payment Link</span>
+              <span className="uppercase tracking-wide">{t('generateLink')}</span>
             </button>
           </div>
         </div>
@@ -728,10 +731,10 @@ export function SendPaymentWizard() {
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Send {denomSet?.totalLabel}
+                {t('sendAmount', { amount: denomSet?.totalLabel })}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                Send the full amount to this address from your exchange or wallet
+                {t('sendFullAmount')}
               </p>
             </div>
 
@@ -747,10 +750,10 @@ export function SendPaymentWizard() {
                   {address}
                 </div>
                 <button
-                  onClick={() => copyToClipboard(address, () => toast.success('Address copied'))}
+                  onClick={() => copyToClipboard(address, () => toast.success(t('addressCopied')))}
                   className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
-                  📋 Copy Address
+                  {t('copyAddress')}
                 </button>
               </div>
             )}
@@ -766,7 +769,7 @@ export function SendPaymentWizard() {
               ))}
             </div>
             <p className="text-center text-[var(--color-text-secondary)] text-xs mt-2" style={{ fontFamily: 'var(--font-mono)' }}>
-              Checking wallet balance...
+              {t('checkingBalance')}
             </p>
           </div>
 
@@ -779,10 +782,10 @@ export function SendPaymentWizard() {
                   className="font-bold text-[var(--color-warning-text)] mb-1"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  DO NOT CLOSE THIS TAB
+                  {t('doNotClose')}
                 </div>
                 <div className="text-[var(--color-warning-text)] opacity-80">
-                  Keep this page open until the payment is complete.
+                  {t('keepPageOpen')}
                 </div>
               </div>
             </div>
@@ -792,7 +795,7 @@ export function SendPaymentWizard() {
             onClick={handleCancel}
             className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            ← Cancel
+            {t('cancel')}
           </button>
         </div>
       )}
@@ -806,11 +809,11 @@ export function SendPaymentWizard() {
                 className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                Processing {currentDepositIndex + 1} of {totalDeposits}
+                {t('processing', { current: currentDepositIndex + 1, total: totalDeposits })}
               </h2>
               <p className="text-[var(--color-text-secondary)] text-sm">
-                {depositStatus === 'approving' && 'Approving token spend...'}
-                {depositStatus === 'depositing' && 'Depositing into shielded pool...'}
+                {depositStatus === 'approving' && t('approvingToken')}
+                {depositStatus === 'depositing' && t('depositingPool')}
               </p>
             </div>
 
@@ -834,7 +837,7 @@ export function SendPaymentWizard() {
                   className="text-sm font-bold text-[var(--color-text-secondary)] uppercase tracking-wide"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  Completed Deposits
+                  {t('completedDeposits')}
                 </h3>
                 {collectedNotes.map((note, i) => (
                   <div
@@ -843,7 +846,7 @@ export function SendPaymentWizard() {
                   >
                     <span className="text-[var(--color-green)]">✓</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>
-                      Deposit #{i + 1} — Pool {note.pool.slice(0, 8)}...
+                      {t('depositNote', { index: i + 1, pool: note.pool.slice(0, 8) })}
                     </span>
                   </div>
                 ))}
@@ -860,10 +863,10 @@ export function SendPaymentWizard() {
                   className="font-bold text-[var(--color-warning-text)] mb-1"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  DO NOT CLOSE THIS TAB
+                  {t('doNotClose')}
                 </div>
                 <div className="text-[var(--color-warning-text)] opacity-80">
-                  Automatically splitting your deposit into privacy pools...
+                  {t('autoSplitting')}
                 </div>
               </div>
             </div>
@@ -873,7 +876,7 @@ export function SendPaymentWizard() {
             onClick={handleCancel}
             className="w-full px-4 py-3 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            ← Cancel
+            {t('cancel')}
           </button>
         </div>
       )}
@@ -887,10 +890,10 @@ export function SendPaymentWizard() {
               className="text-2xl font-bold text-[var(--color-text)] uppercase tracking-wide mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Payment Sent!
+              {t('paymentSent')}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm mb-6">
-              Share the claim code and password below with the recipient.
+              {t('shareClaimCode')}
             </p>
 
             {/* Claim Code */}
@@ -900,7 +903,7 @@ export function SendPaymentWizard() {
                   className="text-xs uppercase tracking-wide text-[var(--color-text-secondary)] mb-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  CLAIM CODE
+                  {t('claimCodeLabel')}
                 </div>
                 <div
                   className="text-2xl font-bold text-[var(--color-text)] tracking-wider mb-3"
@@ -912,7 +915,7 @@ export function SendPaymentWizard() {
                   onClick={() => copyToClipboard(claimCode.code, setCopiedCode)}
                   className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
-                  {copiedCode ? '✓ Copied' : '📋 Copy Code'}
+                  {copiedCode ? t('copied') : t('copyCode')}
                 </button>
               </div>
 
@@ -921,7 +924,7 @@ export function SendPaymentWizard() {
                   className="text-xs uppercase tracking-wide text-[var(--color-text-secondary)] mb-2"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  ENCRYPTION PASSWORD
+                  {t('encryptionPassword')}
                 </div>
                 <div
                   className="text-sm font-mono text-[var(--color-text)] break-all mb-3"
@@ -932,7 +935,7 @@ export function SendPaymentWizard() {
                   onClick={() => copyToClipboard(claimCode.encryptionKey, setCopiedFull)}
                   className="px-4 py-2 bg-[var(--color-button)] text-[var(--color-button-text)] hover:bg-[var(--color-button-hover)] font-medium transition-colors btn-press text-sm rounded-lg"
                 >
-                  {copiedFull ? '✓ Copied' : '📋 Copy Password'}
+                  {copiedFull ? t('copied') : t('copyPassword')}
                 </button>
               </div>
             </div>
@@ -947,11 +950,11 @@ export function SendPaymentWizard() {
                   className="font-bold text-[var(--color-warning-text)] mb-1"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  SHARE SECURELY
+                  {t('shareSecurely')}
                 </div>
                 <div className="text-[var(--color-warning-text)] opacity-80">
-                  Send both the claim code and password to the recipient via a secure channel.
-                  Keep both codes safe — they cannot be recovered.
+                  {t('shareSecurelyDesc')}
+                  {t('codesCannotRecover')}
                 </div>
               </div>
             </div>
@@ -968,7 +971,7 @@ export function SendPaymentWizard() {
             }}
             className="w-full px-6 py-4 bg-[var(--color-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] font-medium transition-colors btn-press rounded-lg"
           >
-            Send Another Payment
+            {t('sendAnother')}
           </button>
         </div>
       )}
