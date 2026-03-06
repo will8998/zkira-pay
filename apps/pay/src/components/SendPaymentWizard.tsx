@@ -88,7 +88,6 @@ function calculateDenominationSplit(amount: number, chain: Chain, token: TokenId
 export function SendPaymentWizard() {
   const t = useTranslations('sendWizard');
   const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
-  const { address, privateKey, isCreated, createWallet, clearWallet } = useBrowserWallet();
 
   // Wizard state
   const [step, setStep] = useState<WizardStep>('select');

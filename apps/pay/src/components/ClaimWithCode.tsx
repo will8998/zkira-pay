@@ -186,7 +186,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
                 <span>{t('decrypting')}</span>
               </>
             ) : (
-              {t('claimButton')}
+              <span>{t('claimButton')}</span>
             )}
           </button>
         </div>
