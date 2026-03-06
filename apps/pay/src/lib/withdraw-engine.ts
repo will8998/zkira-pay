@@ -10,7 +10,7 @@
 
 import type { DepositNoteRecord } from '@/types/payment';
 import type { Chain } from '@/config/pool-registry';
-import { CHAIN_CONFIGS } from '@/config/pool-registry';
+import { CHAIN_CONFIGS, findPool } from '@/config/pool-registry';
 import { getWhitelabelConfig } from '@/config/whitelabel';
 
 const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
@@ -164,19 +164,33 @@ export async function executeBatchWithdrawal(
     );
   }
 
-  // ── 2. Group notes by pool address ─────────────────────────
+  // ── 2. Validate & recover pool addresses ───────────────────
+  //    Bundles created by older code may be missing the pool field.
+  //    Recover from chain + token + denomination via the registry.
+  const resolvedNotes = notes.map((note) => {
+    if (note.pool) return note;
+    if (note.chain && note.token && note.denomination) {
+      const pool = findPool(note.chain, note.token, note.denomination);
+      if (pool) return { ...note, pool: pool.address };
+    }
+    throw new Error(
+      `Note is missing pool address and cannot be recovered (chain=${note.chain}, token=${note.token}, denomination=${note.denomination})`,
+    );
+  });
+
+  // ── 3. Group notes by pool address ─────────────────────────
   const poolGroups = new Map<
     string,
     { notes: Array<DepositNoteRecord & { _batchIndex: number }> }
   >();
 
-  notes.forEach((note, i) => {
+  resolvedNotes.forEach((note, i) => {
     const key = note.pool.toLowerCase();
     if (!poolGroups.has(key)) poolGroups.set(key, { notes: [] });
     poolGroups.get(key)!.notes.push({ ...note, _batchIndex: i });
   });
 
-  // ── 3. Process each pool group ─────────────────────────────
+  // ── 4. Process each pool group ─────────────────────────────
   let processed = 0;
   const whitelabelConfig = getWhitelabelConfig();
 
