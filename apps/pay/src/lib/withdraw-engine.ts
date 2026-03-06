@@ -15,7 +15,32 @@ import { getWhitelabelConfig } from '@/config/whitelabel';
 
 const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
 const TREE_DEPTH = 20;
-const ZERO_VALUE = 0n;
+// Pre-computed zeros from the on-chain MerkleTreeWithHistory contract.
+// ZERO_VALUE = keccak256("tornado") % FIELD_SIZE, then each level is MiMC(prev, prev).
+// These MUST match the contract exactly or ZK proofs will fail.
+const CONTRACT_ZEROS: bigint[] = [
+  0x2fe54c60d3acabf3343a35b6eba15db4821b340f76e741e2249685ed4899af6cn,
+  0x256a6135777eee2fd26f54b8b7037a25439d5235caee224154186d2b8a52e31dn,
+  0x1151949895e82ab19924de92c40a3d6f7bcb60d92b00504b8199613683f0c200n,
+  0x20121ee811489ff8d61f09fb89e313f14959a0f28bb428a20dba6b0b068b3bdbn,
+  0x0a89ca6ffa14cc462cfedb842c30ed221a50a3d6bf022a6a57dc82ab24c157c9n,
+  0x24ca05c2b5cd42e890d6be94c68d0689f4f21c9cec9c0f13fe41d566dfb54959n,
+  0x1ccb97c932565a92c60156bdba2d08f3bf1377464e025cee765679e604a7315cn,
+  0x19156fbd7d1a8bf5cba8909367de1b624534ebab4f0f79e003bccdd1b182bdb4n,
+  0x261af8c1f0912e465744641409f622d466c3920ac6e5ff37e36604cb11dfff80n,
+  0x0058459724ff6ca5a1652fcbc3e82b93895cf08e975b19beab3f54c217d1c007n,
+  0x1f04ef20dee48d39984d8eabe768a70eafa6310ad20849d4573c3c40c2ad1e30n,
+  0x1bea3dec5dab51567ce7e200a30f7ba6d4276aeaa53e2686f962a46c66d511e5n,
+  0x0ee0f941e2da4b9e31c3ca97a40d8fa9ce68d97c084177071b3cb46cd3372f0fn,
+  0x1ca9503e8935884501bbaf20be14eb4c46b89772c97b96e3b2ebf3a36a948bbdn,
+  0x133a80e30697cd55d8f7d4b0965b7be24057ba5dc3da898ee2187232446cb108n,
+  0x13e6d8fc88839ed76e182c2a779af5b2c0da9dd18c90427a644f7e148a6253b6n,
+  0x1eb16b057a477f4bc8f572ea6bee39561098f78f15bfb3699dcbb7bd8db61854n,
+  0x0da2cb16a1ceaabf1c16b838f7a9e3f2a3a3088d9e0a6debaa748114620696ean,
+  0x24a3b3d822420b14b5d8cb6c28a574f01e98ea9e940551d2ebd75cee12649f9dn,
+  0x198622acbd783d1b0d9064105b1fc8e4d8889de95c4c519b3f635809fe6afc05n,
+  0x29d7ed391256ccc3ea596c86e933b89ff339d25ea8ddced975ae2fe30b5296d4n,
+];
 
 // ── Public types ──────────────────────────────────────────────
 
@@ -45,8 +70,6 @@ interface SparseMerkleTreeData {
   root: bigint;
   /** Sparse node storage. Key: `${level}:${index}`, Value: node hash. */
   nodes: Map<string, bigint>;
-  /** Pre-computed zeros for each level. */
-  zeros: bigint[];
   /** Number of deposits in the tree. */
   depositCount: number;
 }
@@ -67,7 +90,6 @@ async function buildSparseMerkleTree(
   poolAddress: string,
   chain: Chain,
   mimcSponge: any,
-  zeros: bigint[],
 ): Promise<SparseMerkleTreeData> {
   const { JsonRpcProvider, Contract } = await import('ethers');
   const rpcUrl = CHAIN_CONFIGS[chain].rpcUrl;
@@ -102,10 +124,10 @@ async function buildSparseMerkleTree(
   // and all nodes along each insertion path.
   const filledSubtrees: bigint[] = new Array(TREE_DEPTH).fill(0n);
   for (let i = 0; i < TREE_DEPTH; i++) {
-    filledSubtrees[i] = zeros[i];
+    filledSubtrees[i] = CONTRACT_ZEROS[i];
   }
 
-  let currentRoot = zeros[TREE_DEPTH];
+  let currentRoot = CONTRACT_ZEROS[TREE_DEPTH];
 
   for (const dep of deposits) {
     let currentIndex = dep.leafIndex;
@@ -117,7 +139,7 @@ async function buildSparseMerkleTree(
 
       if (currentIndex % 2 === 0) {
         left = currentLevelHash;
-        right = zeros[level];
+        right = CONTRACT_ZEROS[level];
         filledSubtrees[level] = currentLevelHash;
       } else {
         left = filledSubtrees[level];
@@ -143,7 +165,7 @@ async function buildSparseMerkleTree(
     currentRoot = currentLevelHash;
   }
 
-  return { root: currentRoot, nodes, zeros, depositCount: deposits.length };
+  return { root: currentRoot, nodes, depositCount: deposits.length };
 }
 
 /**
@@ -152,7 +174,6 @@ async function buildSparseMerkleTree(
 function extractSparsePath(
   leafIndex: number,
   nodes: Map<string, bigint>,
-  zeros: bigint[],
 ): { pathElements: bigint[]; pathIndices: number[] } {
   const pathElements: bigint[] = [];
   const pathIndices: number[] = [];
@@ -160,7 +181,7 @@ function extractSparsePath(
 
   for (let level = 0; level < TREE_DEPTH; level++) {
     const siblingIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
-    const sibling = nodes.get(`${level}:${siblingIdx}`) ?? zeros[level];
+    const sibling = nodes.get(`${level}:${siblingIdx}`) ?? CONTRACT_ZEROS[level];
     pathElements.push(sibling);
     pathIndices.push(idx % 2);
     idx = Math.floor(idx / 2);
@@ -197,13 +218,6 @@ export async function executeBatchWithdrawal(
   const mimcSponge = await buildMimcSponge();
   const snarkjs = await import('snarkjs');
 
-  // Pre-compute zero hashes for the tree
-  const zeros: bigint[] = [ZERO_VALUE];
-  for (let i = 1; i <= TREE_DEPTH; i++) {
-    zeros[i] = mimcSponge.F.toObject(
-      mimcSponge.multiHash([zeros[i - 1], zeros[i - 1]], 0n, 1),
-    );
-  }
 
   // ── 2. Validate & recover pool addresses ───────────────────
   //    Bundles created by older code may be missing the pool field.
@@ -246,7 +260,7 @@ export async function executeBatchWithdrawal(
       message: `Building Merkle tree for pool ${poolAddr.slice(0, 8)}...`,
     });
 
-    const tree = await buildSparseMerkleTree(poolAddr, chain, mimcSponge, zeros);
+    const tree = await buildSparseMerkleTree(poolAddr, chain, mimcSponge);
 
     // Process each note in this pool
     for (const note of group.notes) {
@@ -261,7 +275,6 @@ export async function executeBatchWithdrawal(
       const { pathElements, pathIndices } = extractSparsePath(
         note.leafIndex,
         tree.nodes,
-        tree.zeros,
       );
 
       const nullifier = BigInt(note.nullifier);
