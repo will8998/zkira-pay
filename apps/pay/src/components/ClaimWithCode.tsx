@@ -298,7 +298,7 @@ export function ClaimWithCode({ initialCode }: ClaimWithCodeProps) {
               <p className="text-[var(--color-text-secondary)] text-sm">
                 {withdrawError
                   ? withdrawError
-                  : withdrawProgress?.message ?? t('preparing')
+                  : withdrawProgress?.message ?? t('preparing')}
               </p>
             </div>
 
