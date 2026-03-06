@@ -136,7 +136,17 @@ export function createSessionRoutes(wallet: RelayerWallet, config: RelayerConfig
     try {
       const body = await c.req.json<WithdrawRelayRequest>();
 
-      // Validate all fields
+      // Normalize values BEFORE validation: proof is already hex, but root/nullifierHash may be
+      // decimal strings (from snarkjs publicSignals) or hex strings.
+      body.proof = body.proof.startsWith('0x') ? body.proof : `0x${body.proof}`;
+      body.root = body.root.startsWith('0x')
+        ? body.root
+        : '0x' + BigInt(body.root).toString(16).padStart(64, '0');
+      body.nullifierHash = body.nullifierHash.startsWith('0x')
+        ? body.nullifierHash
+        : '0x' + BigInt(body.nullifierHash).toString(16).padStart(64, '0');
+
+      // Validate all fields (now with normalized hex values)
       const validation = txValidator.validateWithdrawRequest(body);
       if (!validation.valid) {
         const error: ErrorResponse = {
@@ -172,15 +182,10 @@ export function createSessionRoutes(wallet: RelayerWallet, config: RelayerConfig
         return c.json(error, 503);
       }
 
-      // Normalize values: proof is already hex, but root/nullifierHash may be
-      // decimal strings (from snarkjs publicSignals) or hex strings.
-      const proof = body.proof.startsWith('0x') ? body.proof : `0x${body.proof}`;
-      const root = body.root.startsWith('0x')
-        ? body.root
-        : '0x' + BigInt(body.root).toString(16).padStart(64, '0');
-      const nullifierHash = body.nullifierHash.startsWith('0x')
-        ? body.nullifierHash
-        : '0x' + BigInt(body.nullifierHash).toString(16).padStart(64, '0');
+      // Values already normalized above — use them directly
+      const proof = body.proof;
+      const root = body.root;
+      const nullifierHash = body.nullifierHash;
 
       // Pre-broadcast safety checks to avoid wasting gas
       const poolContract = new Contract(body.poolAddress, POOL_ABI, wallet.wallet);
