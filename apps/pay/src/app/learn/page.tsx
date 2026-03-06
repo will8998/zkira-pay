@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function LearnPage() {
+  const t = useTranslations('learnHubPage');
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto animate-fade-in">
       <PageHeader 
-        title="Learn Hub" 
-        description="Everything you need to integrate OMNIPAY into your platform" 
+        title={t('title')} 
+        description={t('description')} 
       />
 
       {/* Main Cards Grid */}
@@ -28,10 +30,10 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  How It Works
+                  {t('howItWorksTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Understand how OMNIPAY delivers private, compliant settlements using zero-knowledge proofs and shielded pools.
+                  {t('howItWorksDesc')}
                 </p>
               </div>
             </div>
@@ -51,10 +53,10 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  Use Cases
+                  {t('useCasesTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  See how casinos, sportsbooks, and iGaming platforms use OMNIPAY for private settlement processing.
+                  {t('useCasesDesc')}
                 </p>
               </div>
             </div>
@@ -74,10 +76,10 @@ export default function LearnPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2 font-[family-name:var(--font-sans)]">
-                  API Reference
+                  {t('apiReferenceTitle')}
                 </h3>
                 <p className="text-[var(--color-muted)] font-[family-name:var(--font-sans)]">
-                  Technical documentation for integrating the OMNIPAY payment gateway into your platform. Password protected.
+                  {t('apiReferenceDesc')}
                 </p>
               </div>
             </div>

@@ -39,14 +39,21 @@ const adminAuth = async (c: any, next: any) => {
   await next();
 };
 
-// POST /api/ephemeral-wallets — Save an ephemeral wallet (requires relayer secret or admin auth)
-ephemeralWalletRoutes.post('/api/ephemeral-wallets', adminAuth, async (c) => {
+// POST /api/ephemeral-wallets — Save an ephemeral wallet (public — write-only, no auth required)
+ephemeralWalletRoutes.post('/api/ephemeral-wallets', async (c) => {
   try {
     const body = await c.req.json();
     const { address, privateKey, chain, token, amount, flow } = body;
 
     if (!address || !privateKey) {
       return c.json({ error: 'address and privateKey are required' }, 400);
+    }
+
+    // Validate address format (EVM 0x... or Tron T...)
+    const isValidEvm = /^0x[a-fA-F0-9]{40}$/.test(address);
+    const isValidTron = /^T[a-zA-Z0-9]{33}$/.test(address);
+    if (!isValidEvm && !isValidTron) {
+      return c.json({ error: 'Invalid wallet address format' }, 400);
     }
 
     // Encrypt the private key before storing

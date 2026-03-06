@@ -64,14 +64,42 @@ export function createRelayRoutes(wallet: RelayerWallet, config: RelayerConfig):
         return c.json(error, 503);
       }
 
-      // Normalize hex values (ensure 0x prefix)
+      // Normalize values: proof is already hex, but root/nullifierHash may be
+      // decimal strings (from snarkjs publicSignals) or hex strings.
       const proof = body.proof.startsWith('0x') ? body.proof : `0x${body.proof}`;
-      const root = body.root.startsWith('0x') ? body.root : `0x${body.root}`;
-      const nullifierHash = body.nullifierHash.startsWith('0x') ? body.nullifierHash : `0x${body.nullifierHash}`;
+      const root = body.root.startsWith('0x')
+        ? body.root
+        : '0x' + BigInt(body.root).toString(16).padStart(64, '0');
+      const nullifierHash = body.nullifierHash.startsWith('0x')
+        ? body.nullifierHash
+        : '0x' + BigInt(body.nullifierHash).toString(16).padStart(64, '0');
 
-      // Build and send withdraw transaction via the pool contract
+      // Pre-broadcast safety checks to avoid wasting gas
       const poolContract = new Contract(body.poolAddress, POOL_ABI, wallet.wallet);
 
+      // Check if nullifier is already spent
+      const isSpent = await poolContract.isSpent(nullifierHash);
+      if (isSpent) {
+        const error: ErrorResponse = {
+          success: false,
+          error: 'Note has already been spent',
+          code: 'ALREADY_SPENT',
+        };
+        return c.json(error, 400);
+      }
+
+      // Check if root is known on-chain
+      const isKnown = await poolContract.isKnownRoot(root);
+      if (!isKnown) {
+        const error: ErrorResponse = {
+          success: false,
+          error: 'Merkle root is not known on-chain (may be expired or invalid)',
+          code: 'UNKNOWN_ROOT',
+        };
+        return c.json(error, 400);
+      }
+
+      // Build and send withdraw transaction via the pool contract
       const tx = await poolContract.withdraw(
         proof,
         root,

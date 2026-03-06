@@ -217,7 +217,7 @@ export function PayInvoiceFlow({ invoiceId }: PayInvoiceFlowProps) {
           amount: invoice.totalRaw,
           flow: 'invoice',
         }),
-      }).catch(() => {}); // Silent failure — recovery is best-effort
+      }).catch((err) => console.warn('Failed to backup ephemeral wallet:', err)); // Recovery is best-effort
     }
 
     const queue = buildQueue();

@@ -274,7 +274,7 @@ export function SendPaymentWizard() {
           amount,
           flow: 'send',
         }),
-      }).catch(() => {});
+      }).catch((err) => console.warn('Failed to backup ephemeral wallet:', err));
     }
 
     const queue = buildQueue(denomSet);

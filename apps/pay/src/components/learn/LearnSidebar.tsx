@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface NavItem {
   name: string;
@@ -16,13 +17,14 @@ interface NavSection {
 
 export function LearnSidebar() {
   const pathname = usePathname();
+  const t = useTranslations('learnSidebar');
 
   const learnNav: NavSection[] = [
     {
-      label: 'OVERVIEW',
+      label: t('overview'),
       items: [
         {
-          name: 'Learn Hub',
+          name: t('learnHub'),
           href: '/learn',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -33,10 +35,10 @@ export function LearnSidebar() {
       ],
     },
     {
-      label: 'RESOURCES',
+      label: t('resources'),
       items: [
         {
-          name: 'How It Works',
+          name: t('documentation'),
           href: '/learn/docs',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -45,7 +47,7 @@ export function LearnSidebar() {
           ),
         },
         {
-          name: 'Use Cases',
+          name: t('useCases'),
           href: '/learn/use-cases',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -54,7 +56,7 @@ export function LearnSidebar() {
           ),
         },
         {
-          name: 'API Reference',
+          name: t('apiReference'),
           href: '/learn/api',
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">

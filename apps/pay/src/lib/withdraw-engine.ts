@@ -10,7 +10,7 @@
 
 import type { DepositNoteRecord } from '@/types/payment';
 import type { Chain } from '@/config/pool-registry';
-import { CHAIN_CONFIGS, findPool } from '@/config/pool-registry';
+import { getChainConfig, findPool } from '@/config/pool-registry';
 import { getWhitelabelConfig } from '@/config/whitelabel';
 
 const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? '';
@@ -92,7 +92,7 @@ async function buildSparseMerkleTree(
   mimcSponge: any,
 ): Promise<SparseMerkleTreeData> {
   const { JsonRpcProvider, Contract } = await import('ethers');
-  const rpcUrl = CHAIN_CONFIGS[chain].rpcUrl;
+  const rpcUrl = getChainConfig(chain).rpcUrl;
   const provider = new JsonRpcProvider(rpcUrl);
 
   const poolAbi = [

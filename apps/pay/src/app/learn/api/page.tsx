@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/PageHeader';
 import { CodeBlock } from '@/components/learn/CodeBlock';
-
 export default function APIReferencePage() {
+  const t = useTranslations('omnipayApiPage');
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,9 +25,9 @@ export default function APIReferencePage() {
       <div className="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto animate-fade-in">
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-8 max-w-md w-full">
-            <h1 className="text-2xl font-medium text-[var(--color-text-primary)] mb-4">API Reference</h1>
+            <h1 className="text-2xl font-medium text-[var(--color-text-primary)] mb-4">{t('login_title')}</h1>
             <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-              This documentation is for authorized integration partners only.
+              {t('login_desc')}
             </p>
             
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -35,7 +36,7 @@ export default function APIReferencePage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
+                  placeholder={t('login_placeholder')}
                   className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--border-subtle)] text-[var(--color-text-primary)] text-sm font-mono focus:outline-none focus:border-[var(--color-text-primary)] transition-colors"
                 />
               </div>
@@ -44,11 +45,11 @@ export default function APIReferencePage() {
                 type="submit"
                 className="w-full bg-white text-black px-4 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
               >
-                Access Documentation
+                {t('login_button')}
               </button>
               
               {error && (
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-400 text-sm">{error === 'Invalid password' ? t('login_error') : error}</p>
               )}
             </form>
           </div>
@@ -60,19 +61,19 @@ export default function APIReferencePage() {
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto animate-fade-in">
       <PageHeader
-        title="API Reference"
-        description="Gateway integration documentation for OMNIPAY payment processing"
+        title={t('title')}
+        description={t('description')}
       />
 
       {/* Getting Started */}
       <section id="getting-started" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Getting Started</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('gettingStarted_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            OMNIPAY provides a simple REST API for integrating private payment processing into your platform. We handle all the complexity of zero-knowledge proofs, shielded pools, and multi-chain settlement. You just make API calls.
+            {t('gettingStarted_desc1')}
           </p>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">
-            API keys are provided by the OMNIPAY team during onboarding. Contact us to get started.
+            {t('gettingStarted_desc2')}
           </p>
         </div>
       </section>
@@ -80,19 +81,19 @@ export default function APIReferencePage() {
       {/* Authentication */}
       <section id="authentication" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Authentication</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('auth_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            All API requests must include your API key in the request headers. API keys are manually provisioned by the OMNIPAY team during the onboarding process.
+            {t('auth_desc')}
           </p>
           
           <CodeBlock 
             code="X-API-Key: your_api_key_here" 
             language="http"
-            title="Authentication Header"
+            title={t('auth_codeTitle')}
           />
           
           <p className="text-[var(--color-text-secondary)] text-[11px] mt-3">
-            API keys are provided manually by OMNIPAY team. No self-service generation available.
+            {t('auth_note')}
           </p>
         </div>
       </section>
@@ -100,14 +101,14 @@ export default function APIReferencePage() {
       {/* Base URL */}
       <section id="base-url" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Base URL</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('baseUrl_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            All API endpoints are relative to the base URL shown below.
+            {t('baseUrl_desc')}
           </p>
           <CodeBlock 
             code="https://omnipay.club/api" 
             language="url"
-            title="Production Base URL"
+            title={t('baseUrl_codeTitle')}
           />
         </div>
       </section>
@@ -115,9 +116,9 @@ export default function APIReferencePage() {
       {/* Create Payment Session */}
       <section id="create-session" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Create Payment Session</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('createSession_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            Create a new payment session for a player. Returns a deposit URL that the player can use to complete the payment.
+            {t('createSession_desc')}
           </p>
           
           <div className="mb-4">
@@ -135,12 +136,12 @@ export default function APIReferencePage() {
                 }
               }, null, 2)} 
               language="json"
-              title="Request Body"
+              title={t('createSession_requestCodeTitle')}
             />
           </div>
 
           <div className="mb-4">
-            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Response</h4>
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('response')}</h4>
             <CodeBlock 
               code={JSON.stringify({
                 "sessionId": "sess_abc123",
@@ -149,7 +150,7 @@ export default function APIReferencePage() {
                 "expiresAt": "2026-03-06T15:30:00Z"
               }, null, 2)} 
               language="json"
-              title="Response Body"
+              title={t('createSession_responseCodeTitle')}
             />
           </div>
         </div>
@@ -158,9 +159,9 @@ export default function APIReferencePage() {
       {/* Get Session Status */}
       <section id="get-session" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Get Session Status</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('getSession_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            Retrieve the current status and details of a payment session.
+            {t('getSession_desc')}
           </p>
           
           <div className="mb-4">
@@ -180,7 +181,7 @@ export default function APIReferencePage() {
                 "completedAt": "2026-03-06T14:25:00Z"
               }, null, 2)} 
               language="json"
-              title="Response Body"
+              title={t('getSession_responseCodeTitle')}
             />
           </div>
         </div>
@@ -189,9 +190,9 @@ export default function APIReferencePage() {
       {/* Create Withdrawal */}
       <section id="create-withdrawal" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Create Withdrawal</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('createWithdrawal_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            Create a withdrawal request for a player. Withdrawals require manual approval from the OMNIPAY team before processing.
+            {t('createWithdrawal_desc')}
           </p>
           
           <div className="mb-4">
@@ -207,12 +208,12 @@ export default function APIReferencePage() {
                 "recipientAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
               }, null, 2)} 
               language="json"
-              title="Request Body"
+              title={t('createWithdrawal_requestCodeTitle')}
             />
           </div>
 
           <div className="mb-4">
-            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Response</h4>
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('response')}</h4>
             <CodeBlock 
               code={JSON.stringify({
                 "withdrawalId": "wd_xyz789",
@@ -220,7 +221,7 @@ export default function APIReferencePage() {
                 "createdAt": "2026-03-06T14:30:00Z"
               }, null, 2)} 
               language="json"
-              title="Response Body"
+              title={t('createWithdrawal_responseCodeTitle')}
             />
           </div>
         </div>
@@ -229,23 +230,23 @@ export default function APIReferencePage() {
       {/* Webhooks */}
       <section id="webhooks" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Webhooks</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('webhooks_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            OMNIPAY sends webhook events to notify your application of important payment events. Configure your webhook endpoint during onboarding.
+            {t('webhooks_desc')}
           </p>
           
           <div className="space-y-4 mb-6">
             <div>
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Event Types</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('webhooks_eventTypes')}</h4>
               <ul className="text-[var(--color-text-secondary)] text-sm space-y-1">
-                <li>• <code>session_completed</code> - Payment session successfully completed</li>
-                <li>• <code>withdrawal_processed</code> - Withdrawal has been processed and sent</li>
+                <li>• <code>session_completed</code> - {t('webhooks_sessionCompleted')}</li>
+                <li>• <code>withdrawal_processed</code> - {t('webhooks_withdrawalProcessed')}</li>
               </ul>
             </div>
           </div>
 
           <div className="mb-4">
-            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Webhook Payload</h4>
+            <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('webhooks_payloadTitle')}</h4>
             <CodeBlock 
               code={JSON.stringify({
                 "event": "session_completed",
@@ -259,7 +260,7 @@ export default function APIReferencePage() {
                 }
               }, null, 2)} 
               language="json"
-              title="Webhook Payload Example"
+              title={t('webhooks_payloadCodeTitle')}
             />
           </div>
 
@@ -285,7 +286,7 @@ app.post('/webhook', (req, res) => {
   }
 });`} 
             language="javascript"
-            title="Webhook Handler Example"
+            title={t('webhooks_handlerCodeTitle')}
           />
         </div>
       </section>
@@ -293,14 +294,14 @@ app.post('/webhook', (req, res) => {
       {/* Error Responses */}
       <section id="errors" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Error Responses</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('errors_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            The API uses standard HTTP status codes to indicate success or failure. Error responses include a JSON body with additional details.
+            {t('errors_desc')}
           </p>
           
           <div className="space-y-4">
             <div className="border-l-4 border-white pl-4">
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">400 Bad Request</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('errors_400')}</h4>
               <CodeBlock 
                 code={JSON.stringify({
                   "error": "Invalid request parameters",
@@ -311,7 +312,7 @@ app.post('/webhook', (req, res) => {
             </div>
             
             <div className="border-l-4 border-gray-400 pl-4">
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">401 Unauthorized</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('errors_401')}</h4>
               <CodeBlock 
                 code={JSON.stringify({
                   "error": "Invalid or missing API key",
@@ -322,7 +323,7 @@ app.post('/webhook', (req, res) => {
             </div>
             
             <div className="border-l-4 border-gray-600 pl-4">
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">404 Not Found</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('errors_404')}</h4>
               <CodeBlock 
                 code={JSON.stringify({
                   "error": "Resource not found",
@@ -333,7 +334,7 @@ app.post('/webhook', (req, res) => {
             </div>
             
             <div className="border-l-4 border-white pl-4">
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">429 Too Many Requests</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('errors_429')}</h4>
               <CodeBlock 
                 code={JSON.stringify({
                   "error": "Rate limit exceeded",
@@ -344,7 +345,7 @@ app.post('/webhook', (req, res) => {
             </div>
             
             <div className="border-l-4 border-gray-400 pl-4">
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">500 Internal Server Error</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('errors_500')}</h4>
               <CodeBlock 
                 code={JSON.stringify({
                   "error": "Internal server error",
@@ -360,18 +361,18 @@ app.post('/webhook', (req, res) => {
       {/* Rate Limiting */}
       <section id="rate-limiting" className="mb-8">
         <div className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6">
-          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">Rate Limiting</h2>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)] mb-4">{t('rateLimit_title')}</h2>
           <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-            API requests are limited to 1000 requests per minute per API key. Rate limit information is included in response headers.
+            {t('rateLimit_desc')}
           </p>
           
           <div className="space-y-3 mb-4">
             <div>
-              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Rate Limit Headers</h4>
+              <h4 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">{t('rateLimit_headers')}</h4>
               <ul className="text-[var(--color-text-secondary)] text-sm space-y-1 font-mono">
-                <li>• <code>X-RateLimit-Limit</code> - Maximum requests per minute</li>
-                <li>• <code>X-RateLimit-Remaining</code> - Remaining requests in current window</li>
-                <li>• <code>X-RateLimit-Reset</code> - Unix timestamp when limit resets</li>
+                <li>• <code>X-RateLimit-Limit</code> - {t('rateLimit_limit')}</li>
+                <li>• <code>X-RateLimit-Remaining</code> - {t('rateLimit_remaining')}</li>
+                <li>• <code>X-RateLimit-Reset</code> - {t('rateLimit_reset')}</li>
               </ul>
             </div>
           </div>
@@ -382,7 +383,7 @@ X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
 X-RateLimit-Reset: 1709744000`} 
             language="http"
-            title="Rate Limit Headers Example"
+            title={t('rateLimit_codeTitle')}
           />
         </div>
       </section>

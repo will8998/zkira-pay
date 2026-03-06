@@ -1,45 +1,48 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { PageHeader } from '@/components/PageHeader';
 
 export default function UseCasesPage() {
+  const t = useTranslations('omnipayUseCasesPage');
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto animate-fade-in">
       <PageHeader
-        title="Use Cases"
-        description="How leading betting and iGaming platforms use OMNIPAY for private settlements"
+        title={t('title')}
+        description={t('description')}
       />
 
       {/* Use Case 1: Casino & iGaming Settlements */}
       <div id="casino" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '100ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">IGAMING</span>
-        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Casino & iGaming Settlements</h2>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">{t('casino_tag')}</span>
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">{t('casino_title')}</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-          Online casinos process thousands of player deposits and withdrawals daily. OMNIPAY enables private settlement processing where player transaction histories remain confidential. No blockchain trail links player deposits to casino payouts.
+          {t('casino_desc')}
         </p>
 
-        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How It Works</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">{t('howItWorks')}</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Casino integrates OMNIPAY gateway API — a simple REST integration similar to Stripe or Paynet</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('casino_step1')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Player deposits are routed through OMNIPAY's shielded pools automatically</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('casino_step2')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Funds are settled privately — no on-chain link between player deposit and casino receipt</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('casino_step3')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Casino initiates player withdrawals through the gateway API</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('casino_step4')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Players receive funds with complete transaction privacy — no blockchain trail</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('casino_step5')}</p>
           </div>
         </div>
 
@@ -47,34 +50,34 @@ export default function UseCasesPage() {
 
       {/* Use Case 2: Sportsbook & Betting Payouts */}
       <div id="sportsbook" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '200ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">BETTING</span>
-        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">Sportsbook & Betting Payouts</h2>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">{t('sportsbook_tag')}</span>
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">{t('sportsbook_title')}</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-          Sportsbooks handle high-frequency, high-value payouts where settlement privacy is critical. OMNIPAY processes payouts ranging from small bets to million-dollar settlements while maintaining complete transaction unlinkability.
+          {t('sportsbook_desc')}
         </p>
 
-        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How It Works</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">{t('howItWorks')}</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Sportsbook connects to OMNIPAY gateway — handles USDC, USDT, and DAI settlements</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('sportsbook_step1')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Player winnings are processed through privacy-preserving shielded pools</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('sportsbook_step2')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Payout amounts are split into fixed denominations for maximum privacy</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('sportsbook_step3')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Winners receive funds at their preferred address — completely unlinkable to the sportsbook</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('sportsbook_step4')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Settlement reports are available through the merchant dashboard for compliance</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('sportsbook_step5')}</p>
           </div>
         </div>
 
@@ -82,34 +85,34 @@ export default function UseCasesPage() {
 
       {/* Use Case 3: High-Volume Payment Processing */}
       <div id="enterprise" className="bg-[var(--color-surface)] border border-[var(--border-subtle)] rounded-none p-6 mb-6 animate-entrance" style={{ animationDelay: '300ms' }}>
-        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">ENTERPRISE</span>
-        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">High-Volume Payment Processing</h2>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF] font-[family-name:var(--font-mono)]">{t('enterprise_tag')}</span>
+        <h2 className="text-lg font-semibold text-[var(--color-text)] mt-2 mb-3">{t('enterprise_title')}</h2>
         
         <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-6">
-          Large operators processing millions in daily volume need a settlement layer that scales. OMNIPAY supports multi-chain settlement (Arbitrum, Tron) with denomination pools ranging from $1 to $1,000,000, handling any settlement size privately.
+          {t('enterprise_desc')}
         </p>
 
-        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">How It Works</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-4">{t('howItWorks')}</h3>
         <div className="mb-6">
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">01</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Enterprise connects via API with dedicated API key — onboarding handled by OMNIPAY team</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('enterprise_step1')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">02</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Large settlements are automatically split across optimal denomination pools</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('enterprise_step2')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">03</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Multi-chain support allows routing through the most cost-effective network</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('enterprise_step3')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">04</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Real-time volume reporting and balance monitoring through the dashboard</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('enterprise_step4')}</p>
           </div>
           <div className="flex gap-3 mb-3">
             <span className="text-[#FFFFFF] font-bold font-[family-name:var(--font-mono)] text-sm shrink-0">05</span>
-            <p className="text-sm text-[var(--color-text-secondary)]">Automated settlement reconciliation with webhook notifications</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">{t('enterprise_step5')}</p>
           </div>
         </div>
 

@@ -61,8 +61,6 @@ export default function HomePage() {
         {/* Hero */}
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-[-0.02em] leading-[1.05]">
-            {t('title')}
-            <br />
             <span className="bg-gradient-to-r from-[#FFFFFF] to-[#FF6B6B] bg-clip-text text-transparent">
               {t('titleHighlight')}
             </span>
