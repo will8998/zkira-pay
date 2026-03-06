@@ -41,22 +41,34 @@ export interface WithdrawResult {
 
 // ── Internal helpers ──────────────────────────────────────────
 
-interface MerkleTreeData {
+interface SparseMerkleTreeData {
   root: bigint;
-  layers: bigint[][];
+  /** Sparse node storage. Key: `${level}:${index}`, Value: node hash. */
+  nodes: Map<string, bigint>;
+  /** Pre-computed zeros for each level. */
   zeros: bigint[];
+  /** Number of deposits in the tree. */
+  depositCount: number;
 }
 
 /**
- * Build a full MiMC Merkle tree from on-chain deposit events.
- * Returns root, layers (for path extraction), and zeros.
+ * Build a sparse MiMC Merkle tree from on-chain deposit events.
+ *
+ * Instead of materializing all 2^20 (~1M) leaf nodes and computing ~1M MiMC
+ * hashes (which crashes the browser), this mirrors the on-chain _insert() logic:
+ *   - Track filledSubtrees[] as each deposit is inserted
+ *   - Store only the nodes along insertion paths (sparse)
+ *   - Use pre-computed zeros for empty subtrees
+ *
+ * Complexity: O(deposits × depth) instead of O(2^depth).
+ * For 4 deposits at depth 20: 80 hashes vs 1,048,576 hashes.
  */
-async function buildMerkleTree(
+async function buildSparseMerkleTree(
   poolAddress: string,
   chain: Chain,
   mimcSponge: any,
   zeros: bigint[],
-): Promise<MerkleTreeData> {
+): Promise<SparseMerkleTreeData> {
   const { JsonRpcProvider, Contract } = await import('ethers');
   const rpcUrl = CHAIN_CONFIGS[chain].rpcUrl;
   const provider = new JsonRpcProvider(rpcUrl);
@@ -67,7 +79,7 @@ async function buildMerkleTree(
   const poolContract = new Contract(poolAddress, poolAbi, provider);
   const events = await poolContract.queryFilter(poolContract.filters.Deposit(), 0, 'latest');
 
-  // Collect and sort deposits
+  // Collect and sort deposits by leafIndex
   const deposits: Array<{ commitment: bigint; leafIndex: number }> = [];
   for (const event of events) {
     const args = (event as any).args;
@@ -78,40 +90,68 @@ async function buildMerkleTree(
   }
   deposits.sort((a, b) => a.leafIndex - b.leafIndex);
 
-  // Build layer 0 (leaves)
-  const layers: bigint[][] = [[]];
+  // Sparse node storage: key = `${level}:${index}`
+  const nodes = new Map<string, bigint>();
+
+  // Insert each deposit leaf
   for (const dep of deposits) {
-    layers[0].push(dep.commitment);
+    nodes.set(`0:${dep.leafIndex}`, dep.commitment);
   }
 
-  // Pad to full tree size
-  const treeSize = 1 << TREE_DEPTH;
-  while (layers[0].length < treeSize) {
-    layers[0].push(ZERO_VALUE);
+  // Replay the contract's _insert() logic to compute filledSubtrees
+  // and all nodes along each insertion path.
+  const filledSubtrees: bigint[] = new Array(TREE_DEPTH).fill(0n);
+  for (let i = 0; i < TREE_DEPTH; i++) {
+    filledSubtrees[i] = zeros[i];
   }
 
-  // Build upper layers
-  for (let level = 1; level <= TREE_DEPTH; level++) {
-    layers[level] = [];
-    const prev = layers[level - 1];
-    for (let i = 0; i < prev.length; i += 2) {
-      const left = prev[i];
-      const right = prev[i + 1] ?? zeros[level - 1];
-      layers[level].push(
-        mimcSponge.F.toObject(mimcSponge.multiHash([left, right], 0n, 1)),
+  let currentRoot = zeros[TREE_DEPTH];
+
+  for (const dep of deposits) {
+    let currentIndex = dep.leafIndex;
+    let currentLevelHash = dep.commitment;
+
+    for (let level = 0; level < TREE_DEPTH; level++) {
+      let left: bigint;
+      let right: bigint;
+
+      if (currentIndex % 2 === 0) {
+        left = currentLevelHash;
+        right = zeros[level];
+        filledSubtrees[level] = currentLevelHash;
+      } else {
+        left = filledSubtrees[level];
+        right = currentLevelHash;
+      }
+
+      // Store sibling for path extraction
+      if (currentIndex % 2 === 0) {
+        nodes.set(`${level}:${currentIndex + 1}`, right);
+      } else {
+        nodes.set(`${level}:${currentIndex - 1}`, left);
+      }
+
+      // Hash and move up
+      const parentIndex = Math.floor(currentIndex / 2);
+      currentLevelHash = mimcSponge.F.toObject(
+        mimcSponge.multiHash([left, right], 0n, 1),
       );
+      nodes.set(`${level + 1}:${parentIndex}`, currentLevelHash);
+      currentIndex = parentIndex;
     }
+
+    currentRoot = currentLevelHash;
   }
 
-  return { root: layers[TREE_DEPTH][0], layers, zeros };
+  return { root: currentRoot, nodes, zeros, depositCount: deposits.length };
 }
 
 /**
- * Extract Merkle path for a given leaf index.
+ * Extract Merkle path for a given leaf index from the sparse tree.
  */
-function extractPath(
+function extractSparsePath(
   leafIndex: number,
-  layers: bigint[][],
+  nodes: Map<string, bigint>,
   zeros: bigint[],
 ): { pathElements: bigint[]; pathIndices: number[] } {
   const pathElements: bigint[] = [];
@@ -120,7 +160,8 @@ function extractPath(
 
   for (let level = 0; level < TREE_DEPTH; level++) {
     const siblingIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
-    pathElements.push(layers[level][siblingIdx] ?? zeros[level]);
+    const sibling = nodes.get(`${level}:${siblingIdx}`) ?? zeros[level];
+    pathElements.push(sibling);
     pathIndices.push(idx % 2);
     idx = Math.floor(idx / 2);
   }
@@ -205,7 +246,7 @@ export async function executeBatchWithdrawal(
       message: `Building Merkle tree for pool ${poolAddr.slice(0, 8)}...`,
     });
 
-    const tree = await buildMerkleTree(poolAddr, chain, mimcSponge, zeros);
+    const tree = await buildSparseMerkleTree(poolAddr, chain, mimcSponge, zeros);
 
     // Process each note in this pool
     for (const note of group.notes) {
@@ -217,9 +258,9 @@ export async function executeBatchWithdrawal(
         message: `Generating zero-knowledge proof (${processed + 1}/${notes.length})...`,
       });
 
-      const { pathElements, pathIndices } = extractPath(
+      const { pathElements, pathIndices } = extractSparsePath(
         note.leafIndex,
-        tree.layers,
+        tree.nodes,
         tree.zeros,
       );
 
